@@ -36,6 +36,24 @@ ng build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
+## Running with Docker
+
+This project already includes the default Angular starter screen, so you can validate the container with that "hello world" experience.
+
+Build and run everything with a single command:
+
+```bash
+docker compose up --build
+```
+
+Then open `http://localhost:4000`.
+
+If you want to stop and remove the container later:
+
+```bash
+docker compose down
+```
+
 ## Running unit tests
 
 To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
