@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+.tilt-card {
+  transform: perspective(1200px) rotateY(-8deg) rotateX(4deg);
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.tilt-card:hover {
+  transform: perspective(1200px) rotateY(-2deg) rotateX(1deg) translateY(-4px);
+}

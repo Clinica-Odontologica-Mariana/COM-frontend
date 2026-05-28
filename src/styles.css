@@ -1,3 +1,36 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+@theme {
+  --color-brand: #cf9c92;
+  --color-brand-deep: #a77769;
+  --color-brand-soft: #efebe9;
+  --color-brand-muted: #ddc7b4;
+  --color-ink: #4f3f38;
+  --color-surface: #fffaf8;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgb(207 156 146 / 0.35), transparent 30%),
+    radial-gradient(circle at top right, rgb(221 199 180 / 0.32), transparent 24%),
+    linear-gradient(180deg, #efebe9 0%, #f8f2ee 58%, #f4e9e2 100%);
+  color: #4f3f38;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+}
