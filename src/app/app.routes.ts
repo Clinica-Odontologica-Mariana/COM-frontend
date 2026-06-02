@@ -2,15 +2,18 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
-    path: 'medical-records/:id',
+    path: 'certificados',
     loadComponent: () =>
-      import('./features/medical-records/pages/patient-record-page/patient-record-page.component').then(
-        (m) => m.PatientRecordPageComponent,
+      import('./features/certificates/pages/certificate-register/certificate-register.component').then(
+        (m) => m.CertificateRegisterPageComponent,
       ),
   },
+  // Temporarily removed route for 'medical-records/:id' because the component
+  // file is missing in this workspace. Restore when `patient-record-page.component` exists.
+
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'medical-records/1',
+    redirectTo: 'certificados',
   },
 ];

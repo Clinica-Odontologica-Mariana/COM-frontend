@@ -91,7 +91,7 @@ export class GlobalSidebarComponent {
     { label: 'Tratamentos', icon: '/tratamentos.svg', link: '/medical-records/1', active: false },
     { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', active: false },
     { label: 'Clínicas', icon: '/Clinicas.svg', link: '/medical-records/1', active: false },
-    { label: 'Certificados', icon: '/certificados.svg', link: '/medical-records/1', active: false },
+    { label: 'Certificados', icon: '/certificados.svg', link: '/certificados', active: false },
   ];
 
   protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
