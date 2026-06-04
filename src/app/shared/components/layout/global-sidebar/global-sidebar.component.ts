@@ -1,17 +1,16 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 interface SidebarItem {
   label: string;
   icon: string;
-  link: string;
-  active: boolean;
+  link: string | null;
 }
 
 @Component({
   selector: 'app-global-sidebar',
-  imports: [RouterLink, NgOptimizedImage],
+  imports: [RouterLink, RouterLinkActive, NgOptimizedImage],
   template: `
     <aside class="hidden h-full min-h-fit bg-[#FAFAF9] px-4 py-6 lg:flex lg:flex-col">
       <div class="pb-8">
@@ -32,27 +31,35 @@ interface SidebarItem {
 
         <nav class="mt-5 space-y-1" aria-label="Area administrativa">
           @for (item of items; track item.label) {
-            <a
-              [routerLink]="item.link"
-              [attr.aria-current]="item.active ? 'page' : null"
-              class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide transition"
-              [class.bg-[#EDE8E6]]="item.active"
-              [class.font-semibold]="item.active"
-              [class.text-[#8B574B]]="item.active"
-              [class.text-[#78716C]]="!item.active"
-            >
-              <img
-                [src]="item.icon"
-                alt=""
-                class="h-5 w-5"
-                [style.filter]="
-                  item.active
-                    ? 'invert(33%) sepia(22%) saturate(560%) hue-rotate(340deg) brightness(95%) contrast(90%)'
-                    : 'none'
-                "
-              />
-              <span>{{ item.label }}</span>
-            </a>
+            @if (item.link) {
+              <a
+                [routerLink]="item.link"
+                routerLinkActive="bg-[rgba(124,81,69,0.1)] font-bold text-[#7C5145]"
+                class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide text-[#78716C] transition hover:bg-[#EDE8E6]/50"
+                #rla="routerLinkActive"
+                [attr.aria-current]="rla.isActive ? 'page' : null"
+              >
+                <img
+                  [src]="item.icon"
+                  alt=""
+                  class="h-5 w-5"
+                  [style.filter]="
+                    rla.isActive
+                      ? 'invert(33%) sepia(22%) saturate(560%) hue-rotate(340deg) brightness(95%) contrast(90%)'
+                      : 'none'
+                  "
+                />
+                <span>{{ item.label }}</span>
+              </a>
+            } @else {
+              <a
+                href="#"
+                class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide text-[#78716C] transition hover:bg-[#EDE8E6]/50"
+              >
+                <img [src]="item.icon" alt="" class="h-5 w-5" />
+                <span>{{ item.label }}</span>
+              </a>
+            }
           }
         </nav>
       </div>
@@ -71,7 +78,7 @@ interface SidebarItem {
         </div>
 
         <a
-          routerLink="/medical-records/1"
+          routerLink="/agenda/novo"
           class="mt-6 flex h-11 items-center justify-center gap-2 rounded-lg bg-[#8B574B] px-4 text-sm font-bold text-white shadow-lg shadow-[#8B574B]/20 transition hover:bg-[#744A40]"
         >
           <span class="text-lg leading-none">+</span>
@@ -84,14 +91,14 @@ interface SidebarItem {
 })
 export class GlobalSidebarComponent {
   protected readonly items: SidebarItem[] = [
-    { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1', active: false },
-    { label: 'Pacientes', icon: '/pacientes.svg', link: '/medical-records/1', active: false },
-    { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', active: false },
-    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/medical-records/1', active: true },
-    { label: 'Tratamentos', icon: '/tratamentos.svg', link: '/medical-records/1', active: false },
-    { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', active: false },
-    { label: 'Clínicas', icon: '/Clinicas.svg', link: '/medical-records/1', active: false },
-    { label: 'Certificados', icon: '/certificados.svg', link: '/medical-records/1', active: false },
+    { label: 'Painel', icon: '/Painel_icon.svg', link: null },
+    { label: 'Pacientes', icon: '/pacientes.svg', link: null },
+    { label: 'Agenda', icon: '/agenda.svg', link: '/agenda' },
+    { label: 'Prontuários', icon: '/prontuarios.svg', link: null },
+    { label: 'Tratamentos', icon: '/tratamentos.svg', link: null },
+    { label: 'Estoque', icon: '/estoque.svg', link: null },
+    { label: 'Clínicas', icon: '/Clinicas.svg', link: null },
+    { label: 'Certificados', icon: '/certificados.svg', link: null },
   ];
 
   protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
