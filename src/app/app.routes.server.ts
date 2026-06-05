@@ -2,7 +2,7 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
   {
-    path: 'medical-records/:id',
+    path: 'inventories',
     renderMode: RenderMode.Client,
   },
   {
