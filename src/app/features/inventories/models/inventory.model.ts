@@ -16,3 +16,8 @@ export interface Supplier {
   lastOrder: string;
   action: 'phone' | 'email';
 }
+
+export interface InventoryTypeOption {
+  label: string;
+  value: string;
+}

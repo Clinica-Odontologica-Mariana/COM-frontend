@@ -1,10 +1,11 @@
 import { NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { InventoryItem, InventoryStatus } from '../../models/inventory.model';
 
 @Component({
   selector: 'app-inventory-catalog',
-  imports: [NgClass],
+  imports: [NgClass, RouterLink],
   template: `
     <section class="mt-10">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -21,9 +22,12 @@ import { InventoryItem, InventoryStatus } from '../../models/inventory.model';
           <button class="h-10 rounded-full bg-[#ECEBEA] px-5 text-sm font-bold text-[#6F6661] transition hover:bg-[#E1DDDA]">
             Filtros
           </button>
-          <button class="h-10 rounded-full bg-[#8B574B] px-5 text-sm font-bold text-white shadow-md shadow-[#8B574B]/20 transition hover:bg-[#744A40]">
+          <a
+            routerLink="/inventories/new"
+            class="inline-flex h-10 items-center justify-center rounded-full bg-[#8B574B] px-5 text-sm font-bold text-white shadow-md shadow-[#8B574B]/20 transition hover:bg-[#744A40]"
+          >
             + Adicionar Item
-          </button>
+          </a>
         </div>
       </div>
 

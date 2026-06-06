@@ -1,4 +1,4 @@
-import { InventoryItem, Supplier } from '../models/inventory.model';
+import { InventoryItem, InventoryTypeOption, Supplier } from '../models/inventory.model';
 
 export const LOW_STOCK_TAGS = ['Resina Z350 (2)', 'Anestésico 2% (5)', 'Agulhas G27 (10)'];
 
@@ -54,4 +54,11 @@ export const SUPPLIERS: Supplier[] = [
     lastOrder: 'Último pedido: Há 1232 dias',
     action: 'email',
   },
+];
+
+export const INVENTORY_TYPE_OPTIONS: InventoryTypeOption[] = [
+  { label: 'Material', value: 'material' },
+  { label: 'Equipamento', value: 'equipment' },
+  { label: 'Descartável', value: 'disposable' },
+  { label: 'Medicamento', value: 'medicine' },
 ];

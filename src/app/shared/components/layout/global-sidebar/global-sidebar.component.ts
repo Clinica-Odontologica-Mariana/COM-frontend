@@ -6,6 +6,7 @@ interface SidebarItem {
   label: string;
   icon: string;
   link: string;
+  exact: boolean;
 }
 
 @Component({
@@ -35,7 +36,7 @@ interface SidebarItem {
               [routerLink]="item.link"
               routerLinkActive="bg-[#EDE8E6] font-semibold text-[#8B574B]"
               #activeLink="routerLinkActive"
-              [routerLinkActiveOptions]="{ exact: true }"
+              [routerLinkActiveOptions]="{ exact: item.exact }"
               [attr.aria-current]="activeLink.isActive ? 'page' : null"
               class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide transition"
               [class.text-[#78716C]]="!activeLink.isActive"
@@ -83,14 +84,14 @@ interface SidebarItem {
 })
 export class GlobalSidebarComponent {
   protected readonly items: SidebarItem[] = [
-    { label: 'Painel', icon: '/Painel_icon.svg', link: '/' },
-    { label: 'Pacientes', icon: '/pacientes.svg', link: '/' },
-    { label: 'Agenda', icon: '/agenda.svg', link: '/' },
-    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/' },
-    { label: 'Tratamentos', icon: '/tratamentos.svg', link: '/' },
-    { label: 'Estoque', icon: '/estoque.svg', link: '/inventories' },
-    { label: 'Clínicas', icon: '/Clinicas.svg', link: '/' },
-    { label: 'Certificados', icon: '/certificados.svg', link: '/' },
+    { label: 'Painel', icon: '/Painel_icon.svg', link: '/', exact: true },
+    { label: 'Pacientes', icon: '/pacientes.svg', link: '/', exact: true },
+    { label: 'Agenda', icon: '/agenda.svg', link: '/', exact: true },
+    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/', exact: true },
+    { label: 'Tratamentos', icon: '/tratamentos.svg', link: '/', exact: true },
+    { label: 'Estoque', icon: '/estoque.svg', link: '/inventories', exact: false },
+    { label: 'Clínicas', icon: '/Clinicas.svg', link: '/', exact: true },
+    { label: 'Certificados', icon: '/certificados.svg', link: '/', exact: true },
   ];
 
   protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
