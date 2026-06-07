@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MedicalRecordNoteCreateDTO } from '../../models/patient-record.models';
@@ -78,7 +78,7 @@ export class CreateEvolutionComponent {
   readonly closed = output<void>();
   readonly saved = output<MedicalRecordNoteCreateDTO>();
 
-  private readonly fb = new FormBuilder();
+  private readonly fb = inject(FormBuilder);
 
   protected readonly form = this.fb.nonNullable.group({
     note: ['', [Validators.required, Validators.minLength(3)]],

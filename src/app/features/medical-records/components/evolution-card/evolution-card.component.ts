@@ -4,6 +4,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
 import { ClinicalNoteView } from '../../models/patient-record.models';
 
 const MAX_CHARS = 300;
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 @Component({
   selector: 'app-evolution-card',
@@ -118,10 +119,8 @@ export class EvolutionCardComponent {
   protected readonly expanded = signal(false);
 
   protected readonly archived = computed(() => {
-    const d = new Date(this.note().createdAt);
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 30);
-    return d < cutoff;
+    const created = new Date(this.note().createdAt).getTime();
+    return Date.now() - created > THIRTY_DAYS_MS;
   });
 
   protected readonly isTruncated = computed(() => this.note().note.length > MAX_CHARS);

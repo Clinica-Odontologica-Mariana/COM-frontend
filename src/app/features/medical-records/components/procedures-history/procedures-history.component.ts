@@ -69,12 +69,14 @@ import { ProcedureView } from '../../models/patient-record.models';
                 </div>
               </div>
 
-              <!-- Status icon -->
+              <!-- Status icon: DONE=filled brown, IN_PROGRESS=light brown with dash, PENDING=gray empty -->
               <div
                 class="grid h-5 w-5 shrink-0 place-items-center rounded-full border-2"
                 [class.border-[#7C5145]]="proc.status === 'DONE'"
                 [class.bg-[#7C5145]]="proc.status === 'DONE'"
-                [class.border-[#D6D3D1]]="proc.status !== 'DONE'"
+                [class.border-[#A77769]]="proc.status === 'IN_PROGRESS'"
+                [class.bg-[#EFE7E3]]="proc.status === 'IN_PROGRESS'"
+                [class.border-[#D6D3D1]]="proc.status !== 'DONE' && proc.status !== 'IN_PROGRESS'"
               >
                 @if (proc.status === 'DONE') {
                   <svg
@@ -89,6 +91,8 @@ import { ProcedureView } from '../../models/patient-record.models';
                   >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
+                } @else if (proc.status === 'IN_PROGRESS') {
+                  <span class="h-0.5 w-2 rounded bg-[#7C5145]"></span>
                 }
               </div>
             </div>

@@ -29,6 +29,10 @@ export function adaptPatient(dto: PatientDTO): PatientView {
   };
 }
 
+function stableAlertId(type: string, desc: string): string {
+  return `${type}-${desc.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)}`;
+}
+
 export function adaptMedicalAlerts(record: MedicalRecordDTO): MedicalAlertView[] {
   const alerts: MedicalAlertView[] = [];
 
@@ -37,8 +41,8 @@ export function adaptMedicalAlerts(record: MedicalRecordDTO): MedicalAlertView[]
       .split(/[,;\n]+/)
       .map((s) => s.trim())
       .filter(Boolean)
-      .forEach((desc, i) => {
-        alerts.push({ id: `allergy-${i}`, description: desc, severity: 'HIGH', type: 'allergy' });
+      .forEach((desc) => {
+        alerts.push({ id: stableAlertId('allergy', desc), description: desc, severity: 'HIGH', type: 'allergy' });
       });
   }
 
@@ -47,8 +51,8 @@ export function adaptMedicalAlerts(record: MedicalRecordDTO): MedicalAlertView[]
       .split(/[,;\n]+/)
       .map((s) => s.trim())
       .filter(Boolean)
-      .forEach((desc, i) => {
-        alerts.push({ id: `condition-${i}`, description: desc, severity: 'MEDIUM', type: 'condition' });
+      .forEach((desc) => {
+        alerts.push({ id: stableAlertId('condition', desc), description: desc, severity: 'MEDIUM', type: 'condition' });
       });
   }
 
@@ -57,8 +61,8 @@ export function adaptMedicalAlerts(record: MedicalRecordDTO): MedicalAlertView[]
       .split(/[,;\n]+/)
       .map((s) => s.trim())
       .filter(Boolean)
-      .forEach((desc, i) => {
-        alerts.push({ id: `medication-${i}`, description: desc, severity: 'LOW', type: 'medication' });
+      .forEach((desc) => {
+        alerts.push({ id: stableAlertId('medication', desc), description: desc, severity: 'LOW', type: 'medication' });
       });
   }
 
@@ -98,6 +102,11 @@ function adaptPlanStatus(status: string): string {
 }
 
 export function adaptLastVisit(notes: MedicalRecordNoteDTO[]): LastVisitView | null {
+  /**
+   * TODO(BACKEND): data derivada da nota mais recente, não de consulta clínica real.
+   * Endpoint esperado: GET /appointments/by-patient/{id}?sort=date&order=desc&limit=1
+   * Impacto atual: a data exibida é quando a nota foi criada, podendo divergir da visita real.
+   */
   if (!notes.length) return null;
 
   const sorted = [...notes].sort(

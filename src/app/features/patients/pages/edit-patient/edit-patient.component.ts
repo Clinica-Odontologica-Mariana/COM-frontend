@@ -64,7 +64,6 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
             Editar Paciente
           </h1>
         </div>
-        1
         <div class="flex items-center gap-3">
           <a
             routerLink="/medical-records"

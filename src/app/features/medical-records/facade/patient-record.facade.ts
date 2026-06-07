@@ -1,6 +1,7 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { forkJoin, Observable, of } from 'rxjs';
-import { catchError, finalize, switchMap, tap } from 'rxjs/operators';
+import { DestroyRef, computed, inject, Injectable, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { forkJoin, Observable, of, Subject } from 'rxjs';
+import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
 
 import { MedicalRecordApi } from '../api/medical-record.api';
 import {
@@ -41,7 +42,9 @@ const initialState: PatientRecordState = {
 @Injectable()
 export class PatientRecordFacade {
   private readonly api = inject(MedicalRecordApi);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly state = signal<PatientRecordState>(initialState);
+  private readonly loadSubject = new Subject<string>();
 
   readonly patient = computed(() => this.state().patient);
   readonly medicalRecord = computed(() => this.state().medicalRecord);
@@ -57,55 +60,62 @@ export class PatientRecordFacade {
   readonly uploadingAttachment = computed(() => this.state().uploadingAttachment);
   readonly error = computed(() => this.state().error);
 
-  load(patientId: string): void {
-    this.patchState({ loading: true, error: undefined });
-
-    forkJoin({
-      patient: this.api.getPatient(patientId).pipe(catchError(() => of(null))),
-      record: this.api.getMedicalRecord(patientId).pipe(catchError(() => of(null))),
-      notes: this.api.getNotes(patientId).pipe(catchError(() => of([]))),
-      attachments: this.api.getAttachments(patientId).pipe(catchError(() => of([]))),
-      plans: this.api.getTreatmentPlans(patientId).pipe(catchError(() => of([]))),
-    })
+  constructor() {
+    this.loadSubject
       .pipe(
-        switchMap(({ patient, record, notes, attachments, plans }) => {
-          const firstPlan: TreatmentPlanDTO | null = plans.length ? plans[0] : null;
-          const itemsRequest = firstPlan
-            ? this.api.getTreatmentPlanItems(firstPlan.id).pipe(catchError(() => of([])))
-            : of<TreatmentPlanItemDTO[]>([]);
+        switchMap((patientId) => {
+          this.patchState({ loading: true, error: undefined });
 
-          return itemsRequest.pipe(
-            tap((items) => {
-              this.patchState({
-                patient: patient ? adaptPatient(patient) : null,
-                medicalRecord: record,
-                alerts: record ? adaptMedicalAlerts(record) : [],
-                treatmentSummary: adaptTreatmentSummary(plans, items),
-                lastVisit: adaptLastVisit(notes),
-                balance: adaptBalance(plans),
-                notes: adaptNotes(notes),
-                attachments: adaptAttachments(attachments),
-                procedures: adaptProcedures(items),
-              });
+          return forkJoin({
+            patient: this.api.getPatient(patientId).pipe(catchError(() => of(null))),
+            record: this.api.getMedicalRecord(patientId).pipe(catchError(() => of(null))),
+            notes: this.api.getNotes(patientId).pipe(catchError(() => of([]))),
+            attachments: this.api.getAttachments(patientId).pipe(catchError(() => of([]))),
+            plans: this.api.getTreatmentPlans(patientId).pipe(catchError(() => of([]))),
+          }).pipe(
+            switchMap(({ patient, record, notes, attachments, plans }) => {
+              const firstPlan: TreatmentPlanDTO | null = plans.length ? plans[0] : null;
+              const itemsRequest = firstPlan
+                ? this.api.getTreatmentPlanItems(firstPlan.id).pipe(catchError(() => of([])))
+                : of<TreatmentPlanItemDTO[]>([]);
+
+              return itemsRequest.pipe(
+                tap((items) => {
+                  this.patchState({
+                    patient: patient ? adaptPatient(patient) : null,
+                    medicalRecord: record,
+                    alerts: record ? adaptMedicalAlerts(record) : [],
+                    treatmentSummary: adaptTreatmentSummary(plans, items),
+                    lastVisit: adaptLastVisit(notes),
+                    balance: adaptBalance(plans),
+                    notes: adaptNotes(notes),
+                    attachments: adaptAttachments(attachments),
+                    procedures: adaptProcedures(items),
+                    loading: false,
+                  });
+                }),
+              );
             }),
           );
         }),
-        finalize(() => this.patchState({ loading: false })),
+        takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe({
-        error: (err: Error) => this.patchState({ error: err.message }),
-      });
+      .subscribe();
+  }
+
+  load(patientId: string): void {
+    this.loadSubject.next(patientId);
   }
 
   createNote(patientId: string, payload: MedicalRecordNoteCreateDTO): Observable<ClinicalNoteView> {
     this.patchState({ savingNote: true, error: undefined });
 
     return this.api.createNote(patientId, payload).pipe(
-      tap((dto) => {
+      map((dto) => {
         const [newNote] = adaptNotes([dto]);
         this.patchState({ notes: [newNote, ...this.state().notes] });
+        return newNote;
       }),
-      switchMap((dto) => of(adaptNotes([dto])[0])),
       finalize(() => this.patchState({ savingNote: false })),
     );
   }

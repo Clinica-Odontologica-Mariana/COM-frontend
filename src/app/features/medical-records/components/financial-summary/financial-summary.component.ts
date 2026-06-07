@@ -1,22 +1,7 @@
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, formatDate } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import { BalanceView, LastVisitView } from '../../models/patient-record.models';
-
-const PT_MONTHS = [
-  'Jan',
-  'Fev',
-  'Mar',
-  'Abr',
-  'Mai',
-  'Jun',
-  'Jul',
-  'Ago',
-  'Set',
-  'Out',
-  'Nov',
-  'Dez',
-];
 
 @Component({
   selector: 'app-financial-summary',
@@ -45,7 +30,7 @@ const PT_MONTHS = [
         }
       </section>
 
-      <!-- Saldo devedor -->
+      <!-- Valor dos Tratamentos -->
       <section class="flex-1 rounded-xl bg-[#7C5145] p-6 flex flex-col justify-between">
         <p class="text-xs font-bold uppercase tracking-[1.2px] text-white/60">
           Valor dos Tratamentos
@@ -79,7 +64,6 @@ export class FinancialSummaryComponent {
   protected readonly shortDate = computed(() => {
     const date = this.lastVisit()?.date;
     if (!date) return '';
-    const d = new Date(date);
-    return `${d.getDate()} ${PT_MONTHS[d.getMonth()]}`;
+    return formatDate(date, 'd MMM', 'pt-BR').replace(/\.$/, '');
   });
 }

@@ -43,6 +43,16 @@ import { MedicalRecordNoteCreateDTO } from '../../models/patient-record.models';
         </div>
       }
 
+      @if (uploadUnavailable()) {
+        <div
+          class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+          role="status"
+          aria-live="polite"
+        >
+          Upload de anexos ainda não disponível — o endpoint de armazenamento está pendente no backend.
+        </div>
+      }
+
       <!-- Patient header -->
       <app-patient-header [patient]="facade.patient()" />
 
@@ -106,6 +116,7 @@ export class PatientRecordPageComponent implements OnInit {
 
   protected readonly patientId = signal('');
   protected readonly showNoteDialog = signal(false);
+  protected readonly uploadUnavailable = signal(false);
 
   ngOnInit(): void {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -144,7 +155,13 @@ export class PatientRecordPageComponent implements OnInit {
   }
 
   protected uploadAttachment(_file: File): void {
-    // TODO: POST /stored-files → storedFileId → POST /medical-records/by-patient/{id}/attachments
-    console.warn('Upload pendente: endpoint de stored-files ausente no backend.');
+    /**
+     * TODO(BACKEND): upload de anexos pendente de endpoint no servidor.
+     * Endpoint esperado: POST /stored-files → { storedFileId }
+     *   depois: POST /medical-records/by-patient/{id}/attachments { storedFileId }
+     * Impacto atual: arquivos selecionados não são persistidos.
+     */
+    this.uploadUnavailable.set(true);
+    setTimeout(() => this.uploadUnavailable.set(false), 4000);
   }
 }

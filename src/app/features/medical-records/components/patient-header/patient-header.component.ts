@@ -37,7 +37,7 @@ import { PatientView } from '../../models/patient-record.models';
               {{ p.fullName }}
             </h1>
             <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[#78716C]">
-              <span class="font-medium text-[#A8A29E]">ID: #OD-{{ shortId() }}</span>
+              <span class="font-medium text-[#A8A29E]">Ref. #{{ shortId() }}</span>
               <span class="text-[#D6D3D1]">•</span>
               <span>{{ age() }} anos</span>
               <span class="text-[#D6D3D1]">•</span>
