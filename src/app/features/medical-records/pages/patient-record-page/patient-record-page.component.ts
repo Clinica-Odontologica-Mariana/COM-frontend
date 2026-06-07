@@ -12,13 +12,14 @@ import { ActivatedRoute } from '@angular/router';
 import { ClinicalEvolutionsComponent } from '../../components/clinical-evolutions/clinical-evolutions.component';
 import { FinancialSummaryComponent } from '../../components/financial-summary/financial-summary.component';
 import { MedicalAlertsComponent } from '../../components/medical-alerts/medical-alerts.component';
+import { PatientGalleryComponent } from '../../components/patient-gallery/patient-gallery.component';
 import { PatientHeaderComponent } from '../../components/patient-header/patient-header.component';
 import { PrescriptionsPanelComponent } from '../../components/prescriptions-panel/prescriptions-panel.component';
 import { ProceduresHistoryComponent } from '../../components/procedures-history/procedures-history.component';
 import { TreatmentSummaryComponent } from '../../components/treatment-summary/treatment-summary.component';
 import { CreateEvolutionComponent } from '../../dialogs/create-evolution/create-evolution.component';
 import { PatientRecordFacade } from '../../facade/patient-record.facade';
-import { CreateEvolutionDTO } from '../../models/patient-record.models';
+import { MedicalRecordNoteCreateDTO } from '../../models/patient-record.models';
 
 @Component({
   selector: 'app-patient-record-page',
@@ -27,6 +28,7 @@ import { CreateEvolutionDTO } from '../../models/patient-record.models';
     CreateEvolutionComponent,
     FinancialSummaryComponent,
     MedicalAlertsComponent,
+    PatientGalleryComponent,
     PatientHeaderComponent,
     PrescriptionsPanelComponent,
     ProceduresHistoryComponent,
@@ -34,65 +36,66 @@ import { CreateEvolutionDTO } from '../../models/patient-record.models';
   ],
   providers: [PatientRecordFacade],
   template: `
-    <div class="mx-auto max-w-7xl">
-      <div
-        class="mb-4 flex items-center justify-between rounded-lg border border-[#E4D8D1] bg-white px-4 py-3 lg:hidden"
-      >
-        <div>
-          <p class="text-xs font-semibold uppercase text-[#A77769]">Prontuario</p>
-          <p class="font-semibold text-[#3F322D]">Dra. Mariana</p>
-        </div>
-        <span class="rounded-lg bg-[#EFE7E3] px-3 py-2 text-sm font-semibold text-[#7B564A]">
-          Menu
-        </span>
-      </div>
-
-      @if (facade.error(); as error) {
-        <div class="m-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {{ error }}
+    <div class="mx-auto w-full px-6 pb-16" style="font-family: 'Manrope', sans-serif">
+      @if (facade.error(); as err) {
+        <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {{ err }}
         </div>
       }
 
+      <!-- Patient header -->
       <app-patient-header [patient]="facade.patient()" />
 
-      @if (facade.loading()) {
-        <div class="mt-6 grid gap-4 lg:grid-cols-12">
-          <div class="h-40 animate-pulse rounded-lg bg-[#EFE7E3] lg:col-span-8"></div>
-          <div class="h-40 animate-pulse rounded-lg bg-[#EFE7E3] lg:col-span-4"></div>
-          <div class="h-80 animate-pulse rounded-lg bg-[#EFE7E3] lg:col-span-8"></div>
-          <div class="h-80 animate-pulse rounded-lg bg-[#EFE7E3] lg:col-span-4"></div>
+      <hr class="border-[#F5F5F4]" />
+
+      <!-- Bento stats row -->
+      <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-start  ">
+        <!-- Treatment summary — wider card -->
+        <div class="sm:flex-2">
+          <app-treatment-summary [summary]="facade.treatmentSummary()" />
         </div>
-      } @else {
-        <div class="mt-6 grid gap-4 lg:grid-cols-12">
-          <div class="space-y-8 lg:col-span-8">
-            <div class="grid gap-4 xl:grid-cols-2">
-              <app-treatment-summary [summary]="facade.treatmentSummary()" />
-              <app-financial-summary [financial]="facade.financial()" />
-            </div>
 
-            <app-clinical-evolutions
-              [evolutions]="facade.evolutions()"
-              (newEvolution)="openEvolutionDialog()"
-            />
-          </div>
-
-          <aside class="flex flex-col gap-4 lg:col-span-4">
-            <app-medical-alerts [alerts]="facade.alerts()" />
-            <app-prescriptions-panel [prescriptions]="facade.prescriptions()" />
-            <app-procedures-history [procedures]="facade.procedures()" />
-          </aside>
+        <!-- Last visit + Saldo -->
+        <div class="flex flex-col gap-4 sm:flex-2">
+          <app-financial-summary [balance]="facade.balance()" [lastVisit]="facade.lastVisit()" />
         </div>
-      }
+      </div>
 
-      @if (creatingEvolution()) {
-        <app-create-evolution
-          [patientId]="patientId()"
-          [saving]="facade.creatingEvolution()"
-          (closed)="closeEvolutionDialog()"
-          (saved)="createEvolution($event)"
-        />
-      }
+      <!-- Main content grid -->
+      <div class="mt-10 grid gap-10 lg:grid-cols-[1fr_293px]">
+        <!-- Left column: evolutions + gallery -->
+        <div class="space-y-14">
+          <app-clinical-evolutions
+            [notes]="facade.notes()"
+            (newNote)="openNoteDialog()"
+            (noteDeleted)="deleteNote($event)"
+          />
+
+          <app-patient-gallery
+            [patientId]="patientId()"
+            [attachments]="facade.attachments()"
+            [uploading]="facade.uploadingAttachment()"
+            (deleted)="deleteAttachment($event)"
+            (fileSelected)="uploadAttachment($event)"
+          />
+        </div>
+
+        <!-- Right column: alerts + procedures + prescriptions -->
+        <aside class="flex flex-col gap-6">
+          <app-medical-alerts [alerts]="facade.alerts()" />
+          <app-procedures-history [procedures]="facade.procedures()" [patientId]="patientId()" />
+          <app-prescriptions-panel />
+        </aside>
+      </div>
     </div>
+
+    @if (showNoteDialog()) {
+      <app-create-evolution
+        [saving]="facade.savingNote()"
+        (closed)="closeNoteDialog()"
+        (saved)="saveNote($event)"
+      />
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -101,32 +104,47 @@ export class PatientRecordPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly patientId = signal(0);
-  protected readonly creatingEvolution = signal(false);
+  protected readonly patientId = signal('');
+  protected readonly showNoteDialog = signal(false);
 
   ngOnInit(): void {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-      const patientId = Number(params.get('id'));
-      this.patientId.set(patientId);
-      this.facade.load(patientId);
+      const id = params.get('id') ?? '';
+      this.patientId.set(id);
+      this.facade.load(id);
     });
   }
 
-  protected openEvolutionDialog(): void {
-    this.creatingEvolution.set(true);
+  protected openNoteDialog(): void {
+    this.showNoteDialog.set(true);
+  }
+  protected closeNoteDialog(): void {
+    this.showNoteDialog.set(false);
   }
 
-  protected closeEvolutionDialog(): void {
-    this.creatingEvolution.set(false);
-  }
-
-  protected createEvolution(payload: CreateEvolutionDTO): void {
+  protected saveNote(payload: MedicalRecordNoteCreateDTO): void {
     this.facade
-      .createEvolution(payload)
+      .createNote(this.patientId(), payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => this.closeEvolutionDialog(),
-        error: () => undefined,
-      });
+      .subscribe({ next: () => this.closeNoteDialog(), error: () => undefined });
+  }
+
+  protected deleteNote(noteId: string): void {
+    this.facade
+      .deleteNote(this.patientId(), noteId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
+
+  protected deleteAttachment(attachmentId: string): void {
+    this.facade
+      .deleteAttachment(this.patientId(), attachmentId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
+
+  protected uploadAttachment(_file: File): void {
+    // TODO: POST /stored-files → storedFileId → POST /medical-records/by-patient/{id}/attachments
+    console.warn('Upload pendente: endpoint de stored-files ausente no backend.');
   }
 }

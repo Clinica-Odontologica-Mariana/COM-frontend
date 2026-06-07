@@ -1,39 +1,164 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { API_BASE_URL } from '../../../core/config/api.config';
+import { ApiResponse } from '../../../core/models/api-response.model';
 import {
-  ClinicalEvolutionDTO,
-  CreateEvolutionDTO,
+  MedicalRecordAttachmentCreateDTO,
+  MedicalRecordAttachmentDTO,
+  MedicalRecordDTO,
+  MedicalRecordNoteCreateDTO,
+  MedicalRecordNoteDTO,
+  OdontogramEntryDTO,
   PatientDTO,
-  PatientRecordDTO,
-  PrescriptionDTO,
+  TreatmentPlanDTO,
+  TreatmentPlanItemDTO,
 } from '../models/patient-record.models';
 
-@Injectable({
-  providedIn: 'root',
-})
+function unwrap<T>(source: Observable<ApiResponse<T>>): Observable<T> {
+  return source.pipe(map((res) => res.data));
+}
+
+@Injectable({ providedIn: 'root' })
 export class MedicalRecordApi {
   private readonly http = inject(HttpClient);
-  private readonly api = inject(API_BASE_URL);
+  private readonly base = inject(API_BASE_URL);
 
-  getPatient(id: number) {
-    return this.http.get<PatientDTO>(`${this.api}/patients/${id}`);
+  getPatient(patientId: string): Observable<PatientDTO> {
+    return unwrap(this.http.get<ApiResponse<PatientDTO>>(`${this.base}/patients/${patientId}`));
   }
 
-  getRecord(patientId: number) {
-    return this.http.get<PatientRecordDTO>(`${this.api}/records/${patientId}`);
+  getMedicalRecord(patientId: string): Observable<MedicalRecordDTO> {
+    return unwrap(
+      this.http.get<ApiResponse<MedicalRecordDTO>>(`${this.base}/medical-records/by-patient/${patientId}`),
+    );
   }
 
-  getEvolutions(patientId: number) {
-    return this.http.get<ClinicalEvolutionDTO[]>(`${this.api}/patients/${patientId}/evolutions`);
+  getNotes(patientId: string): Observable<MedicalRecordNoteDTO[]> {
+    return unwrap(
+      this.http.get<ApiResponse<MedicalRecordNoteDTO[]>>(
+        `${this.base}/medical-records/by-patient/${patientId}/notes`,
+      ),
+    );
   }
 
-  createEvolution(payload: CreateEvolutionDTO) {
-    return this.http.post<ClinicalEvolutionDTO>(`${this.api}/evolutions`, payload);
+  createNote(patientId: string, payload: MedicalRecordNoteCreateDTO): Observable<MedicalRecordNoteDTO> {
+    return unwrap(
+      this.http.post<ApiResponse<MedicalRecordNoteDTO>>(
+        `${this.base}/medical-records/by-patient/${patientId}/notes`,
+        payload,
+      ),
+    );
   }
 
-  getPrescriptions(patientId: number) {
-    return this.http.get<PrescriptionDTO[]>(`${this.api}/patients/${patientId}/prescriptions`);
+  updateNote(
+    patientId: string,
+    noteId: string,
+    payload: MedicalRecordNoteCreateDTO,
+  ): Observable<MedicalRecordNoteDTO> {
+    return unwrap(
+      this.http.put<ApiResponse<MedicalRecordNoteDTO>>(
+        `${this.base}/medical-records/by-patient/${patientId}/notes/${noteId}`,
+        payload,
+      ),
+    );
+  }
+
+  deleteNote(patientId: string, noteId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/medical-records/by-patient/${patientId}/notes/${noteId}`,
+    );
+  }
+
+  getAttachments(patientId: string): Observable<MedicalRecordAttachmentDTO[]> {
+    return unwrap(
+      this.http.get<ApiResponse<MedicalRecordAttachmentDTO[]>>(
+        `${this.base}/medical-records/by-patient/${patientId}/attachments`,
+      ),
+    );
+  }
+
+  addAttachment(
+    patientId: string,
+    payload: MedicalRecordAttachmentCreateDTO,
+  ): Observable<MedicalRecordAttachmentDTO> {
+    return unwrap(
+      this.http.post<ApiResponse<MedicalRecordAttachmentDTO>>(
+        `${this.base}/medical-records/by-patient/${patientId}/attachments`,
+        payload,
+      ),
+    );
+  }
+
+  deleteAttachment(patientId: string, attachmentId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/medical-records/by-patient/${patientId}/attachments/${attachmentId}`,
+    );
+  }
+
+  getTreatmentPlans(patientId: string): Observable<TreatmentPlanDTO[]> {
+    return unwrap(
+      this.http.get<ApiResponse<TreatmentPlanDTO[]>>(
+        `${this.base}/treatment-plans/by-patient/${patientId}`,
+      ),
+    );
+  }
+
+  getTreatmentPlanItems(planId: string): Observable<TreatmentPlanItemDTO[]> {
+    return unwrap(
+      this.http.get<ApiResponse<TreatmentPlanItemDTO[]>>(
+        `${this.base}/treatment-plans/${planId}/items`,
+      ),
+    );
+  }
+
+  createTreatmentPlanItem(
+    planId: string,
+    payload: { description: string; toothNumber: number | null; estimatedPrice: number; status: string },
+  ): Observable<TreatmentPlanItemDTO> {
+    return unwrap(
+      this.http.post<ApiResponse<TreatmentPlanItemDTO>>(
+        `${this.base}/treatment-plans/${planId}/items`,
+        payload,
+      ),
+    );
+  }
+
+  updateTreatmentPlanItem(
+    planId: string,
+    itemId: string,
+    payload: { description: string; toothNumber: number | null; estimatedPrice: number; status: string },
+  ): Observable<TreatmentPlanItemDTO> {
+    return unwrap(
+      this.http.put<ApiResponse<TreatmentPlanItemDTO>>(
+        `${this.base}/treatment-plans/${planId}/items/${itemId}`,
+        payload,
+      ),
+    );
+  }
+
+  updatePatient(patientId: string, payload: Partial<PatientDTO>): Observable<PatientDTO> {
+    return unwrap(
+      this.http.put<ApiResponse<PatientDTO>>(`${this.base}/patients/${patientId}`, payload),
+    );
+  }
+
+  updateMedicalRecord(
+    recordId: string,
+    payload: Partial<Pick<MedicalRecordDTO, 'allergies' | 'chronicConditions' | 'continuousMedications' | 'generalObservations'>>,
+  ): Observable<MedicalRecordDTO> {
+    return unwrap(
+      this.http.put<ApiResponse<MedicalRecordDTO>>(`${this.base}/medical-records/${recordId}`, payload),
+    );
+  }
+
+  getOdontogramEntries(patientId: string): Observable<OdontogramEntryDTO[]> {
+    return unwrap(
+      this.http.get<ApiResponse<OdontogramEntryDTO[]>>(
+        `${this.base}/odontogram-entries/by-patient/${patientId}`,
+      ),
+    );
   }
 }

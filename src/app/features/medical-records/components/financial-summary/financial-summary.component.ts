@@ -1,37 +1,85 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-import { FinancialSummaryDTO } from '../../models/patient-record.models';
+import { BalanceView, LastVisitView } from '../../models/patient-record.models';
+
+const PT_MONTHS = [
+  'Jan',
+  'Fev',
+  'Mar',
+  'Abr',
+  'Mai',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Set',
+  'Out',
+  'Nov',
+  'Dez',
+];
 
 @Component({
   selector: 'app-financial-summary',
-  imports: [CurrencyPipe, DatePipe],
+  imports: [CurrencyPipe],
   template: `
-    <section class="rounded-lg border border-[#E7DCD5] bg-white p-5 shadow-sm">
-      <p class="text-sm font-semibold text-[#A77769]">Resumo financeiro</p>
+    <div class="flex flex-col gap-4 sm:flex-row h-full">
+      <!-- Última visita -->
+      <section class="flex-1 rounded-xl bg-[#F3F3F3] p-6">
+        <p class="text-xs font-bold uppercase tracking-[1.2px] text-[#69594A]">Última Visita</p>
 
-      @if (financial(); as financial) {
-        <div class="mt-4 grid gap-4 sm:grid-cols-2">
-          <div>
-            <p class="text-xs font-semibold uppercase text-[#8D7A71]">Saldo</p>
-            <p class="mt-1 text-2xl font-semibold text-[#3F322D]">
-              {{ financial.balance | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+        @if (lastVisit(); as v) {
+          <div class="mt-3">
+            <p
+              class="text-3xl font-bold text-[#7C5145] leading-tight"
+              style="font-family: 'Noto Serif', serif"
+            >
+              {{ shortDate() }}
             </p>
+            <p class="mt-1 text-xs text-[#78716C] leading-5 line-clamp-2">{{ v.description }}</p>
           </div>
-          <div>
-            <p class="text-xs font-semibold uppercase text-[#8D7A71]">Proxima fatura</p>
-            <p class="mt-1 text-2xl font-semibold text-[#3F322D]">
-              {{ financial.nextDueDate | date: 'dd/MM/yyyy' }}
+        } @else {
+          <div class="mt-3 space-y-2">
+            <div class="h-8 w-24 animate-pulse rounded bg-[#E2D8D4]"></div>
+            <div class="h-4 w-32 animate-pulse rounded bg-[#E2D8D4]"></div>
+          </div>
+        }
+      </section>
+
+      <!-- Saldo devedor -->
+      <section class="flex-1 rounded-xl bg-[#7C5145] p-6 flex flex-col justify-between">
+        <p class="text-xs font-bold uppercase tracking-[1.2px] text-white/60">
+          Valor dos Tratamentos
+        </p>
+
+        @if (balance(); as b) {
+          <div class="mt-3">
+            <p
+              class="text-3xl font-bold text-white leading-tight"
+              style="font-family: 'Noto Serif', serif"
+            >
+              {{ b.amount | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
             </p>
+            <p class="mt-1 text-xs text-white/60">Valor estimado do plano</p>
           </div>
-        </div>
-      } @else {
-        <div class="mt-4 h-20 animate-pulse rounded-lg bg-[#EFE7E3]"></div>
-      }
-    </section>
+        } @else {
+          <div class="mt-3 space-y-2">
+            <div class="h-8 w-28 animate-pulse rounded bg-white/20"></div>
+            <div class="h-4 w-32 animate-pulse rounded bg-white/20"></div>
+          </div>
+        }
+      </section>
+    </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FinancialSummaryComponent {
-  readonly financial = input<FinancialSummaryDTO | null>(null);
+  readonly balance = input<BalanceView | null>(null);
+  readonly lastVisit = input<LastVisitView | null>(null);
+
+  protected readonly shortDate = computed(() => {
+    const date = this.lastVisit()?.date;
+    if (!date) return '';
+    const d = new Date(date);
+    return `${d.getDate()} ${PT_MONTHS[d.getMonth()]}`;
+  });
 }

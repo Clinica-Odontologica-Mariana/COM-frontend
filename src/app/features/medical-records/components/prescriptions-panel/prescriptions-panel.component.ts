@@ -1,30 +1,49 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-import { PrescriptionDTO } from '../../models/patient-record.models';
+// TODO: Integrar com GET /prescriptions/by-patient/{patientId} quando endpoint for adicionado ao backend.
 
 @Component({
   selector: 'app-prescriptions-panel',
   template: `
-    <section class="rounded-lg border border-[#E7DCD5] bg-white p-5 shadow-sm">
-      <p class="text-sm font-semibold text-[#A77769]">Prescrições</p>
-
-      <div class="mt-6 space-y-4">
-        @for (prescription of prescriptions(); track prescription.id) {
-          <article class="rounded-lg bg-[#FBF8F6] p-4">
-            <h3 class="font-semibold text-[#3F322D]">{{ prescription.medication }}</h3>
-            <p class="mt-1 text-sm font-medium text-[#7B564A]">{{ prescription.dosage }}</p>
-            <p class="mt-2 text-sm leading-6 text-[#5F5049]">{{ prescription.instructions }}</p>
-          </article>
-        } @empty {
-          <p class="rounded-lg bg-[#FBF8F6] p-4 text-sm text-[#76645B]">
-            Nenhuma prescricao registrada.
-          </p>
-        }
+    <section
+      class="rounded-xl border border-[#F0BAAF] p-8"
+      style="background: rgba(255, 218, 211, 0.3)"
+    >
+      <!-- Heading -->
+      <div class="mb-6 flex items-center gap-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-[#7E544C]"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          />
+        </svg>
+        <h3 class="text-xl font-bold text-[#7E544C]" style="font-family: 'Noto Serif', serif">
+          Prescrições Ativas
+        </h3>
       </div>
+
+      <!-- Empty state -->
+      <div class="space-y-6 text-sm text-[#78716C]">
+        <p class="text-center text-[#A8A29E]">Nenhuma prescrição ativa registrada.</p>
+      </div>
+
+      <!-- CTA -->
+      <button
+        type="button"
+        class="mt-6 w-full rounded-lg border border-[#7E544C] py-3 text-xs font-bold uppercase tracking-[1.2px] text-[#7E544C] transition hover:bg-[#7E544C]/5"
+      >
+        Emitir Nova Receita
+      </button>
     </section>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PrescriptionsPanelComponent {
-  readonly prescriptions = input<PrescriptionDTO[]>([]);
-}
+export class PrescriptionsPanelComponent {}

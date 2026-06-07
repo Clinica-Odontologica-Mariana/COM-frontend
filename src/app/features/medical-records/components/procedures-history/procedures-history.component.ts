@@ -1,38 +1,107 @@
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
-import { ProcedureDTO } from '../../models/patient-record.models';
+import { ProcedureView } from '../../models/patient-record.models';
 
 @Component({
   selector: 'app-procedures-history',
-  imports: [DatePipe],
+  imports: [CurrencyPipe, RouterLink],
   template: `
-    <section class="rounded-lg border border-[#E7DCD5] bg-white p-5 shadow-sm">
-      <p class="text-sm font-semibold text-[#A77769]">Procedimentos</p>
+    <section class="rounded-xl bg-[#F3F3F3] p-8">
+      <div class="flex items-center justify-between gap-2">
+        <h3
+          class="text-xl font-bold text-[#7C5145] leading-tight"
+          style="font-family: 'Noto Serif', serif"
+        >
+          Histórico de Procedimentos
+        </h3>
 
-      <div class="mt-6 space-y-4">
-        @for (procedure of procedures(); track procedure.id) {
-          <div class="rounded-lg bg-[#FBF8F6] p-3">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <h3 class="font-semibold text-[#3F322D]">{{ procedure.name }}</h3>
-                <p class="mt-1 text-sm text-[#76645B]">{{ procedure.professional }}</p>
-              </div>
-              <span class="text-right text-sm text-[#76645B]">
-                {{ procedure.performedAt | date: 'dd/MM/yyyy' }}
-              </span>
-            </div>
-          </div>
-        } @empty {
-          <p class="rounded-lg bg-[#FBF8F6] p-4 text-sm text-[#76645B]">
-            Nenhum procedimento registrado.
-          </p>
-        }
+        <a
+          [routerLink]="['/patients', patientId(), 'treatments']"
+          class="flex shrink-0 items-center gap-1 rounded-lg bg-[#7C5145] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#6B4439]"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-3.5 w-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Gerenciar
+        </a>
       </div>
+
+      @if (procedures().length) {
+        <div class="mt-6 space-y-4">
+          @for (proc of procedures(); track proc.id) {
+            <div
+              class="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-3 shadow-sm"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <!-- Tooth icon -->
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 shrink-0 text-[#A8A29E]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M12 2C9.5 2 7 4 7 7c0 2 .5 3.5 1 5 .5 1.5 1 4 1 6 0 1 .5 2 1.5 2s1.5-1 2-2c.5-1 1-1 1.5 0 .5 1 1 2 2 2s1.5-1 1.5-2c0-2 .5-4.5 1-6 .5-1.5 1-3 1-5 0-3-2.5-5-5-5z"
+                  />
+                </svg>
+
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-bold text-[#44403C]">{{ proc.description }}</p>
+                  <p class="text-[10px] text-[#A8A29E]">
+                    @if (proc.toothNumber) {
+                      Dente {{ proc.toothNumber }} ·
+                    }
+                    {{ proc.estimatedPrice | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Status icon -->
+              <div
+                class="grid h-5 w-5 shrink-0 place-items-center rounded-full border-2"
+                [class.border-[#7C5145]]="proc.status === 'DONE'"
+                [class.bg-[#7C5145]]="proc.status === 'DONE'"
+                [class.border-[#D6D3D1]]="proc.status !== 'DONE'"
+              >
+                @if (proc.status === 'DONE') {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-3 w-3 text-white"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="mt-6 text-sm text-[#A8A29E]">Nenhum procedimento no plano de tratamento.</p>
+      }
     </section>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProceduresHistoryComponent {
-  readonly procedures = input<ProcedureDTO[]>([]);
+  readonly procedures = input<ProcedureView[]>([]);
+  readonly patientId = input('');
 }
