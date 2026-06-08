@@ -1,20 +1,33 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { CurrencyMaskDirective } from '../../../../shared/directives/currency-mask.directive';
-import { DateMaskDirective } from '../../../../shared/directives/date-mask.directive';
-import { InventoryTypeOption } from '../../models/inventory.model';
+import { ClinicOption, InventoryTypeOption } from '../../models/inventory.model';
 
 @Component({
   selector: 'app-inventory-item-form',
-  imports: [ReactiveFormsModule, CurrencyMaskDirective, DateMaskDirective],
+  imports: [ReactiveFormsModule],
   template: `
     <article class="rounded-[2rem] bg-[#F3F3F3] px-6 py-8 shadow-sm ring-1 ring-[#ECE8E5] sm:px-8 lg:px-10">
       <div class="flex items-center gap-4">
         <span class="h-10 w-10 rounded-full bg-[#E2D7D2]" aria-hidden="true"></span>
-        <h2 class="font-serif text-2xl font-bold text-[#202020]">Cadastrar Item</h2>
+        <h2 class="font-serif text-2xl font-bold text-[#202020]">{{ title() }}</h2>
       </div>
 
       <form class="mt-8 grid gap-x-8 gap-y-6 lg:grid-cols-2" [formGroup]="form()">
+        @if (showClinicField()) {
+          <label class="grid gap-2 lg:col-span-2">
+            <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">Clínica</span>
+            <select
+              formControlName="clinicId"
+              class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#7D7772] outline-none focus:ring-2 focus:ring-[#B98577]"
+            >
+              <option value="">Selecione</option>
+              @for (clinic of clinics(); track clinic.id) {
+                <option [value]="clinic.id">{{ clinic.name }}</option>
+              }
+            </select>
+          </label>
+        }
+
         <label class="grid gap-2">
           <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">Nome</span>
           <input
@@ -39,60 +52,65 @@ import { InventoryTypeOption } from '../../models/inventory.model';
         </label>
 
         <label class="grid gap-2">
-          <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">
-            Data de Compra
-          </span>
+          <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">Unidade</span>
           <input
-            formControlName="purchaseDate"
-            appDateMask
+            formControlName="unit"
             type="text"
-            inputmode="numeric"
-            maxlength="10"
-            placeholder="dd/mm/yyyy"
-            class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#2D2926] outline-none placeholder:text-[#1F1F1F] focus:ring-2 focus:ring-[#B98577]"
+            maxlength="30"
+            placeholder="unidade, caixa, pacote..."
+            class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#2D2926] outline-none placeholder:text-[#A6A19D] focus:ring-2 focus:ring-[#B98577]"
+          />
+        </label>
+
+        <label class="grid gap-2">
+          <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">SKU</span>
+          <input
+            formControlName="sku"
+            type="text"
+            maxlength="80"
+            placeholder="Código interno"
+            class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#2D2926] outline-none placeholder:text-[#A6A19D] focus:ring-2 focus:ring-[#B98577]"
           />
         </label>
 
         <label class="grid gap-2">
           <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">
-            Data de Vencimento (opcional)
+            Estoque mínimo
           </span>
           <input
-            formControlName="expirationDate"
-            appDateMask
-            type="text"
-            inputmode="numeric"
-            maxlength="10"
-            placeholder="dd/mm/yyyy"
-            class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#2D2926] outline-none placeholder:text-[#1F1F1F] focus:ring-2 focus:ring-[#B98577]"
-          />
-        </label>
-
-        <label class="grid gap-2 lg:max-w-[28rem]">
-          <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">
-            Quantidade
-          </span>
-          <input
-            formControlName="quantity"
+            formControlName="minimumQuantity"
             type="number"
             min="0"
-            placeholder="00"
+            step="0.01"
+            placeholder="0"
             class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#2D2926] outline-none placeholder:text-[#A6A19D] focus:ring-2 focus:ring-[#B98577]"
           />
         </label>
 
+        @if (showInitialQuantity()) {
+          <label class="grid gap-2">
+            <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">
+              Quantidade inicial
+            </span>
+            <input
+              formControlName="initialQuantity"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0"
+              class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#2D2926] outline-none placeholder:text-[#A6A19D] focus:ring-2 focus:ring-[#B98577]"
+            />
+          </label>
+        }
+
         <label class="grid gap-2 lg:col-span-2">
-          <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">
-            Valor da Compra
-          </span>
-          <input
-            formControlName="purchaseValue"
-            appCurrencyMask
-            type="text"
-            inputmode="numeric"
-            placeholder="R$ 0,00"
-            class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#2D2926] outline-none placeholder:text-[#A6A19D] focus:ring-2 focus:ring-[#B98577]"
-          />
+          <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">Descrição</span>
+          <textarea
+            formControlName="description"
+            rows="4"
+            placeholder="Observações sobre o item"
+            class="resize-none rounded-xl border-0 bg-[#EDEDED] px-4 py-4 text-sm text-[#2D2926] outline-none placeholder:text-[#A6A19D] focus:ring-2 focus:ring-[#B98577]"
+          ></textarea>
         </label>
       </form>
     </article>
@@ -102,4 +120,8 @@ import { InventoryTypeOption } from '../../models/inventory.model';
 export class InventoryItemFormComponent {
   readonly form = input.required<FormGroup>();
   readonly typeOptions = input.required<InventoryTypeOption[]>();
+  readonly clinics = input<ClinicOption[]>([]);
+  readonly title = input('Cadastrar Item');
+  readonly showClinicField = input(true);
+  readonly showInitialQuantity = input(true);
 }

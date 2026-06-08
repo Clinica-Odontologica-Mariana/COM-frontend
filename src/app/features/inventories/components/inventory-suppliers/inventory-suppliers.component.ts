@@ -1,5 +1,11 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Supplier } from '../../models/inventory.model';
+
+interface Supplier {
+  initials: string;
+  name: string;
+  lastOrder: string;
+  action: 'phone' | 'email';
+}
 
 @Component({
   selector: 'app-inventory-suppliers',

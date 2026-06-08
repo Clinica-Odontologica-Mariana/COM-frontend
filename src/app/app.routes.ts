@@ -9,6 +9,13 @@ export const routes: Routes = [
       ).then((m) => m.InventoryItemFormPageComponent),
   },
   {
+    path: 'inventories/:id/edit',
+    loadComponent: () =>
+      import(
+        './features/inventories/pages/inventory-item-form-page/inventory-item-form-page.component'
+      ).then((m) => m.InventoryItemFormPageComponent),
+  },
+  {
     path: 'inventories',
     loadComponent: () =>
       import('./features/inventories/pages/inventory-page/inventory-page.component').then(
