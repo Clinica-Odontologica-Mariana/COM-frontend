@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { Observable, delay, of } from 'rxjs';
+import { Observable, delay, of, throwError } from 'rxjs';
 import {
   CLINIC_SCHEDULE_TEMPLATE,
   ClinicFormValue,
@@ -82,6 +82,16 @@ export class ClinicsMockService {
     return of(this.clinicsState().map((clinic) => this.cloneClinic(clinic))).pipe(delay(220));
   }
 
+  findById(id: string): Observable<ClinicRecord> {
+    const clinic = this.clinicsState().find((item) => item.id === id);
+
+    if (!clinic) {
+      return throwError(() => new Error('Clínica não encontrada.'));
+    }
+
+    return of(this.cloneClinic(clinic)).pipe(delay(180));
+  }
+
   create(payload: ClinicFormValue): Observable<ClinicRecord> {
     const clinic: ClinicRecord = {
       id: crypto.randomUUID(),
@@ -93,6 +103,27 @@ export class ClinicsMockService {
 
     this.clinicsState.update((clinics) => [clinic, ...clinics]);
     return of(this.cloneClinic(clinic)).pipe(delay(180));
+  }
+
+  update(id: string, payload: ClinicFormValue): Observable<ClinicRecord> {
+    const current = this.clinicsState().find((clinic) => clinic.id === id);
+
+    if (!current) {
+      return throwError(() => new Error('Clínica não encontrada.'));
+    }
+
+    const updated: ClinicRecord = {
+      ...current,
+      ...payload,
+      imageUrl: payload.imageUrl || current.imageUrl,
+      schedule: cloneClinicSchedule(payload.schedule),
+    };
+
+    this.clinicsState.update((clinics) =>
+      clinics.map((clinic) => (clinic.id === id ? updated : clinic)),
+    );
+
+    return of(this.cloneClinic(updated)).pipe(delay(180));
   }
 
   private cloneClinic(clinic: ClinicRecord): ClinicRecord {
