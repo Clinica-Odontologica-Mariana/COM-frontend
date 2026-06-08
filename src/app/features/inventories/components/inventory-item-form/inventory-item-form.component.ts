@@ -103,6 +103,22 @@ import { ClinicOption, InventoryTypeOption } from '../../models/inventory.model'
           </label>
         }
 
+        @if (showQuantityAdjustment()) {
+          <label class="grid gap-2">
+            <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">
+              Ajustar quantidade atual
+            </span>
+            <input
+              formControlName="adjustedQuantity"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0"
+              class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#2D2926] outline-none placeholder:text-[#A6A19D] focus:ring-2 focus:ring-[#B98577]"
+            />
+          </label>
+        }
+
         <label class="grid gap-2 lg:col-span-2">
           <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">Descrição</span>
           <textarea
@@ -124,4 +140,5 @@ export class InventoryItemFormComponent {
   readonly title = input('Cadastrar Item');
   readonly showClinicField = input(true);
   readonly showInitialQuantity = input(true);
+  readonly showQuantityAdjustment = input(false);
 }

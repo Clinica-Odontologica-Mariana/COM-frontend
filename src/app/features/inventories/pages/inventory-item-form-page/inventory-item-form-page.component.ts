@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { concatMap, of } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { InventoryItemFormComponent } from '../../components/inventory-item-form/inventory-item-form.component';
 import { INVENTORY_TYPE_OPTIONS } from '../../data/inventory.mock';
@@ -65,6 +66,7 @@ import { InventoryService } from '../../services/inventory.service';
             [title]="isEditMode() ? 'Editar Item' : 'Cadastrar Item'"
             [showClinicField]="!isEditMode()"
             [showInitialQuantity]="!isEditMode()"
+            [showQuantityAdjustment]="isEditMode()"
           />
         </div>
       </div>
@@ -85,6 +87,7 @@ export class InventoryItemFormPageComponent implements OnInit {
   protected readonly errorMessage = signal('');
   protected readonly itemId = signal<string | null>(null);
   protected readonly isEditMode = signal(false);
+  private readonly originalQuantity = signal(0);
 
   protected readonly itemForm = this.formBuilder.group({
     name: ['', Validators.required],
@@ -95,6 +98,7 @@ export class InventoryItemFormPageComponent implements OnInit {
     description: [''],
     minimumQuantity: [0, [Validators.min(0)]],
     initialQuantity: [0, [Validators.min(0)]],
+    adjustedQuantity: [0, [Validators.min(0)]],
   });
 
   ngOnInit(): void {
@@ -127,7 +131,9 @@ export class InventoryItemFormPageComponent implements OnInit {
     const itemId = this.itemId();
 
     if (itemId) {
-      this.inventoryService.updateItem(itemId, this.buildUpdatePayload()).subscribe({
+      this.inventoryService.updateItem(itemId, this.buildUpdatePayload()).pipe(
+        concatMap((item) => this.adjustQuantityIfNeeded(item.id)),
+      ).subscribe({
         next: () => void this.router.navigate(['/inventories']),
         error: (error: unknown) => this.showError(error),
       });
@@ -176,6 +182,8 @@ export class InventoryItemFormPageComponent implements OnInit {
   }
 
   private patchForm(item: InventoryItem): void {
+    this.originalQuantity.set(Number(item.currentQuantity) || 0);
+
     this.itemForm.patchValue({
       name: item.name,
       type: item.itemType,
@@ -185,6 +193,7 @@ export class InventoryItemFormPageComponent implements OnInit {
       description: item.description ?? '',
       minimumQuantity: item.minimumQuantity ?? 0,
       initialQuantity: item.currentQuantity,
+      adjustedQuantity: item.currentQuantity,
     });
   }
 
@@ -219,6 +228,31 @@ export class InventoryItemFormPageComponent implements OnInit {
 
   private toNumber(value: number): number {
     return Number(value) || 0;
+  }
+
+  private adjustQuantityIfNeeded(itemId: string) {
+    const adjustedQuantity = this.toNumber(this.itemForm.controls.adjustedQuantity.value);
+    const originalQuantity = this.originalQuantity();
+
+    if (adjustedQuantity === originalQuantity) {
+      return of(null);
+    }
+
+    if (adjustedQuantity === 0 && originalQuantity > 0) {
+      return this.inventoryService.createMovement({
+        inventoryItemId: itemId,
+        movementType: 'OUT',
+        quantity: originalQuantity,
+        reason: 'Zerar estoque pelo cadastro de estoque',
+      });
+    }
+
+    return this.inventoryService.createMovement({
+      inventoryItemId: itemId,
+      movementType: 'ADJUSTMENT',
+      quantity: adjustedQuantity,
+      reason: 'Ajuste manual pelo cadastro de estoque',
+    });
   }
 
   private showError(error: unknown): void {
