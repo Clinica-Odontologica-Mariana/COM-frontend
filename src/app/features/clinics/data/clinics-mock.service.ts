@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { Observable, delay, of } from 'rxjs';
 import {
   CLINIC_SCHEDULE_TEMPLATE,
+  ClinicFormValue,
   ClinicRecord,
   cloneClinicSchedule,
 } from '../models/clinic.models';
@@ -79,6 +80,19 @@ export class ClinicsMockService {
 
   list(): Observable<ClinicRecord[]> {
     return of(this.clinicsState().map((clinic) => this.cloneClinic(clinic))).pipe(delay(220));
+  }
+
+  create(payload: ClinicFormValue): Observable<ClinicRecord> {
+    const clinic: ClinicRecord = {
+      id: crypto.randomUUID(),
+      active: true,
+      ...payload,
+      imageUrl: payload.imageUrl || CLINIC_IMAGES[this.clinicsState().length % CLINIC_IMAGES.length],
+      schedule: cloneClinicSchedule(payload.schedule),
+    };
+
+    this.clinicsState.update((clinics) => [clinic, ...clinics]);
+    return of(this.cloneClinic(clinic)).pipe(delay(180));
   }
 
   private cloneClinic(clinic: ClinicRecord): ClinicRecord {

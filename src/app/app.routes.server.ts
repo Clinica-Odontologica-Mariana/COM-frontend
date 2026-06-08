@@ -6,6 +6,10 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'clinics/new',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'patients/:id/treatments',
     renderMode: RenderMode.Client,
   },

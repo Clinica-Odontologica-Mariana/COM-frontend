@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { ClinicCardComponent } from '../../components/clinic-card/clinic-card.component';
 import { ClinicEmptyStateComponent } from '../../components/clinic-empty-state/clinic-empty-state.component';
 import { ClinicPageHeaderComponent } from '../../components/clinic-page-header/clinic-page-header.component';
@@ -11,7 +12,7 @@ import { ClinicCardViewModel, toClinicCardViewModel } from '../../models/clinic.
   template: `
     <div class="min-h-screen bg-[#F9F9F9]" style="font-family: 'Manrope', sans-serif">
       <section class="mx-auto flex w-full max-w-350 flex-col gap-10 px-6 py-8 md:px-10 xl:px-12">
-        <app-clinic-page-header />
+        <app-clinic-page-header (create)="openCreatePage()" />
 
         @if (loading()) {
           <section class="grid gap-6 lg:grid-cols-2">
@@ -27,7 +28,7 @@ import { ClinicCardViewModel, toClinicCardViewModel } from '../../models/clinic.
             }
           </section>
         } @else if (!visibleClinics().length) {
-          <app-clinic-empty-state />
+          <app-clinic-empty-state (create)="openCreatePage()" />
         } @else {
           <section class="grid gap-6 lg:grid-cols-2">
             @for (clinic of visibleClinics(); track clinic.id) {
@@ -42,6 +43,7 @@ import { ClinicCardViewModel, toClinicCardViewModel } from '../../models/clinic.
 })
 export class ClinicsPageComponent implements OnInit {
   private readonly clinicsMockService = inject(ClinicsMockService);
+  private readonly router = inject(Router);
 
   protected readonly skeletonCards = Array.from({ length: 3 });
   protected readonly loading = signal(true);
@@ -55,6 +57,10 @@ export class ClinicsPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadClinics();
+  }
+
+  protected openCreatePage(): void {
+    void this.router.navigate(['/clinics/new']);
   }
 
   private loadClinics(): void {
