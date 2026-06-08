@@ -87,9 +87,23 @@ import { InventoryItem, InventoryStatus } from '../../models/inventory.model';
             <div class="flex justify-end">
               <a
                 [routerLink]="['/inventories', item.id, 'edit']"
-                class="inline-flex h-9 items-center justify-center rounded-lg bg-[#F1ECE9] px-4 text-xs font-extrabold text-[#8B574B] transition hover:bg-[#E5D8D2]"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-md text-[#B8B2AE] transition hover:bg-[#F1ECE9] hover:text-[#8B574B] focus:outline-none focus:ring-2 focus:ring-[#B98577]"
+                aria-label="Editar item"
+                title="Editar"
               >
-                Editar
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  class="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 5H6.5A2.5 2.5 0 0 0 4 7.5v10A2.5 2.5 0 0 0 6.5 20h10A2.5 2.5 0 0 0 19 17.5V12" />
+                  <path d="M16.5 4.5 19.5 7.5 11 16l-4 1 1-4 8.5-8.5Z" />
+                </svg>
               </a>
             </div>
           </article>

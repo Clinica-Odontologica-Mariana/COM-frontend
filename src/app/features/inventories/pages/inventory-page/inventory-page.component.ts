@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { FormsModule } from '@angular/forms';
 import { InventoryCatalogComponent } from '../../components/inventory-catalog/inventory-catalog.component';
 import { InventoryLowStockAlertComponent } from '../../components/inventory-low-stock-alert/inventory-low-stock-alert.component';
-import { InventoryShowcaseComponent } from '../../components/inventory-showcase/inventory-showcase.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ClinicOption, InventoryItem } from '../../models/inventory.model';
 import { InventoryService } from '../../services/inventory.service';
@@ -13,7 +12,6 @@ import { InventoryService } from '../../services/inventory.service';
     FormsModule,
     InventoryCatalogComponent,
     InventoryLowStockAlertComponent,
-    InventoryShowcaseComponent,
   ],
   template: `
     <section class="min-h-screen bg-[#F9F9F9] px-5 py-6 sm:px-8 lg:px-12">
@@ -77,10 +75,6 @@ import { InventoryService } from '../../services/inventory.service';
           }
 
           <app-inventory-catalog [items]="filteredItems()" />
-
-          <section class="mt-16">
-            <app-inventory-showcase />
-          </section>
         }
       </div>
     </section>

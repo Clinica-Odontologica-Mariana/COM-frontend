@@ -51,6 +51,11 @@ export interface InventoryTypeOption {
   value: InventoryItemType;
 }
 
+export interface InventoryUnitOption {
+  label: string;
+  value: string;
+}
+
 export interface ClinicOption {
   id: string;
   name: string;

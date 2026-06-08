@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ClinicOption, InventoryTypeOption } from '../../models/inventory.model';
+import { ClinicOption, InventoryTypeOption, InventoryUnitOption } from '../../models/inventory.model';
 
 @Component({
   selector: 'app-inventory-item-form',
@@ -53,13 +53,15 @@ import { ClinicOption, InventoryTypeOption } from '../../models/inventory.model'
 
         <label class="grid gap-2">
           <span class="text-xs font-extrabold uppercase tracking-wide text-[#7D7772]">Unidade</span>
-          <input
+          <select
             formControlName="unit"
-            type="text"
-            maxlength="30"
-            placeholder="unidade, caixa, pacote..."
-            class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#2D2926] outline-none placeholder:text-[#A6A19D] focus:ring-2 focus:ring-[#B98577]"
-          />
+            class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#7D7772] outline-none focus:ring-2 focus:ring-[#B98577]"
+          >
+            <option value="">Opções</option>
+            @for (option of unitOptions(); track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
         </label>
 
         <label class="grid gap-2">
@@ -136,6 +138,7 @@ import { ClinicOption, InventoryTypeOption } from '../../models/inventory.model'
 export class InventoryItemFormComponent {
   readonly form = input.required<FormGroup>();
   readonly typeOptions = input.required<InventoryTypeOption[]>();
+  readonly unitOptions = input.required<InventoryUnitOption[]>();
   readonly clinics = input<ClinicOption[]>([]);
   readonly title = input('Cadastrar Item');
   readonly showClinicField = input(true);

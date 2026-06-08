@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { concatMap, of } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { InventoryItemFormComponent } from '../../components/inventory-item-form/inventory-item-form.component';
-import { INVENTORY_TYPE_OPTIONS } from '../../data/inventory.mock';
+import { INVENTORY_TYPE_OPTIONS, INVENTORY_UNIT_OPTIONS } from '../../data/inventory.mock';
 import {
   ClinicOption,
   InventoryItem,
@@ -62,6 +62,7 @@ import { InventoryService } from '../../services/inventory.service';
           <app-inventory-item-form
             [form]="itemForm"
             [typeOptions]="typeOptions"
+            [unitOptions]="unitOptions"
             [clinics]="clinics()"
             [title]="isEditMode() ? 'Editar Item' : 'Cadastrar Item'"
             [showClinicField]="!isEditMode()"
@@ -82,6 +83,7 @@ export class InventoryItemFormPageComponent implements OnInit {
   private readonly router = inject(Router);
 
   protected readonly typeOptions = INVENTORY_TYPE_OPTIONS;
+  protected readonly unitOptions = INVENTORY_UNIT_OPTIONS;
   protected readonly clinics = signal<ClinicOption[]>([]);
   protected readonly isSaving = signal(false);
   protected readonly errorMessage = signal('');
