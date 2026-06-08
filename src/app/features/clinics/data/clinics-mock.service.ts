@@ -126,6 +126,14 @@ export class ClinicsMockService {
     return of(this.cloneClinic(updated)).pipe(delay(180));
   }
 
+  inactivate(id: string): Observable<void> {
+    this.clinicsState.update((clinics) =>
+      clinics.map((clinic) => (clinic.id === id ? { ...clinic, active: false } : clinic)),
+    );
+
+    return of(void 0).pipe(delay(160));
+  }
+
   private cloneClinic(clinic: ClinicRecord): ClinicRecord {
     return {
       ...clinic,
