@@ -2,15 +2,15 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
-    path: 'medical-records/:id',
+    path: 'atendimento',
     loadComponent: () =>
-      import('./features/medical-records/pages/patient-record-page/patient-record-page.component').then(
-        (m) => m.PatientRecordPageComponent,
+      import('./features/attendance/pages/attendance-page/attendance-page.components').then(
+        (m) => m.AttendancePageComponent,
       ),
   },
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'medical-records/1',
+    redirectTo: 'atendimento',
   },
 ];
