@@ -1,13 +1,54 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs';
 
 interface SidebarItem {
   label: string;
   icon: string;
   link: string;
+  routePrefix: string;
   active: boolean;
 }
+
+const SEED_TREATMENT_PLAN_ID = '14d37daa-a0b2-4e11-9e20-5efc9c3d703e';
+
+const NAV_ITEMS: Omit<SidebarItem, 'active'>[] = [
+  { label: 'Painel', icon: '/Painel_icon.svg', link: '/painel', routePrefix: '/painel' },
+  {
+    label: 'Pacientes',
+    icon: '/pacientes.svg',
+    link: '/pacientes',
+    routePrefix: '/pacientes',
+  },
+  { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', routePrefix: '/agenda' },
+  {
+    label: 'Prontuários',
+    icon: '/prontuarios.svg',
+    link: '/medical-records/1',
+    routePrefix: '/medical-records',
+  },
+  {
+    label: 'Tratamentos',
+    icon: '/tratamentos.svg',
+    link: `/tratamentos/${SEED_TREATMENT_PLAN_ID}`,
+    routePrefix: '/tratamentos',
+  },
+  { label: 'Estoque', icon: '/estoque.svg', link: '/estoque', routePrefix: '/estoque' },
+  {
+    label: 'Clínicas',
+    icon: '/Clinicas.svg',
+    link: '/clinicas',
+    routePrefix: '/clinicas',
+  },
+  {
+    label: 'Certificados',
+    icon: '/certificados.svg',
+    link: '/certificados',
+    routePrefix: '/certificados',
+  },
+];
 
 @Component({
   selector: 'app-global-sidebar',
@@ -19,7 +60,8 @@ interface SidebarItem {
       <div class="mb-4 flex items-center justify-between lg:hidden">
         <span
           style="font-family: Manrope, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #78716C;"
-        >Menu</span>
+          >Menu</span
+        >
         <button
           type="button"
           class="grid h-8 w-8 place-items-center rounded-full transition hover:bg-[#EDE8E6]"
@@ -28,7 +70,12 @@ interface SidebarItem {
           aria-label="Fechar menu"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path
+              d="M1 1l12 12M13 1L1 13"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
         </button>
       </div>
@@ -50,7 +97,7 @@ interface SidebarItem {
         </div>
 
         <nav class="mt-5 space-y-1" aria-label="Area administrativa">
-          @for (item of items; track item.label) {
+          @for (item of items(); track item.label) {
             <a
               [routerLink]="item.link"
               [attr.aria-current]="item.active ? 'page' : null"
@@ -106,16 +153,20 @@ export class GlobalSidebarComponent {
   mobileOpen = input(false);
   closeMobile = output<void>();
 
-  protected readonly items: SidebarItem[] = [
-    { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1', active: false },
-    { label: 'Pacientes', icon: '/pacientes.svg', link: '/medical-records/1', active: false },
-    { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', active: false },
-    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/medical-records/1', active: true },
-    { label: 'Tratamentos', icon: '/tratamentos.svg', link: '/tratamentos/1', active: false },
-    { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', active: false },
-    { label: 'Clínicas', icon: '/Clinicas.svg', link: '/medical-records/1', active: false },
-    { label: 'Certificados', icon: '/certificados.svg', link: '/medical-records/1', active: false },
-  ];
+  private router = inject(Router);
+
+  private currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd),
+      map((e) => (e as NavigationEnd).urlAfterRedirects),
+      startWith(this.router.url),
+    ),
+  );
+
+  protected items = computed<SidebarItem[]>(() => {
+    const url = this.currentUrl() ?? '';
+    return NAV_ITEMS.map((item) => ({ ...item, active: url.startsWith(item.routePrefix) }));
+  });
 
   protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
 

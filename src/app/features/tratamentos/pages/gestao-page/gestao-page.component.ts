@@ -199,7 +199,9 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
           (click)="$event.stopPropagation()"
         >
           <div class="mb-2 flex items-center justify-between">
-            <h2 class="[font-family:var(--font-family-serif)] m-0 text-xl font-normal text-[#1A1C1C]">
+            <h2
+              class="[font-family:var(--font-family-serif)] m-0 text-xl font-normal text-[#1A1C1C]"
+            >
               {{ confirmType() === 'complete' ? 'Concluir Procedimento' : 'Iniciar Procedimento' }}
             </h2>
             <button
@@ -209,15 +211,22 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
               aria-label="Fechar"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path
+                  d="M1 1l12 12M13 1L1 13"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
               </svg>
             </button>
           </div>
 
           <p class="mb-1 text-sm text-[#78716C]">
-            {{ confirmType() === 'complete'
-              ? 'Tem certeza que deseja marcar este procedimento como concluído?'
-              : 'Tem certeza que deseja iniciar este procedimento?' }}
+            {{
+              confirmType() === 'complete'
+                ? 'Tem certeza que deseja marcar este procedimento como concluído?'
+                : 'Tem certeza que deseja iniciar este procedimento?'
+            }}
           </p>
           <p class="mb-6 text-sm font-semibold text-[#1A1C1C]">{{ confirmProcedure()!.nome }}</p>
 
@@ -250,7 +259,6 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
       >
         <div
           class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[32px] bg-white p-8 shadow-[0_24px_64px_rgba(0,0,0,0.15)]"
-
           (click)="$event.stopPropagation()"
         >
           <div class="mb-6 flex items-center justify-between">
@@ -497,7 +505,9 @@ export class GestaoPageComponent implements OnInit {
     this._data.update((t) => {
       if (!t) return null;
       const updatedProcs = t.procedures.map((p) =>
-        p.id === proc.id ? { ...p, status: 'em_andamento' as ProcedureStatus, dataInicio: today } : p,
+        p.id === proc.id
+          ? { ...p, status: 'em_andamento' as ProcedureStatus, dataInicio: today }
+          : p,
       );
       return { ...t, procedures: updatedProcs };
     });

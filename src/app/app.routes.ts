@@ -25,6 +25,6 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'tratamentos/1',
+    redirectTo: 'tratamentos/14d37daa-a0b2-4e11-9e20-5efc9c3d703e',
   },
 ];
