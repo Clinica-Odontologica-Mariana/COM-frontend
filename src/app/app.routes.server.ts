@@ -2,12 +2,21 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
   {
+    path: 'patients/:id/treatments',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'patients/:id/edit',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'medical-records/:id',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'certificados',
     renderMode: RenderMode.Client,
   },
-  // Removed 'medical-records/:id' server route because the corresponding
-  // client route is not present in the current routing configuration.
-  // Restore when the client route is added back to `app.routes.ts`.
   {
     path: '**',
     renderMode: RenderMode.Prerender,
