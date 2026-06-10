@@ -4,12 +4,5 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "warn"
-  },
-  "/keycloak": {
-    "target": "http://localhost:8081",
-    "secure": false,
-    "changeOrigin": true,
-    "pathRewrite": { "^/keycloak": "" },
-    "logLevel": "warn"
   }
 }

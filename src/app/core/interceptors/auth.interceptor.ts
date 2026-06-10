@@ -9,10 +9,6 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
     return next(request);
   }
 
-  if (request.url.includes('/keycloak/')) {
-    return next(request);
-  }
-
   const token = localStorage.getItem('access_token');
 
   if (!token) {

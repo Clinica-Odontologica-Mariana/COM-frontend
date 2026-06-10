@@ -1,24 +1,24 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 
-interface KeycloakTokenResponse {
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
   access_token: string;
-  expires_in: number;
   refresh_token: string;
-  refresh_expires_in: number;
-  token_type: string;
-  scope: string;
+  expires_in: number;
 }
 
 const TOKEN_KEY = 'access_token';
 const TOKEN_EXPIRY_KEY = 'access_token_expiry';
 
-const KEYCLOAK_TOKEN_URL = '/keycloak/realms/rest-ms/protocol/openid-connect/token';
-const CLIENT_ID = 'rest-ms-api';
-const CLIENT_SECRET = 'rest-ms-api-secret';
+const AUTH_LOGIN_URL = '/api/v1/auth/login';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -38,22 +38,14 @@ export class AuthService {
     return Date.now() < Number(expiry);
   }
 
-  login(username: string, password: string): Observable<KeycloakTokenResponse> {
-    const body = new HttpParams()
-      .set('grant_type', 'password')
-      .set('client_id', CLIENT_ID)
-      .set('client_secret', CLIENT_SECRET)
-      .set('username', username)
-      .set('password', password);
-
-    const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
-
-    return this.http.post<KeycloakTokenResponse>(KEYCLOAK_TOKEN_URL, body.toString(), { headers }).pipe(
+  login(username: string, password: string): Observable<LoginResponse> {
+    const credentials: LoginRequest = { username, password };
+    return this.http.post<LoginResponse>(AUTH_LOGIN_URL, credentials).pipe(
       tap((res) => this.storeToken(res)),
     );
   }
 
-  initDevSession(): Observable<KeycloakTokenResponse | null> {
+  initDevSession(): Observable<LoginResponse | null> {
     if (!isPlatformBrowser(this.platformId)) return of(null);
     if (this.isTokenValid()) return of(null);
     return this.login('api-admin', 'admin123').pipe(
@@ -67,7 +59,7 @@ export class AuthService {
     localStorage.removeItem(TOKEN_EXPIRY_KEY);
   }
 
-  private storeToken(res: KeycloakTokenResponse): void {
+  private storeToken(res: LoginResponse): void {
     if (!isPlatformBrowser(this.platformId)) return;
     localStorage.setItem(TOKEN_KEY, res.access_token);
     localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + res.expires_in * 1000));
