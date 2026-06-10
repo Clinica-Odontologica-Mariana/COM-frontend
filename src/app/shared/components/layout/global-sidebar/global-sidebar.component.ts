@@ -8,47 +8,10 @@ interface SidebarItem {
   label: string;
   icon: string;
   link: string;
-  routePrefix: string;
-  active: boolean;
+  match: readonly string[];
 }
 
 const SEED_TREATMENT_PLAN_ID = '14d37daa-a0b2-4e11-9e20-5efc9c3d703e';
-
-const NAV_ITEMS: Omit<SidebarItem, 'active'>[] = [
-  { label: 'Painel', icon: '/Painel_icon.svg', link: '/painel', routePrefix: '/painel' },
-  {
-    label: 'Pacientes',
-    icon: '/pacientes.svg',
-    link: '/pacientes',
-    routePrefix: '/pacientes',
-  },
-  { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', routePrefix: '/agenda' },
-  {
-    label: 'Prontuários',
-    icon: '/prontuarios.svg',
-    link: '/medical-records/1',
-    routePrefix: '/medical-records',
-  },
-  {
-    label: 'Tratamentos',
-    icon: '/tratamentos.svg',
-    link: `/tratamentos/${SEED_TREATMENT_PLAN_ID}`,
-    routePrefix: '/tratamentos',
-  },
-  { label: 'Estoque', icon: '/estoque.svg', link: '/estoque', routePrefix: '/estoque' },
-  {
-    label: 'Clínicas',
-    icon: '/Clinicas.svg',
-    link: '/clinicas',
-    routePrefix: '/clinicas',
-  },
-  {
-    label: 'Certificados',
-    icon: '/certificados.svg',
-    link: '/certificados',
-    routePrefix: '/certificados',
-  },
-];
 
 @Component({
   selector: 'app-global-sidebar',
@@ -97,15 +60,15 @@ const NAV_ITEMS: Omit<SidebarItem, 'active'>[] = [
         </div>
 
         <nav class="mt-5 space-y-1" aria-label="Area administrativa">
-          @for (item of items(); track item.label) {
+          @for (item of items; track item.label) {
             <a
               [routerLink]="item.link"
-              [attr.aria-current]="item.active ? 'page' : null"
+              [attr.aria-current]="isItemActive(item) ? 'page' : null"
               class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide transition"
-              [class.bg-[#EDE8E6]]="item.active"
-              [class.font-semibold]="item.active"
-              [class.text-[#8B574B]]="item.active"
-              [class.text-[#78716C]]="!item.active"
+              [class.bg-[#EDE8E6]]="isItemActive(item)"
+              [class.font-semibold]="isItemActive(item)"
+              [class.text-[#8B574B]]="isItemActive(item)"
+              [class.text-[#78716C]]="!isItemActive(item)"
               (click)="closeMobile.emit()"
             >
               <img
@@ -113,7 +76,7 @@ const NAV_ITEMS: Omit<SidebarItem, 'active'>[] = [
                 alt=""
                 class="h-5 w-5"
                 [style.filter]="
-                  item.active
+                  isItemActive(item)
                     ? 'invert(33%) sepia(22%) saturate(560%) hue-rotate(340deg) brightness(95%) contrast(90%)'
                     : 'none'
                 "
@@ -163,11 +126,21 @@ export class GlobalSidebarComponent {
     ),
   );
 
-  protected items = computed<SidebarItem[]>(() => {
-    const url = this.currentUrl() ?? '';
-    return NAV_ITEMS.map((item) => ({ ...item, active: url.startsWith(item.routePrefix) }));
-  });
-
+  protected readonly items: SidebarItem[] = [
+    { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1', match: ['/dashboard'] },
+    { label: 'Pacientes', icon: '/pacientes.svg', link: '/medical-records/1', match: ['/patients'] },
+    { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', match: ['/agenda'] },
+    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/medical-records/1', match: ['/medical-records'] },
+    {
+      label: 'Tratamentos',
+      icon: '/tratamentos.svg',
+      link: `/tratamentos/${SEED_TREATMENT_PLAN_ID}`,
+      match: ['/tratamentos', '/treatments', '/patients/'],
+    },
+    { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', match: ['/stock'] },
+    { label: 'Clínicas', icon: '/Clinicas.svg', link: '/clinics', match: ['/clinics'] },
+    { label: 'Certificados', icon: '/certificados.svg', link: '/medical-records/1', match: ['/certificates'] },
+  ];
   protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
 
   protected sidebarClass = computed(() => {
@@ -177,4 +150,8 @@ export class GlobalSidebarComponent {
     }
     return `${base} hidden lg:flex lg:h-full lg:min-h-fit`;
   });
+
+  protected isItemActive(item: SidebarItem): boolean {
+    return item.match.some((prefix) => (this.currentUrl() ?? '').startsWith(prefix));
+  }
 }
