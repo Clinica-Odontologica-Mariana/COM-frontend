@@ -7,6 +7,27 @@ const DEFAULT_PATIENT_ID = 'a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56';
 
 export const routes: Routes = [
   {
+    path: 'clinics/new',
+    loadComponent: () =>
+      import('./features/clinics/pages/clinic-form-page/clinic-form-page.component').then(
+        (m) => m.ClinicFormPageComponent,
+      ),
+  },
+  {
+    path: 'clinics/:id/edit',
+    loadComponent: () =>
+      import('./features/clinics/pages/clinic-form-page/clinic-form-page.component').then(
+        (m) => m.ClinicFormPageComponent,
+      ),
+  },
+  {
+    path: 'clinics',
+    loadComponent: () =>
+      import('./features/clinics/pages/clinics-page/clinics-page.component').then(
+        (m) => m.ClinicsPageComponent,
+      ),
+  },
+  {
     path: 'patients/:id/treatments',
     loadComponent: () =>
       import('./features/patients/pages/treatments/treatments-page.component').then(

@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
 
 interface SidebarItem {
   label: string;
   icon: string;
   link: string;
-  active: boolean;
+  match: readonly string[];
 }
 
 @Component({
@@ -15,18 +16,18 @@ interface SidebarItem {
   template: `
     <aside class="hidden h-full min-h-fit bg-[#FAFAF9] px-4 py-6 lg:flex lg:flex-col">
       <div class="pb-8">
-        <div class="flex-row items-center gap-4 ">
+        <div class="flex-row items-center gap-4">
           <img
             [ngSrc]="logo.icon"
             alt=""
             draggable="false"
-            class="h-15 w-auto m-3"
+            class="m-3 h-15 w-auto"
             width="20"
             height="20"
             aria-hidden="true"
           />
           <div>
-            <p class="text-sm font-bold text-[#7c5145b6] p-2">Olá, Usuário</p>
+            <p class="p-2 text-sm font-bold text-[#7c5145b6]">Olá, Usuário</p>
           </div>
         </div>
 
@@ -34,19 +35,19 @@ interface SidebarItem {
           @for (item of items; track item.label) {
             <a
               [routerLink]="item.link"
-              [attr.aria-current]="item.active ? 'page' : null"
+              [attr.aria-current]="isItemActive(item) ? 'page' : null"
               class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide transition"
-              [class.bg-[#EDE8E6]]="item.active"
-              [class.font-semibold]="item.active"
-              [class.text-[#8B574B]]="item.active"
-              [class.text-[#78716C]]="!item.active"
+              [class.bg-[#EDE8E6]]="isItemActive(item)"
+              [class.font-semibold]="isItemActive(item)"
+              [class.text-[#8B574B]]="isItemActive(item)"
+              [class.text-[#78716C]]="!isItemActive(item)"
             >
               <img
                 [src]="item.icon"
                 alt=""
                 class="h-5 w-5"
                 [style.filter]="
-                  item.active
+                  isItemActive(item)
                     ? 'invert(33%) sepia(22%) saturate(560%) hue-rotate(340deg) brightness(95%) contrast(90%)'
                     : 'none'
                 "
@@ -83,16 +84,33 @@ interface SidebarItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GlobalSidebarComponent {
-  protected readonly items: SidebarItem[] = [
-    { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1', active: false },
-    { label: 'Pacientes', icon: '/pacientes.svg', link: '/medical-records/1', active: false },
-    { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', active: false },
-    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/medical-records/1', active: true },
-    { label: 'Tratamentos', icon: '/tratamentos.svg', link: '/medical-records/1', active: false },
-    { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', active: false },
-    { label: 'Clínicas', icon: '/Clinicas.svg', link: '/medical-records/1', active: false },
-    { label: 'Certificados', icon: '/certificados.svg', link: '/medical-records/1', active: false },
-  ];
+  private readonly router = inject(Router);
 
+  protected readonly currentUrl = signal(this.router.url);
+  protected readonly items: SidebarItem[] = [
+    { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1', match: ['/dashboard'] },
+    { label: 'Pacientes', icon: '/pacientes.svg', link: '/medical-records/1', match: ['/patients'] },
+    { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', match: ['/agenda'] },
+    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/medical-records/1', match: ['/medical-records'] },
+    {
+      label: 'Tratamentos',
+      icon: '/tratamentos.svg',
+      link: '/patients/a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56/treatments',
+      match: ['/treatments', '/patients/'],
+    },
+    { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', match: ['/stock'] },
+    { label: 'Clínicas', icon: '/Clinicas.svg', link: '/clinics', match: ['/clinics'] },
+    { label: 'Certificados', icon: '/certificados.svg', link: '/medical-records/1', match: ['/certificates'] },
+  ];
   protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
+
+  constructor() {
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(() => this.currentUrl.set(this.router.url));
+  }
+
+  protected isItemActive(item: SidebarItem): boolean {
+    return item.match.some((prefix) => this.currentUrl().startsWith(prefix));
+  }
 }
