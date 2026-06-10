@@ -2,6 +2,10 @@
   display: block;
 }
 
+body {
+  font-family: 'Manrope', sans-serif;
+}
+
 .tilt-card {
   transform: perspective(1200px) rotateY(-8deg) rotateX(4deg);
   transition:
