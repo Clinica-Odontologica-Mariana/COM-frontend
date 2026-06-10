@@ -7,6 +7,14 @@ const DEFAULT_PATIENT_ID = 'a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56';
 
 export const routes: Routes = [
   {
+    path: 'unidades',
+    loadComponent: () =>
+      import('./features/public/pages/locations/locations-page.component').then(
+        (m) => m.LocationsPageComponent,
+      ),
+    data: { layout: 'public' },
+  },
+  {
     path: 'patients/:id/treatments',
     loadComponent: () =>
       import('./features/patients/pages/treatments/treatments-page.component').then(
@@ -35,6 +43,6 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'medical-records',
+    redirectTo: 'unidades',
   },
 ];

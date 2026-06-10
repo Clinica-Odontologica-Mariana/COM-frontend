@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-global-header',
-  imports: [RouterLink],
+  imports: [RouterLink, RouterLinkActive],
   template: `
     <header class="border-b border-[#E8DED8] bg-white">
       <div class="flex min-h-24 items-center justify-between gap-6 px-6 py-4 lg:min-h-28 lg:px-12">
@@ -21,9 +21,9 @@ import { RouterLink } from '@angular/router';
           @for (item of navItems; track item.label) {
             <a
               [routerLink]="item.link"
+              routerLinkActive="border-[#89594C] text-[#89594C]"
+              [routerLinkActiveOptions]="{ exact: item.exact }"
               class="border-b-4 border-transparent pb-2 transition hover:text-[#89594C]"
-              [class.border-[#89594C]]="item.active"
-              [class.text-[#89594C]]="item.active"
             >
               {{ item.label }}
             </a>
@@ -43,8 +43,8 @@ import { RouterLink } from '@angular/router';
 })
 export class GlobalHeaderComponent {
   protected readonly navItems = [
-    { label: 'Sobre', link: '/', active: true },
-    { label: 'Atendimento', link: '/', active: false },
-    { label: 'Unidades', link: '/', active: false },
+    { label: 'Sobre', link: '/', exact: true },
+    { label: 'Atendimento', link: '/', exact: true },
+    { label: 'Unidades', link: '/unidades', exact: true },
   ];
 }
