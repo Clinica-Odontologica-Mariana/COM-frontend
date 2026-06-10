@@ -13,7 +13,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
         ></button>
 
         <section
-          class="relative z-10 w-full max-w-[360px] rounded-[32px] bg-white px-8 py-8 text-center shadow-[0px_32px_60px_-24px_rgba(28,25,23,0.45)]"
+          class="relative z-10 w-full max-w-90 rounded-4xl bg-white px-8 py-8 text-center shadow-[0px_32px_60px_-24px_rgba(28,25,23,0.45)]"
           role="dialog"
           aria-modal="true"
           aria-labelledby="confirm-delete-title"
@@ -65,7 +65,9 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 export class ConfirmDeleteModalComponent {
   readonly open = input(false);
   readonly title = input('Excluir item?');
-  readonly description = input('Tem certeza que deseja remover este item? Esta ação não pode ser desfeita.');
+  readonly description = input(
+    'Tem certeza que deseja remover este item? Esta ação não pode ser desfeita.',
+  );
   readonly confirmLabel = input('Sim, Excluir');
   readonly cancelLabel = input('Cancelar');
 

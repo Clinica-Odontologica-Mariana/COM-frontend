@@ -2,7 +2,11 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClinicFormDrawerComponent } from '../../components/clinic-form-drawer/clinic-form-drawer.component';
 import { ClinicsMockService } from '../../data/clinics-mock.service';
-import { ClinicCardViewModel, ClinicFormValue, toClinicCardViewModel } from '../../models/clinic.models';
+import {
+  ClinicCardViewModel,
+  ClinicFormValue,
+  toClinicCardViewModel,
+} from '../../models/clinic.models';
 
 @Component({
   selector: 'app-clinic-form-page',

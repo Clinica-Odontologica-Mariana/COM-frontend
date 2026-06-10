@@ -4,9 +4,7 @@ import { ChangeDetectionStrategy, Component, output } from '@angular/core';
   selector: 'app-clinic-page-header',
   template: `
     <section class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-      <div class="max-w-2xl space-y-4">
-
-
+      <div class="max-w-full space-y-4">
         <div class="space-y-3">
           <h1
             class="text-4xl font-bold leading-tight text-[#7C5145] md:text-4xl"
@@ -15,9 +13,9 @@ import { ChangeDetectionStrategy, Component, output } from '@angular/core';
             Gerenciamento de Clínicas
           </h1>
 
-          <p class="max-w-xl text-base leading-7 text-[#78716C] md:text-lg">
-            Administre sua rede de parceiros e organize os horários de atendimento móvel
-            com precisão clínica e sofisticação.
+          <p class="max-w-full text-base leading-7 text-[#78716C] md:text-lg">
+            Administre sua rede de parceiros e organize os horários de atendimento móvel com
+            precisão clínica e sofisticação.
           </p>
         </div>
       </div>

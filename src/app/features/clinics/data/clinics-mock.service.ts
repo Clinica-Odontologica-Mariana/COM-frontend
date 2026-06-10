@@ -4,7 +4,7 @@ import {
   CLINIC_SCHEDULE_TEMPLATE,
   ClinicFormValue,
   ClinicRecord,
-  cloneClinicSchedule,
+  cloneWorkingDays,
 } from '../models/clinic.models';
 
 const CLINIC_IMAGES = ['/clinic-card-1.png', '/clinic-card-2.png', '/clinic-card-3.png'] as const;
@@ -23,7 +23,7 @@ const INITIAL_CLINICS: ClinicRecord[] = [
     zipCode: '01418000',
     city: 'São Paulo',
     imageUrl: CLINIC_IMAGES[0],
-    schedule: cloneClinicSchedule(CLINIC_SCHEDULE_TEMPLATE),
+    workingDays: cloneWorkingDays(CLINIC_SCHEDULE_TEMPLATE),
     active: true,
   },
   {
@@ -39,13 +39,55 @@ const INITIAL_CLINICS: ClinicRecord[] = [
     zipCode: '01310100',
     city: 'São Paulo',
     imageUrl: CLINIC_IMAGES[1],
-    schedule: cloneClinicSchedule([
-      { dayKey: 'monday', label: 'Segunda-feira', enabled: false, openingTime: '09:00', closingTime: '20:00' },
-      { dayKey: 'tuesday', label: 'Terça-feira', enabled: true, openingTime: '09:00', closingTime: '20:00' },
-      { dayKey: 'wednesday', label: 'Quarta-feira', enabled: false, openingTime: '09:00', closingTime: '20:00' },
-      { dayKey: 'thursday', label: 'Quinta-feira', enabled: true, openingTime: '09:00', closingTime: '20:00' },
-      { dayKey: 'friday', label: 'Sexta-feira', enabled: false, openingTime: '09:00', closingTime: '20:00' },
-      { dayKey: 'saturday', label: 'Sábado', enabled: false, openingTime: '09:00', closingTime: '14:00' },
+    workingDays: cloneWorkingDays([
+      {
+        dayKey: 'monday',
+        label: 'Segunda-feira',
+        enabled: false,
+        intervals: [{ startTime: '09:00', endTime: '20:00' }],
+      },
+      {
+        dayKey: 'tuesday',
+        label: 'Terça-feira',
+        enabled: true,
+        intervals: [
+          { startTime: '09:00', endTime: '13:00' },
+          { startTime: '14:00', endTime: '20:00' },
+        ],
+      },
+      {
+        dayKey: 'wednesday',
+        label: 'Quarta-feira',
+        enabled: false,
+        intervals: [{ startTime: '09:00', endTime: '20:00' }],
+      },
+      {
+        dayKey: 'thursday',
+        label: 'Quinta-feira',
+        enabled: true,
+        intervals: [
+          { startTime: '09:00', endTime: '13:00' },
+          { startTime: '14:00', endTime: '20:00' },
+        ],
+      },
+      {
+        dayKey: 'friday',
+        label: 'Sexta-feira',
+        enabled: false,
+        intervals: [{ startTime: '09:00', endTime: '20:00' }],
+      },
+      {
+        dayKey: 'saturday',
+        label: 'Sábado',
+        enabled: false,
+        intervals: [{ startTime: '09:00', endTime: '14:00' }],
+      },
+      {
+        dayKey: 'sunday',
+        label: 'Domingo',
+        enabled: false,
+        intervals: [{ startTime: '09:00', endTime: '14:00' }],
+      },
     ]),
     active: true,
   },
@@ -62,13 +104,49 @@ const INITIAL_CLINICS: ClinicRecord[] = [
     zipCode: '05435000',
     city: 'São Paulo',
     imageUrl: CLINIC_IMAGES[2],
-    schedule: cloneClinicSchedule([
-      { dayKey: 'monday', label: 'Segunda-feira', enabled: true, openingTime: '08:00', closingTime: '17:00' },
-      { dayKey: 'tuesday', label: 'Terça-feira', enabled: true, openingTime: '08:00', closingTime: '17:00' },
-      { dayKey: 'wednesday', label: 'Quarta-feira', enabled: true, openingTime: '08:00', closingTime: '17:00' },
-      { dayKey: 'thursday', label: 'Quinta-feira', enabled: true, openingTime: '08:00', closingTime: '17:00' },
-      { dayKey: 'friday', label: 'Sexta-feira', enabled: true, openingTime: '08:00', closingTime: '17:00' },
-      { dayKey: 'saturday', label: 'Sábado', enabled: false, openingTime: '08:00', closingTime: '12:00' },
+    workingDays: cloneWorkingDays([
+      {
+        dayKey: 'monday',
+        label: 'Segunda-feira',
+        enabled: true,
+        intervals: [{ startTime: '08:00', endTime: '17:00' }],
+      },
+      {
+        dayKey: 'tuesday',
+        label: 'Terça-feira',
+        enabled: true,
+        intervals: [{ startTime: '08:00', endTime: '17:00' }],
+      },
+      {
+        dayKey: 'wednesday',
+        label: 'Quarta-feira',
+        enabled: true,
+        intervals: [{ startTime: '08:00', endTime: '17:00' }],
+      },
+      {
+        dayKey: 'thursday',
+        label: 'Quinta-feira',
+        enabled: true,
+        intervals: [{ startTime: '08:00', endTime: '17:00' }],
+      },
+      {
+        dayKey: 'friday',
+        label: 'Sexta-feira',
+        enabled: true,
+        intervals: [{ startTime: '08:00', endTime: '17:00' }],
+      },
+      {
+        dayKey: 'saturday',
+        label: 'Sábado',
+        enabled: false,
+        intervals: [{ startTime: '08:00', endTime: '12:00' }],
+      },
+      {
+        dayKey: 'sunday',
+        label: 'Domingo',
+        enabled: false,
+        intervals: [{ startTime: '08:00', endTime: '12:00' }],
+      },
     ]),
     active: true,
   },
@@ -95,10 +173,15 @@ export class ClinicsMockService {
   create(payload: ClinicFormValue): Observable<ClinicRecord> {
     const clinic: ClinicRecord = {
       id: crypto.randomUUID(),
-      active: true,
       ...payload,
-      imageUrl: payload.imageUrl || CLINIC_IMAGES[this.clinicsState().length % CLINIC_IMAGES.length],
-      schedule: cloneClinicSchedule(payload.schedule),
+      imageUrl:
+        payload.imageUrl || CLINIC_IMAGES[this.clinicsState().length % CLINIC_IMAGES.length],
+      workingDays: cloneWorkingDays(payload.workingDays),
+      inactiveType: !payload.active ? payload.inactiveType : undefined,
+      inactiveFrom:
+        !payload.active && payload.inactiveType === 'temporary' ? payload.inactiveFrom : undefined,
+      inactiveTo:
+        !payload.active && payload.inactiveType === 'temporary' ? payload.inactiveTo : undefined,
     };
 
     this.clinicsState.update((clinics) => [clinic, ...clinics]);
@@ -116,7 +199,12 @@ export class ClinicsMockService {
       ...current,
       ...payload,
       imageUrl: payload.imageUrl || current.imageUrl,
-      schedule: cloneClinicSchedule(payload.schedule),
+      workingDays: cloneWorkingDays(payload.workingDays),
+      inactiveType: !payload.active ? payload.inactiveType : undefined,
+      inactiveFrom:
+        !payload.active && payload.inactiveType === 'temporary' ? payload.inactiveFrom : undefined,
+      inactiveTo:
+        !payload.active && payload.inactiveType === 'temporary' ? payload.inactiveTo : undefined,
     };
 
     this.clinicsState.update((clinics) =>
@@ -128,16 +216,38 @@ export class ClinicsMockService {
 
   inactivate(id: string): Observable<void> {
     this.clinicsState.update((clinics) =>
-      clinics.map((clinic) => (clinic.id === id ? { ...clinic, active: false } : clinic)),
+      clinics.map((clinic) =>
+        clinic.id === id
+          ? {
+              ...clinic,
+              active: false,
+              inactiveType: 'permanent',
+              inactiveFrom: undefined,
+              inactiveTo: undefined,
+            }
+          : clinic,
+      ),
     );
 
     return of(void 0).pipe(delay(160));
   }
 
   private cloneClinic(clinic: ClinicRecord): ClinicRecord {
-    return {
-      ...clinic,
-      schedule: cloneClinicSchedule(clinic.schedule),
-    };
+    const cloned = { ...clinic, workingDays: cloneWorkingDays(clinic.workingDays) };
+
+    if (!cloned.active && cloned.inactiveType === 'temporary' && cloned.inactiveTo) {
+      const today = new Date().toISOString().slice(0, 10);
+      if (today > cloned.inactiveTo) {
+        return {
+          ...cloned,
+          active: true,
+          inactiveType: undefined,
+          inactiveFrom: undefined,
+          inactiveTo: undefined,
+        };
+      }
+    }
+
+    return cloned;
   }
 }

@@ -1,17 +1,24 @@
+export type InactiveType = 'permanent' | 'temporary';
+
 export type ClinicDayKey =
   | 'monday'
   | 'tuesday'
   | 'wednesday'
   | 'thursday'
   | 'friday'
-  | 'saturday';
+  | 'saturday'
+  | 'sunday';
 
-export interface ClinicScheduleDay {
+export interface WorkingInterval {
+  startTime: string;
+  endTime: string;
+}
+
+export interface WorkingDay {
   dayKey: ClinicDayKey;
   label: string;
   enabled: boolean;
-  openingTime: string;
-  closingTime: string;
+  intervals: WorkingInterval[];
 }
 
 export interface ClinicRecord {
@@ -27,8 +34,11 @@ export interface ClinicRecord {
   zipCode: string;
   city: string;
   imageUrl: string;
-  schedule: ClinicScheduleDay[];
+  workingDays: WorkingDay[];
   active: boolean;
+  inactiveType?: InactiveType;
+  inactiveFrom?: string;
+  inactiveTo?: string;
 }
 
 export interface ClinicFormValue {
@@ -43,7 +53,11 @@ export interface ClinicFormValue {
   zipCode: string;
   city: string;
   imageUrl: string;
-  schedule: ClinicScheduleDay[];
+  workingDays: WorkingDay[];
+  active: boolean;
+  inactiveType?: InactiveType;
+  inactiveFrom?: string;
+  inactiveTo?: string;
 }
 
 export interface ClinicCardViewModel extends ClinicRecord {
@@ -52,22 +66,27 @@ export interface ClinicCardViewModel extends ClinicRecord {
   serviceWindowLabel: string;
 }
 
-export const CLINIC_SCHEDULE_TEMPLATE: ClinicScheduleDay[] = [
-  { dayKey: 'monday', label: 'Segunda-feira', enabled: true, openingTime: '08:00', closingTime: '18:00' },
-  { dayKey: 'tuesday', label: 'Terça-feira', enabled: true, openingTime: '08:00', closingTime: '18:00' },
-  { dayKey: 'wednesday', label: 'Quarta-feira', enabled: true, openingTime: '08:00', closingTime: '18:00' },
-  { dayKey: 'thursday', label: 'Quinta-feira', enabled: true, openingTime: '08:00', closingTime: '18:00' },
-  { dayKey: 'friday', label: 'Sexta-feira', enabled: true, openingTime: '08:00', closingTime: '18:00' },
-  { dayKey: 'saturday', label: 'Sábado', enabled: false, openingTime: '08:00', closingTime: '12:00' },
+export const CLINIC_SCHEDULE_TEMPLATE: WorkingDay[] = [
+  { dayKey: 'monday', label: 'Segunda-feira', enabled: true, intervals: [{ startTime: '08:00', endTime: '18:00' }] },
+  { dayKey: 'tuesday', label: 'Terça-feira', enabled: true, intervals: [{ startTime: '08:00', endTime: '18:00' }] },
+  { dayKey: 'wednesday', label: 'Quarta-feira', enabled: true, intervals: [{ startTime: '08:00', endTime: '18:00' }] },
+  { dayKey: 'thursday', label: 'Quinta-feira', enabled: true, intervals: [{ startTime: '08:00', endTime: '18:00' }] },
+  { dayKey: 'friday', label: 'Sexta-feira', enabled: true, intervals: [{ startTime: '08:00', endTime: '18:00' }] },
+  { dayKey: 'saturday', label: 'Sábado', enabled: false, intervals: [{ startTime: '08:00', endTime: '12:00' }] },
+  { dayKey: 'sunday', label: 'Domingo', enabled: false, intervals: [{ startTime: '08:00', endTime: '12:00' }] },
 ];
 
-export function cloneClinicSchedule(schedule: ClinicScheduleDay[]): ClinicScheduleDay[] {
-  return schedule.map((day) => ({ ...day }));
+export function cloneWorkingDays(days: WorkingDay[]): WorkingDay[] {
+  return days.map((day) => ({
+    ...day,
+    intervals: day.intervals.map((interval) => ({ ...interval })),
+  }));
 }
 
 export function toClinicCardViewModel(clinic: ClinicRecord): ClinicCardViewModel {
-  const enabledDays = clinic.schedule.filter((day) => day.enabled);
-  const firstEnabledDay = enabledDays[0];
+  const enabledDays = clinic.workingDays.filter((day) => day.enabled);
+  const firstInterval = enabledDays[0]?.intervals[0];
+
   const addressParts = [
     [clinic.street, clinic.number].filter(Boolean).join(', '),
     clinic.neighborhood,
@@ -77,14 +96,14 @@ export function toClinicCardViewModel(clinic: ClinicRecord): ClinicCardViewModel
   return {
     ...clinic,
     addressLabel: addressParts.join(' - '),
-    serviceDaysLabel: formatClinicScheduleDays(enabledDays),
-    serviceWindowLabel: firstEnabledDay
-      ? `${firstEnabledDay.openingTime} - ${firstEnabledDay.closingTime}`
+    serviceDaysLabel: formatWorkingDays(enabledDays),
+    serviceWindowLabel: firstInterval
+      ? `${firstInterval.startTime} - ${firstInterval.endTime}`
       : '--:-- - --:--',
   };
 }
 
-function formatClinicScheduleDays(days: ClinicScheduleDay[]): string {
+function formatWorkingDays(days: WorkingDay[]): string {
   if (!days.length) {
     return 'Nenhum dia configurado';
   }
