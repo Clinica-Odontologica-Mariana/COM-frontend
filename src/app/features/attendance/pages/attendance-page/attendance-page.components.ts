@@ -27,11 +27,8 @@ import {
       <app-attendance-hero />
       <app-attendance-journey [steps]="journeySteps" />
 
-      <!-- Mobile: benefits standalone -->
       <app-attendance-benefits class="md:hidden block" [benefits]="benefits" />
 
-      <!-- Mobile + Desktop: mobility gerencia seus próprios breakpoints internamente -->
-      <!-- Desktop: envolto em section com fundo e benefits ao lado -->
       <div class="md:hidden">
         <app-attendance-mobility-partners [highlights]="mobilityHighlights" />
       </div>
