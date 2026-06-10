@@ -42,6 +42,6 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'admin-access',
+    redirectTo: 'medical-records',
   },
 ];
