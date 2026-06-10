@@ -1,11 +1,15 @@
 <div class="min-h-screen bg-[#F9F9F9] text-[#57514d]">
-  <div class="lg:grid lg:grid-cols-[256px_minmax(0,1fr)]">
-    <app-global-sidebar />
+  @if (isPublicRoute()) {
+    <router-outlet />
+  } @else {
+    <div class="lg:grid lg:grid-cols-[256px_minmax(0,1fr)]">
+      <app-global-sidebar />
 
-    <main class="min-w-0">
-      <router-outlet />
-    </main>
-  </div>
+      <main class="min-w-0">
+        <router-outlet />
+      </main>
+    </div>
 
-  <app-global-footer />
+    <app-global-footer />
+  }
 </div>

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { HomeComponent } from './pages/home/home.component';
 
 // Pacientes de teste (seed via database)
 // Beatriz Oliveira Cavalcanti: c14671c5-976a-4d1e-9567-8a417f778b59
@@ -6,6 +7,16 @@ import { Routes } from '@angular/router';
 const DEFAULT_PATIENT_ID = 'a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56';
 
 export const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    component: HomeComponent,
+  },
+  {
+    path: 'home',
+    redirectTo: '',
+    pathMatch: 'full',
+  },
   {
     path: 'patients/:id/treatments',
     loadComponent: () =>
@@ -33,8 +44,7 @@ export const routes: Routes = [
     redirectTo: `medical-records/${DEFAULT_PATIENT_ID}`,
   },
   {
-    path: '',
-    pathMatch: 'full',
-    redirectTo: 'medical-records',
+    path: '**',
+    redirectTo: '',
   },
 ];
