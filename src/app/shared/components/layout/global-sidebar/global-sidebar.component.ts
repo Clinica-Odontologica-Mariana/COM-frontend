@@ -87,11 +87,11 @@ export class GlobalSidebarComponent {
     { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1', active: false },
     { label: 'Pacientes', icon: '/pacientes.svg', link: '/medical-records/1', active: false },
     { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', active: false },
-    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/medical-records/1', active: true },
+    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/medical-records/1', active: false },
     { label: 'Tratamentos', icon: '/tratamentos.svg', link: '/medical-records/1', active: false },
     { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', active: false },
     { label: 'Clínicas', icon: '/Clinicas.svg', link: '/medical-records/1', active: false },
-    { label: 'Certificados', icon: '/certificados.svg', link: '/certificados', active: false },
+    { label: 'Certificados', icon: '/certificados.svg', link: '/certificados', active: true },
   ];
 
   protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
