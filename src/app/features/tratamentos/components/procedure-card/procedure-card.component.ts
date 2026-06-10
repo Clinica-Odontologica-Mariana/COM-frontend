@@ -20,7 +20,7 @@ type Variant = 'in_progress' | 'pending' | 'completed';
       <!-- Left: icon + info -->
       <div class="flex min-w-0 flex-1 items-start gap-4">
         <div [class]="iconBgClass()">
-          <img [src]="iconSrc()" alt="" width="20" height="20" />
+          <img [src]="iconSrc()" alt="" width="20" height="20" [style.filter]="iconFilter()" />
         </div>
 
         <div class="min-w-0">
@@ -42,7 +42,7 @@ type Variant = 'in_progress' | 'pending' | 'completed';
         </div>
       </div>
 
-      <!-- Right: amount + optional complete button -->
+      <!-- Right: amount + optional action buttons -->
       <div class="flex shrink-0 flex-col items-end gap-2">
         <div class="text-right">
           <p class="[font-family:var(--font-family-sans)] text-[20px] font-bold leading-7" [class]="amountColorClass()">
@@ -68,6 +68,20 @@ type Variant = 'in_progress' | 'pending' | 'completed';
             Concluir
           </button>
         }
+
+        @if (allowStart() && variant() === 'pending') {
+          <button
+            type="button"
+            class="flex items-center gap-1.5 rounded-lg bg-[#7C5145]/10 px-3 py-1.5 text-xs font-bold text-[#7C5145] transition hover:bg-[#7C5145]/20"
+            (click)="$event.stopPropagation(); markStart.emit()"
+            aria-label="Iniciar procedimento"
+          >
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M2.5 2L9 5.5L2.5 9V2Z" fill="currentColor" />
+            </svg>
+            Iniciar
+          </button>
+        }
       </div>
     </div>
   `,
@@ -75,8 +89,10 @@ type Variant = 'in_progress' | 'pending' | 'completed';
 export class ProcedureCardComponent {
   procedure = input.required<Procedure>();
   allowComplete = input(false);
+  allowStart = input(false);
   cardClick = output<void>();
   markComplete = output<void>();
+  markStart = output<void>();
 
   protected variant = computed<Variant>(() => {
     switch (this.procedure().status) {
@@ -113,6 +129,12 @@ export class ProcedureCardComponent {
         return `${base} bg-[#E7E5E4]`;
     }
   });
+
+  protected iconFilter = computed(() =>
+    this.variant() === 'completed'
+      ? 'invert(42%) sepia(73%) saturate(559%) hue-rotate(98deg) brightness(94%) contrast(89%)'
+      : '',
+  );
 
   protected iconSrc = computed(() => {
     switch (this.procedure().tipo) {

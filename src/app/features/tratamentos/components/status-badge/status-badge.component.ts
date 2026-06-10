@@ -8,7 +8,7 @@ interface BadgeConfig {
 }
 
 const BADGE_CONFIGS: Record<ProcedureStatus, BadgeConfig> = {
-  concluido: { label: 'Concluído', color: '#57534E', bg: '#E7E5E4' },
+  concluido: { label: 'Concluído', color: '#16A34A', bg: '#DCFCE7' },
   pendente: { label: 'Pendente', color: '#92400E', bg: '#FEF3C7' },
   em_andamento: { label: 'Em andamento', color: '#FFFFFF', bg: '#7C5145' },
   interrompido: { label: 'Interrompido', color: '#B20000', bg: 'rgba(178,0,0,0.10)' },
