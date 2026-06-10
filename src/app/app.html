@@ -1,11 +1,15 @@
-<div class="min-h-screen bg-[#F9F9F9] text-[#57514d]">
-  <div class="lg:grid lg:grid-cols-[256px_minmax(0,1fr)]">
-    <app-global-sidebar />
+@if (hideShell()) {
+  <router-outlet />
+} @else {
+  <div class="min-h-screen bg-[#F9F9F9] text-[#57514d]">
+    <div class="lg:grid lg:grid-cols-[256px_minmax(0,1fr)]">
+      <app-global-sidebar />
 
-    <main class="min-w-0">
-      <router-outlet />
-    </main>
+      <main class="min-w-0">
+        <router-outlet />
+      </main>
+    </div>
+
+    <app-global-footer />
   </div>
-
-  <app-global-footer />
-</div>
+}

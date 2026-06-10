@@ -7,6 +7,10 @@ const DEFAULT_PATIENT_ID = 'a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56';
 
 export const routes: Routes = [
   {
+    path: 'admin-access',
+    loadComponent: () =>
+      import('./features/admin-access/pages/admin-access-page/admin-access-page.component').then(
+        (m) => m.AdminAccessPageComponent,
     path: 'clinics/new',
     loadComponent: () =>
       import('./features/clinics/pages/clinic-form-page/clinic-form-page.component').then(
