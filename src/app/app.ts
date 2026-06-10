@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { GlobalFooterComponent } from './shared/components/layout/global-footer/global-footer.component';
-import { GlobalSidebarComponent } from './shared/components/layout/global-sidebar/global-sidebar.component';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { GlobalFooterComponent } from './shared/components/layout/global-footer/global-footer.component';
+import { GlobalSidebarComponent } from './shared/components/layout/global-sidebar/global-sidebar.component';
 
 @Component({
   selector: 'app-root',
@@ -17,17 +17,18 @@ export class App {
 
   protected readonly currentUrl = signal(this.router.url);
 
-  protected readonly isPublicRoute = computed(
-    () => this.currentUrl() === '/' || this.currentUrl() === '/home',
-  );
+  // Unificando as regras: esconde a estrutura padrão do app tanto na rota admin quanto na Home de apresentação
+  protected readonly hideShell = computed(() => {
+    const url = this.currentUrl();
+    return url === '/' || url === '/home' || url.startsWith('/admin-access');
+  });
 
   constructor() {
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-        takeUntilDestroyed(),
+        takeUntilDestroyed()
       )
-      .subscribe(() => this.currentUrl.set(this.router.url));
+      .subscribe((event) => this.currentUrl.set(event.urlAfterRedirects));
   }
 }
-
