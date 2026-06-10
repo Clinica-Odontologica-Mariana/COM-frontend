@@ -1,11 +1,9 @@
 <div class="min-h-screen bg-[#F9F9F9] text-[#57514d]">
-  <div class="lg:grid lg:grid-cols-[256px_minmax(0,1fr)]">
-    <app-global-sidebar />
+  <app-global-header />
 
-    <main class="min-w-0">
-      <router-outlet />
-    </main>
-  </div>
+  <main class="pt-24 lg:pt-28 min-w-0">
+    <router-outlet />
+  </main>
 
   <app-global-footer />
 </div>
