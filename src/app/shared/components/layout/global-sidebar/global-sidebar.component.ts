@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -12,21 +12,40 @@ interface SidebarItem {
 @Component({
   selector: 'app-global-sidebar',
   imports: [RouterLink, NgOptimizedImage],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <aside class="hidden h-full min-h-fit bg-[#FAFAF9] px-4 py-6 lg:flex lg:flex-col">
+    <aside [class]="sidebarClass()">
+      <!-- Mobile close row -->
+      <div class="mb-4 flex items-center justify-between lg:hidden">
+        <span
+          style="font-family: Manrope, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #78716C;"
+        >Menu</span>
+        <button
+          type="button"
+          class="grid h-8 w-8 place-items-center rounded-full transition hover:bg-[#EDE8E6]"
+          style="color: #7C5145;"
+          (click)="closeMobile.emit()"
+          aria-label="Fechar menu"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
       <div class="pb-8">
-        <div class="flex-row items-center gap-4 ">
+        <div class="flex-row items-center gap-4">
           <img
             [ngSrc]="logo.icon"
             alt=""
             draggable="false"
-            class="h-15 w-auto m-3"
+            class="m-3 h-15 w-auto"
             width="20"
             height="20"
             aria-hidden="true"
           />
           <div>
-            <p class="text-sm font-bold text-[#7c5145b6] p-2">Olá, Usuário</p>
+            <p class="p-2 text-sm font-bold text-[#7c5145b6]">Olá, Usuário</p>
           </div>
         </div>
 
@@ -40,6 +59,7 @@ interface SidebarItem {
               [class.font-semibold]="item.active"
               [class.text-[#8B574B]]="item.active"
               [class.text-[#78716C]]="!item.active"
+              (click)="closeMobile.emit()"
             >
               <img
                 [src]="item.icon"
@@ -73,6 +93,7 @@ interface SidebarItem {
         <a
           routerLink="/medical-records/1"
           class="mt-6 flex h-11 items-center justify-center gap-2 rounded-lg bg-[#8B574B] px-4 text-sm font-bold text-white shadow-lg shadow-[#8B574B]/20 transition hover:bg-[#744A40]"
+          (click)="closeMobile.emit()"
         >
           <span class="text-lg leading-none">+</span>
           Novo Atendimento
@@ -80,19 +101,29 @@ interface SidebarItem {
       </div>
     </aside>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GlobalSidebarComponent {
+  mobileOpen = input(false);
+  closeMobile = output<void>();
+
   protected readonly items: SidebarItem[] = [
     { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1', active: false },
     { label: 'Pacientes', icon: '/pacientes.svg', link: '/medical-records/1', active: false },
     { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', active: false },
     { label: 'Prontuários', icon: '/prontuarios.svg', link: '/medical-records/1', active: true },
-    { label: 'Tratamentos', icon: '/tratamentos.svg', link: '/medical-records/1', active: false },
+    { label: 'Tratamentos', icon: '/tratamentos.svg', link: '/tratamentos/1', active: false },
     { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', active: false },
     { label: 'Clínicas', icon: '/Clinicas.svg', link: '/medical-records/1', active: false },
     { label: 'Certificados', icon: '/certificados.svg', link: '/medical-records/1', active: false },
   ];
 
   protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
+
+  protected sidebarClass = computed(() => {
+    const base = 'bg-[#FAFAF9] px-4 py-6 flex-col overflow-y-auto';
+    if (this.mobileOpen()) {
+      return `${base} fixed left-0 top-0 h-screen w-64 z-50 flex shadow-2xl`;
+    }
+    return `${base} hidden lg:flex lg:h-full lg:min-h-fit`;
+  });
 }

@@ -2,15 +2,29 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
-    path: 'medical-records/:id',
+    path: 'tratamentos/:id/novo',
     loadComponent: () =>
-      import('./features/medical-records/pages/patient-record-page/patient-record-page.component').then(
-        (m) => m.PatientRecordPageComponent,
+      import('./features/tratamentos/pages/cadastro-procedimento-page/cadastro-procedimento-page.component').then(
+        (m) => m.CadastroProcedimentoPageComponent,
+      ),
+  },
+  {
+    path: 'tratamentos/:id/editar',
+    loadComponent: () =>
+      import('./features/tratamentos/pages/edicao-procedimento-page/edicao-procedimento-page.component').then(
+        (m) => m.EdicaoProcedimentoPageComponent,
+      ),
+  },
+  {
+    path: 'tratamentos/:id',
+    loadComponent: () =>
+      import('./features/tratamentos/pages/gestao-page/gestao-page.component').then(
+        (m) => m.GestaoPageComponent,
       ),
   },
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'medical-records/1',
+    redirectTo: 'tratamentos/1',
   },
 ];
