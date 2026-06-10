@@ -56,6 +56,6 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'clinics',
+    redirectTo: 'medical-records',
   },
 ];

@@ -49,7 +49,8 @@ import { MedicalRecordNoteCreateDTO } from '../../models/patient-record.models';
           role="status"
           aria-live="polite"
         >
-          Upload de anexos ainda não disponível — o endpoint de armazenamento está pendente no backend.
+          Upload de anexos ainda não disponível — o endpoint de armazenamento está pendente no
+          backend.
         </div>
       }
 
