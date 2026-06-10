@@ -3,6 +3,15 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 export const serverRoutes: ServerRoute[] = [
   {
     path: 'admin-access',
+    path: 'clinics',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'clinics/new',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'clinics/:id/edit',
     renderMode: RenderMode.Client,
   },
   {

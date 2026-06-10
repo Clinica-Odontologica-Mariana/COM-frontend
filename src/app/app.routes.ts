@@ -11,6 +11,24 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/admin-access/pages/admin-access-page/admin-access-page.component').then(
         (m) => m.AdminAccessPageComponent,
+    path: 'clinics/new',
+    loadComponent: () =>
+      import('./features/clinics/pages/clinic-form-page/clinic-form-page.component').then(
+        (m) => m.ClinicFormPageComponent,
+      ),
+  },
+  {
+    path: 'clinics/:id/edit',
+    loadComponent: () =>
+      import('./features/clinics/pages/clinic-form-page/clinic-form-page.component').then(
+        (m) => m.ClinicFormPageComponent,
+      ),
+  },
+  {
+    path: 'clinics',
+    loadComponent: () =>
+      import('./features/clinics/pages/clinics-page/clinics-page.component').then(
+        (m) => m.ClinicsPageComponent,
       ),
   },
   {
