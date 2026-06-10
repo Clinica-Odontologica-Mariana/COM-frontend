@@ -6,36 +6,32 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   imports: [CurrencyPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div
-      class="relative overflow-hidden rounded-[32px] p-8"
-      style="background-color: #7C5145;"
-    >
-      <!-- Decorative blurred circle -->
+    <div class="relative overflow-hidden rounded-[32px] bg-[#7C5145] p-8">
+      <!-- Decorative blur circle -->
       <div
-        class="pointer-events-none absolute"
-        style="width:192px; height:192px; right:-48px; top:-48px; background:#98695C; opacity:0.5; filter:blur(32px); border-radius:50%;"
+        class="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-[#98695C] opacity-50 blur-[32px]"
       ></div>
 
       <div class="relative z-10">
-        <p class="text-[20px] leading-snug text-white" style="font-family: 'Noto Serif', serif; font-weight: 400;">
+        <p class="[font-family:var(--font-family-serif)] text-[20px] font-normal leading-snug text-white">
           Resumo do Orçamento
         </p>
-        <p class="mt-3 text-[36px] font-bold leading-none text-white" style="font-family: 'Noto Serif', serif;">
+        <p class="[font-family:var(--font-family-serif)] mt-3 text-[36px] font-bold leading-none text-white">
           {{ total() | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
         </p>
 
-        <div class="my-6 h-px" style="background: rgba(255,255,255,0.1);"></div>
+        <div class="my-6 h-px bg-white/10"></div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-white/70">Executado</p>
-            <p class="mt-1 text-[18px] font-bold text-white" style="font-family: Manrope, sans-serif;">
+            <p class="[font-family:var(--font-family-sans)] mt-1 text-[18px] font-bold text-white">
               {{ executado() | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
             </p>
           </div>
           <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-white/70">A Pagar</p>
-            <p class="mt-1 text-[18px] font-bold text-white" style="font-family: Manrope, sans-serif;">
+            <p class="[font-family:var(--font-family-sans)] mt-1 text-[18px] font-bold text-white">
               {{ aPagar() | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
             </p>
           </div>
@@ -43,8 +39,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 
         <button
           type="button"
-          class="mt-6 w-full rounded-xl py-3 text-sm font-bold transition hover:opacity-90 cursor-pointer"
-          style="background-color: #FFFFFF; color: #7C5145; border-radius: 12px;"
+          class="mt-6 w-full cursor-pointer rounded-xl bg-white py-3 text-sm font-bold text-[#7C5145] transition hover:opacity-90"
           (click)="viewDetails.emit()"
         >
           Ver Detalhes do Orçamento

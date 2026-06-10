@@ -1,7 +1,16 @@
-import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { CurrencyPipe, Location } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { getMockTratamento } from '../../data/mock-tratamento';
+import { ProcedureStatus, TratamentoData } from '../../models/tratamento.model';
+import { TratamentoService } from '../../services/tratamento.service';
 import { BudgetCardComponent } from '../../components/budget-card/budget-card.component';
 import { JourneyTrackerComponent } from '../../components/journey-tracker/journey-tracker.component';
 import { OdontogramGridComponent } from '../../components/odontogram-grid/odontogram-grid.component';
@@ -26,18 +35,15 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
       <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1
-            class="text-[clamp(32px,4vw,48px)] leading-tight text-[#7C5145]"
-            style="font-family: 'Noto Serif', serif; font-weight: 400;"
+            class="[font-family:var(--font-family-serif)] text-[clamp(32px,4vw,48px)] font-normal leading-tight text-[#7C5145]"
           >
             Gestão de Tratamentos
           </h1>
           <div class="mt-2 flex flex-wrap items-center gap-2">
             <span class="text-sm text-[#78716C]">Paciente:</span>
-            <span
-              class="rounded-full px-3 py-1 text-sm font-semibold text-[#1A1C1C]"
-              style="background: #F3F3F3;"
-              >{{ tratamento().patient.nome }}</span
-            >
+            <span class="rounded-full bg-[#F3F3F3] px-3 py-1 text-sm font-semibold text-[#1A1C1C]">
+              {{ tratamento().patient.nome }}
+            </span>
             <span class="text-sm text-[#78716C]">ID: #{{ tratamento().patient.codigo }}</span>
           </div>
         </div>
@@ -45,17 +51,16 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
         <div class="flex shrink-0 flex-wrap items-center gap-3">
           <button
             type="button"
-            class="cursor-pointer rounded-xl px-5 py-3 text-sm font-bold text-[#7C5145] transition hover:opacity-80"
-            style="background: #F3F3F3; border-radius: 12px;"
+            class="cursor-pointer rounded-xl bg-[#F3F3F3] px-5 py-3 text-sm font-bold text-[#7C5145] transition hover:opacity-80"
           >
             Imprimir Plano
           </button>
           <button
             type="button"
-            class="cursor-pointer rounded-xl px-6 py-3 text-sm font-bold text-white transition hover:opacity-90"
-            style="background: #7C5145; border-radius: 12px; box-shadow: var(--shadow-btn);"
+            class="cursor-pointer rounded-xl bg-[#7C5145] px-6 py-3 text-sm font-bold text-white shadow-[var(--shadow-btn)] transition hover:opacity-90"
+            (click)="goBack()"
           >
-            Finalizar Sessão
+            Voltar aos Pacientes
           </button>
         </div>
       </div>
@@ -65,7 +70,7 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
         <!-- Left column -->
         <div class="min-w-0 flex-1">
           <!-- Odontogram card -->
-          <div class="rounded-[32px] bg-white p-6" style="box-shadow: var(--shadow-card);">
+          <div class="rounded-[32px] bg-white p-6 shadow-[var(--shadow-card)]">
             <app-odontogram-grid
               [toothStates]="tratamento().toothStates"
               [procedures]="tratamento().procedures"
@@ -74,31 +79,40 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
           </div>
 
           <!-- Mobile-only: Clinical notes (between odontogram and plan) -->
-          <div
-            class="mt-6 rounded-[32px] bg-white p-6 lg:hidden"
-            style="box-shadow: var(--shadow-card);"
-          >
-            <p
-              class="mb-3 text-sm font-bold uppercase tracking-wider text-[#78716C]"
-              style="font-family: Manrope, sans-serif; letter-spacing: 1px;"
-            >
-              Anotações Clínicas
-            </p>
+          <div class="mt-6 rounded-[32px] bg-white p-6 shadow-[var(--shadow-card)] lg:hidden">
+            <div class="mb-3 flex items-center justify-between">
+              <p
+                class="[font-family:var(--font-family-sans)] text-sm font-bold uppercase tracking-[1px] text-[#78716C]"
+              >
+                Anotações Clínicas
+              </p>
+              <button
+                type="button"
+                class="grid h-7 w-7 place-items-center rounded-full text-[#78716C] transition hover:bg-[#F3F3F3]"
+                (click)="openNotesDialog()"
+                aria-label="Editar anotações clínicas"
+              >
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <path
+                    d="M10.5 1.5L13.5 4.5L5 13H2V10L10.5 1.5Z"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
             <p class="text-sm leading-relaxed text-[#69594A]">{{ tratamento().observacoes }}</p>
           </div>
 
           <!-- Plano de execução header -->
           <div class="mt-8 flex items-center justify-between">
-            <h2
-              class="text-[20px] font-bold text-[#1A1C1C]"
-              style="font-family: 'Noto Serif', serif;"
-            >
+            <h2 class="[font-family:var(--font-family-serif)] text-[20px] font-bold text-[#1A1C1C]">
               Plano de Execução
             </h2>
             <a
               [routerLink]="['/tratamentos', id(), 'novo']"
-              class="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-              style="background: #7C5145; border-radius: 12px; box-shadow: var(--shadow-btn);"
+              class="flex items-center gap-2 rounded-xl bg-[#7C5145] px-5 py-2.5 text-sm font-bold text-white shadow-[var(--shadow-btn)] transition hover:opacity-90"
             >
               <span class="text-lg leading-none">+</span>
               Adicionar Procedimento
@@ -108,7 +122,12 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
           <!-- Procedure cards -->
           <div class="mt-4 flex flex-col gap-4">
             @for (proc of tratamento().procedures; track proc.id) {
-              <app-procedure-card [procedure]="proc" (cardClick)="navigateToEdit(proc.id)" />
+              <app-procedure-card
+                [procedure]="proc"
+                [allowComplete]="true"
+                (cardClick)="navigateToEdit(proc.id)"
+                (markComplete)="onCompleteProc(proc.id)"
+              />
             }
           </div>
         </div>
@@ -123,16 +142,29 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
           />
 
           <!-- Clinical notes (desktop only) -->
-          <div
-            class="hidden rounded-[32px] bg-white p-6 lg:block"
-            style="box-shadow: var(--shadow-card);"
-          >
-            <p
-              class="mb-3 text-sm font-bold uppercase tracking-wider text-[#78716C]"
-              style="font-family: Manrope, sans-serif; letter-spacing: 1px;"
-            >
-              Anotações Clínicas
-            </p>
+          <div class="hidden rounded-4xl bg-white p-6 shadow-[var(--shadow-card)] lg:block">
+            <div class="mb-3 flex items-center justify-between">
+              <p
+                class="[font-family:var(--font-family-sans)] text-sm font-bold uppercase tracking-[1px] text-[#78716C]"
+              >
+                Anotações Clínicas
+              </p>
+              <button
+                type="button"
+                class="grid h-7 w-7 place-items-center rounded-full text-[#78716C] transition hover:bg-[#F3F3F3]"
+                (click)="openNotesDialog()"
+                aria-label="Editar anotações clínicas"
+              >
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <path
+                    d="M10.5 1.5L13.5 4.5L5 13H2V10L10.5 1.5Z"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
             <p class="text-sm leading-relaxed text-[#69594A]">{{ tratamento().observacoes }}</p>
           </div>
 
@@ -147,26 +179,22 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
     <!-- Budget dialog -->
     @if (showBudgetDialog()) {
       <div
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        style="background: rgba(0,0,0,0.45);"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
         (click)="showBudgetDialog.set(false)"
       >
         <div
-          class="w-full max-w-md rounded-[32px] bg-white p-8"
-          style="box-shadow: 0 24px 64px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto;"
+          class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[32px] bg-white p-8 shadow-[0_24px_64px_rgba(0,0,0,0.15)]"
           (click)="$event.stopPropagation()"
         >
-          <!-- Dialog header -->
           <div class="mb-6 flex items-center justify-between">
             <h2
-              style="font-family: 'Noto Serif', serif; font-weight: 400; font-size: 20px; color: #1A1C1C; margin: 0;"
+              class="[font-family:var(--font-family-serif)] m-0 text-xl font-normal text-[#1A1C1C]"
             >
               Detalhes do Orçamento
             </h2>
             <button
               type="button"
-              class="grid h-8 w-8 place-items-center rounded-full transition hover:bg-[#F3F3F3]"
-              style="color: #78716C;"
+              class="grid h-8 w-8 place-items-center rounded-full text-[#78716C] transition hover:bg-[#F3F3F3]"
               (click)="showBudgetDialog.set(false)"
               aria-label="Fechar"
             >
@@ -181,21 +209,19 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
             </button>
           </div>
 
-          <!-- Procedure rows -->
-          <div class="flex flex-col" style="gap: 8px;">
+          <div class="flex flex-col gap-2">
             @for (proc of tratamento().procedures; track proc.id) {
               <div
-                class="flex items-center justify-between rounded-2xl"
-                style="padding: 14px 16px; background: #F9F9F9;"
+                class="flex items-center justify-between rounded-2xl bg-[#F9F9F9] px-4 py-[14px]"
               >
                 <div class="min-w-0 flex-1 pr-4">
                   <p
-                    style="font-family: Manrope, sans-serif; font-size: 14px; font-weight: 700; color: #1A1C1C; margin: 0;"
+                    class="[font-family:var(--font-family-sans)] m-0 text-sm font-bold text-[#1A1C1C]"
                   >
                     {{ proc.nome }}
                   </p>
                   <p
-                    style="font-family: Manrope, sans-serif; font-size: 12px; color: #69594A; margin: 4px 0 6px;"
+                    class="[font-family:var(--font-family-sans)] mb-1.5 mt-1 text-xs text-[#69594A]"
                   >
                     {{ proc.tipo }}
                   </p>
@@ -203,7 +229,7 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
                 </div>
                 <div class="shrink-0 text-right">
                   <p
-                    style="font-family: Manrope, sans-serif; font-size: 16px; font-weight: 700; color: #1A1C1C; margin: 0;"
+                    class="[font-family:var(--font-family-sans)] m-0 text-base font-bold text-[#1A1C1C]"
                   >
                     {{ proc.valor | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
                   </p>
@@ -212,36 +238,31 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
             }
           </div>
 
-          <!-- Summary -->
-          <div class="mt-6 rounded-2xl" style="background: #F3F3F3; padding: 16px;">
-            <div class="flex items-center justify-between" style="margin-bottom: 8px;">
-              <span style="font-family: Manrope, sans-serif; font-size: 12px; color: #78716C;"
+          <div class="mt-6 rounded-2xl bg-[#F3F3F3] p-4">
+            <div class="mb-2 flex items-center justify-between">
+              <span class="[font-family:var(--font-family-sans)] text-xs text-[#78716C]"
                 >Total do orçamento</span
               >
-              <span
-                style="font-family: Manrope, sans-serif; font-size: 14px; font-weight: 700; color: #1A1C1C;"
-              >
+              <span class="[font-family:var(--font-family-sans)] text-sm font-bold text-[#1A1C1C]">
                 {{ tratamento().totalOrcamento | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
               </span>
             </div>
-            <div class="flex items-center justify-between" style="margin-bottom: 8px;">
-              <span style="font-family: Manrope, sans-serif; font-size: 12px; color: #78716C;"
+            <div class="mb-2 flex items-center justify-between">
+              <span class="[font-family:var(--font-family-sans)] text-xs text-[#78716C]"
                 >Executado</span
               >
-              <span
-                style="font-family: Manrope, sans-serif; font-size: 14px; font-weight: 700; color: #16A34A;"
-              >
+              <span class="[font-family:var(--font-family-sans)] text-sm font-bold text-[#16A34A]">
                 {{ tratamento().executado | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
               </span>
             </div>
-            <div class="h-px my-2" style="background: #E7E5E4;"></div>
+            <div class="my-2 h-px bg-[#E7E5E4]"></div>
             <div class="flex items-center justify-between">
               <span
-                style="font-family: Manrope, sans-serif; font-size: 13px; font-weight: 700; color: #7C5145;"
+                class="[font-family:var(--font-family-sans)] text-[13px] font-bold text-[#7C5145]"
                 >A pagar</span
               >
               <span
-                style="font-family: 'Noto Serif', serif; font-size: 18px; font-weight: 700; color: #7C5145;"
+                class="[font-family:var(--font-family-serif)] text-[18px] font-bold text-[#7C5145]"
               >
                 {{ tratamento().aPagar | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
               </span>
@@ -250,19 +271,121 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
         </div>
       </div>
     }
+
+    <!-- Notes edit dialog -->
+    @if (showNotesDialog()) {
+      <div
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+        (click)="showNotesDialog.set(false)"
+      >
+        <div
+          class="w-full max-w-md rounded-[32px] bg-white p-8 shadow-[0_24px_64px_rgba(0,0,0,0.15)]"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="mb-5 flex items-center justify-between">
+            <h2 class="font-family-serif m-0 text-xl font-normal text-[#1A1C1C]">
+              Editar Anotações Clínicas
+            </h2>
+            <button
+              type="button"
+              class="grid h-8 w-8 place-items-center rounded-full text-[#78716C] transition hover:bg-[#F3F3F3]"
+              (click)="showNotesDialog.set(false)"
+              aria-label="Fechar"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path
+                  d="M1 1l12 12M13 1L1 13"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <textarea
+            class="min-h-36 w-full resize-none rounded-xl bg-[#F3F3F3] p-4 text-sm leading-relaxed text-[#1A1C1C] focus:outline-none focus:ring-2 focus:ring-[#7C5145]/30"
+            [value]="editingObs()"
+            (input)="editingObs.set($any($event.target).value)"
+            rows="6"
+            placeholder="Adicione observações sobre o tratamento..."
+          ></textarea>
+
+          <div class="mt-4 flex justify-end gap-3">
+            <button
+              type="button"
+              class="rounded-xl bg-[#F3F3F3] px-5 py-2.5 text-sm font-bold text-[#78716C] transition hover:opacity-80"
+              (click)="showNotesDialog.set(false)"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="rounded-xl bg-[#7C5145] px-5 py-2.5 text-sm font-bold text-white shadow-[var(--shadow-btn)] transition hover:opacity-90"
+              (click)="saveNotes()"
+            >
+              Salvar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   `,
 })
-export class GestaoPageComponent {
+export class GestaoPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private location = inject(Location);
+  private tratamentoService = inject(TratamentoService);
 
   protected id = computed(() => this.route.snapshot.paramMap.get('id') ?? '1');
-  protected tratamento = computed(() => getMockTratamento(this.id()));
+
+  private _data = signal<TratamentoData | null>(null);
+  protected tratamento = computed<TratamentoData>(
+    () => this._data() ?? getMockTratamento(this.id()),
+  );
+
   protected showBudgetDialog = signal(false);
+  protected showNotesDialog = signal(false);
+  protected editingObs = signal('');
+
+  ngOnInit(): void {
+    this.tratamentoService.getTratamento(this.id()).subscribe((data) => this._data.set(data));
+  }
 
   protected navigateToEdit(procedureId: string): void {
     this.router.navigate(['/tratamentos', this.id(), 'editar'], {
       queryParams: { procedimento: procedureId },
     });
+  }
+
+  protected goBack(): void {
+    this.location.back();
+  }
+
+  protected openNotesDialog(): void {
+    this.editingObs.set(this.tratamento().observacoes);
+    this.showNotesDialog.set(true);
+  }
+
+  protected saveNotes(): void {
+    const obs = this.editingObs().trim();
+    this._data.update((t) => (t ? { ...t, observacoes: obs } : null));
+    this.showNotesDialog.set(false);
+    this.tratamentoService.updateObservacoes(this.id(), obs).subscribe();
+  }
+
+  protected onCompleteProc(procedureId: string): void {
+    this._data.update((t) => {
+      if (!t) return null;
+      const updatedProcs = t.procedures.map((p) =>
+        p.id === procedureId ? { ...p, status: 'concluido' as ProcedureStatus } : p,
+      );
+      const executado = updatedProcs
+        .filter((p) => p.status === 'concluido')
+        .reduce((sum, p) => sum + p.valor, 0);
+      return { ...t, procedures: updatedProcs, executado, aPagar: t.totalOrcamento - executado };
+    });
+    this.tratamentoService.updateProcedureStatus(this.id(), procedureId, 'concluido').subscribe();
   }
 }

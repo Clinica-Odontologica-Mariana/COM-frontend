@@ -11,31 +11,21 @@ type Variant = 'in_progress' | 'pending' | 'completed';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
-      class="flex cursor-pointer items-center justify-between rounded-xl transition-opacity hover:opacity-90"
-      style="padding: 24px; gap: 16px;"
-      [style.background-color]="cardBg()"
-      [style.border-left]="borderLeft()"
-      [style.opacity]="variant() === 'completed' ? '0.6' : '1'"
+      [class]="cardClass()"
       (click)="cardClick.emit()"
       role="button"
       [attr.tabindex]="0"
       (keydown.enter)="cardClick.emit()"
     >
       <!-- Left: icon + info -->
-      <div class="flex items-start gap-4 min-w-0 flex-1">
-        <!-- Icon circle -->
-        <div
-          class="grid h-12 w-12 shrink-0 place-items-center rounded-full"
-          [style.background-color]="iconBg()"
-        >
+      <div class="flex min-w-0 flex-1 items-start gap-4">
+        <div [class]="iconBgClass()">
           <img [src]="iconSrc()" alt="" width="20" height="20" />
         </div>
 
-        <!-- Text content -->
         <div class="min-w-0">
           <p
-            class="text-[18px] font-bold leading-7 text-[#1A1C1C]"
-            style="font-family: Manrope, sans-serif;"
+            class="[font-family:var(--font-family-sans)] text-[18px] font-bold leading-7 text-[#1A1C1C]"
             [class.line-through]="variant() === 'completed'"
           >
             {{ procedure().nome }}
@@ -44,7 +34,7 @@ type Variant = 'in_progress' | 'pending' | 'completed';
           <div class="mt-2 flex items-center gap-2">
             <app-status-badge [status]="procedure().status" />
             @if (procedure().dataInicio && variant() === 'in_progress') {
-              <span class="text-[12px] font-medium text-[#7C5145]" style="font-family: Manrope, sans-serif;">
+              <span class="[font-family:var(--font-family-sans)] text-[12px] font-medium text-[#7C5145]">
                 Iniciado em {{ procedure().dataInicio }}
               </span>
             }
@@ -52,19 +42,31 @@ type Variant = 'in_progress' | 'pending' | 'completed';
         </div>
       </div>
 
-      <!-- Right: amount -->
-      <div class="shrink-0 text-right">
-        <p
-          class="text-[20px] font-bold leading-7"
-          style="font-family: Manrope, sans-serif;"
-          [style.color]="amountColor()"
-        >
-          {{ procedure().valor | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
-        </p>
-        @if (variant() === 'completed' && procedure().dataFim) {
-          <p class="text-xs text-[#69594A]">Pago em {{ procedure().dataFim }}</p>
-        } @else {
-          <p class="text-xs text-[#69594A]">Valor do procedimento</p>
+      <!-- Right: amount + optional complete button -->
+      <div class="flex shrink-0 flex-col items-end gap-2">
+        <div class="text-right">
+          <p class="[font-family:var(--font-family-sans)] text-[20px] font-bold leading-7" [class]="amountColorClass()">
+            {{ procedure().valor | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+          </p>
+          @if (variant() === 'completed' && procedure().dataFim) {
+            <p class="text-xs text-[#69594A]">Pago em {{ procedure().dataFim }}</p>
+          } @else {
+            <p class="text-xs text-[#69594A]">Valor do procedimento</p>
+          }
+        </div>
+
+        @if (allowComplete() && variant() === 'in_progress') {
+          <button
+            type="button"
+            class="flex items-center gap-1.5 rounded-lg bg-[#DCFCE7] px-3 py-1.5 text-xs font-bold text-[#16A34A] transition hover:bg-[#BBF7D0]"
+            (click)="$event.stopPropagation(); markComplete.emit()"
+            aria-label="Concluir procedimento"
+          >
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M1.5 5.5L4 8L9.5 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            Concluir
+          </button>
         }
       </div>
     </div>
@@ -72,7 +74,9 @@ type Variant = 'in_progress' | 'pending' | 'completed';
 })
 export class ProcedureCardComponent {
   procedure = input.required<Procedure>();
+  allowComplete = input(false);
   cardClick = output<void>();
+  markComplete = output<void>();
 
   protected variant = computed<Variant>(() => {
     switch (this.procedure().status) {
@@ -85,29 +89,28 @@ export class ProcedureCardComponent {
     }
   });
 
-  protected cardBg = computed(() => {
+  protected cardClass = computed(() => {
+    const base =
+      'flex cursor-pointer items-start justify-between rounded-xl p-6 gap-4 transition-opacity hover:opacity-90';
     switch (this.variant()) {
       case 'in_progress':
-        return 'rgba(124,81,69,0.05)';
+        return `${base} bg-[#7C5145]/5 border-l-4 border-[#7C5145]`;
       case 'completed':
-        return '#FFFFFF';
+        return `${base} bg-white opacity-60`;
       default:
-        return '#F3F3F3';
+        return `${base} bg-[#F3F3F3]`;
     }
   });
 
-  protected borderLeft = computed(() =>
-    this.variant() === 'in_progress' ? '4px solid #7C5145' : 'none',
-  );
-
-  protected iconBg = computed(() => {
+  protected iconBgClass = computed(() => {
+    const base = 'grid h-12 w-12 shrink-0 place-items-center rounded-full';
     switch (this.variant()) {
       case 'in_progress':
-        return 'rgba(124,81,69,0.10)';
+        return `${base} bg-[#7C5145]/10`;
       case 'completed':
-        return '#DCFCE7';
+        return `${base} bg-[#DCFCE7]`;
       default:
-        return '#E7E5E4';
+        return `${base} bg-[#E7E5E4]`;
     }
   });
 
@@ -129,7 +132,7 @@ export class ProcedureCardComponent {
     }
   });
 
-  protected amountColor = computed(() =>
-    this.variant() === 'in_progress' ? '#7C5145' : '#1A1C1C',
+  protected amountColorClass = computed(() =>
+    this.variant() === 'in_progress' ? 'text-[#7C5145]' : 'text-[#1A1C1C]',
   );
 }
