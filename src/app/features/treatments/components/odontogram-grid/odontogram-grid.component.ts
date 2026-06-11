@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
-import { Procedure, ToothState } from '../../models/tratamento.model';
+import { Procedure, ToothState } from '../../models/treatment.model';
 import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 
 interface ToothStyle {
@@ -25,9 +25,17 @@ const LEGEND = [
   { label: 'Observação', dot: '#2291C5', bg: 'rgba(34,145,197,0.12)', text: '#2291C5' },
 ];
 
-const MOBILE_STATE_CONFIG: Record<string, { label: string; bg: string; border: string; color: string }> = {
+const MOBILE_STATE_CONFIG: Record<
+  string,
+  { label: string; bg: string; border: string; color: string }
+> = {
   pending: { label: 'Pendentes', bg: '#FEF3C7', border: '#F59E0B', color: '#92400E' },
-  selected: { label: 'Concluídos', bg: 'rgba(34,197,94,0.18)', border: '#22C55E', color: '#16A34A' },
+  selected: {
+    label: 'Concluídos',
+    bg: 'rgba(34,197,94,0.18)',
+    border: '#22C55E',
+    color: '#16A34A',
+  },
   note: { label: 'Observações', bg: 'rgba(34,145,197,0.18)', border: '#2291C5', color: '#2291C5' },
 };
 
@@ -68,9 +76,9 @@ const MOBILE_STATE_CONFIG: Record<string, { label: string; bg: string; border: s
         aria-label="Informação sobre odontograma"
       >
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M9 8v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="9" cy="5.5" r="1" fill="currentColor"/>
+          <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" />
+          <path d="M9 8v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          <circle cx="9" cy="5.5" r="1" fill="currentColor" />
         </svg>
       </button>
     </div>
@@ -82,11 +90,13 @@ const MOBILE_STATE_CONFIG: Record<string, { label: string; bg: string; border: s
         style="background: #1A1C1C;"
       >
         <svg class="mt-0.5 shrink-0" width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <circle cx="7" cy="7" r="6" stroke="white" stroke-width="1.2"/>
-          <path d="M7 6.5v4" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
-          <circle cx="7" cy="4.5" r="0.7" fill="white"/>
+          <circle cx="7" cy="7" r="6" stroke="white" stroke-width="1.2" />
+          <path d="M7 6.5v4" stroke="white" stroke-width="1.2" stroke-linecap="round" />
+          <circle cx="7" cy="4.5" r="0.7" fill="white" />
         </svg>
-        <p style="font-family: Manrope, sans-serif; font-size: 13px; color: white; margin: 0; line-height: 20px; flex: 1;">
+        <p
+          style="font-family: Manrope, sans-serif; font-size: 13px; color: white; margin: 0; line-height: 20px; flex: 1;"
+        >
           Para melhor visualização do odontograma, acesse em uma tela maior.
         </p>
         <button
@@ -97,7 +107,12 @@ const MOBILE_STATE_CONFIG: Record<string, { label: string; bg: string; border: s
           aria-label="Fechar"
         >
           <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-            <path d="M1 1l9 9M10 1L1 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path
+              d="M1 1l9 9M10 1L1 10"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            />
           </svg>
         </button>
       </div>
@@ -117,10 +132,14 @@ const MOBILE_STATE_CONFIG: Record<string, { label: string; bg: string; border: s
               <span
                 style="font-family: Manrope, sans-serif; font-size: 9px; font-weight: 700;"
                 [style.color]="group.color"
-              >{{ tooth }}</span>
+                >{{ tooth }}</span
+              >
             </div>
           }
-          <span style="font-family: Manrope, sans-serif; font-size: 13px; font-weight: 600;" [style.color]="group.color">
+          <span
+            style="font-family: Manrope, sans-serif; font-size: 13px; font-weight: 600;"
+            [style.color]="group.color"
+          >
             {{ group.count }}{{ group.showPlus ? '+' : '' }} {{ group.label }}
           </span>
         </div>
@@ -142,7 +161,8 @@ const MOBILE_STATE_CONFIG: Record<string, { label: string; bg: string; border: s
               class="block text-center font-bold leading-none"
               style="font-family: Manrope, sans-serif; font-size: 10px;"
               [style.color]="styleFor(tooth).labelColor"
-            >{{ tooth }}</span>
+              >{{ tooth }}</span
+            >
             <button
               type="button"
               class="h-10 w-7 transition-all duration-150"
@@ -182,7 +202,8 @@ const MOBILE_STATE_CONFIG: Record<string, { label: string; bg: string; border: s
               class="block text-center font-bold leading-none"
               style="font-family: Manrope, sans-serif; font-size: 10px;"
               [style.color]="styleFor(tooth).labelColor"
-            >{{ tooth }}</span>
+              >{{ tooth }}</span
+            >
           </div>
         }
       </div>
@@ -190,10 +211,7 @@ const MOBILE_STATE_CONFIG: Record<string, { label: string; bg: string; border: s
 
     <!-- Tooth history panel (desktop only) -->
     @if (activeTooth() !== null) {
-      <div
-        class="mt-4 hidden rounded-xl lg:block"
-        style="background: #F3F3F3; padding: 16px;"
-      >
+      <div class="mt-4 hidden rounded-xl lg:block" style="background: #F3F3F3; padding: 16px;">
         <div class="mb-3 flex items-center justify-between">
           <p
             style="font-family: Manrope, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #78716C; margin: 0;"
@@ -208,7 +226,12 @@ const MOBILE_STATE_CONFIG: Record<string, { label: string; bg: string; border: s
             aria-label="Fechar histórico"
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path
+                d="M1 1l10 10M11 1L1 11"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
         </div>
@@ -225,11 +248,15 @@ const MOBILE_STATE_CONFIG: Record<string, { label: string; bg: string; border: s
                 style="padding: 12px 14px;"
               >
                 <div>
-                  <p style="font-family: Manrope, sans-serif; font-size: 14px; font-weight: 700; color: #1A1C1C; margin: 0;">
-                    {{ proc.nome }}
+                  <p
+                    style="font-family: Manrope, sans-serif; font-size: 14px; font-weight: 700; color: #1A1C1C; margin: 0;"
+                  >
+                    {{ proc.name }}
                   </p>
-                  <p style="font-family: Manrope, sans-serif; font-size: 12px; color: #69594A; margin: 4px 0 0;">
-                    {{ proc.tipo }} · {{ proc.dataInicio }}
+                  <p
+                    style="font-family: Manrope, sans-serif; font-size: 12px; color: #69594A; margin: 4px 0 0;"
+                  >
+                    {{ proc.type }} · {{ proc.startDate }}
                   </p>
                 </div>
                 <app-status-badge [status]="proc.status" />
@@ -257,7 +284,7 @@ export class OdontogramGridComponent {
   protected toothProcedures = computed(() => {
     const tooth = this.activeTooth();
     if (tooth === null) return [];
-    return this.procedures().filter((p) => p.dentes.includes(tooth));
+    return this.procedures().filter((p) => p.teeth.includes(tooth));
   });
 
   protected mobileGroups = computed(() => {
@@ -269,8 +296,19 @@ export class OdontogramGridComponent {
       grouped[state].push(Number(tooth));
     }
     return Object.entries(grouped).map(([state, teeth]) => {
-      const cfg = MOBILE_STATE_CONFIG[state] ?? { label: state, bg: '#EEEEEE', border: '#A8A29E', color: '#57534E' };
-      return { state, sample: teeth.slice(0, 2), count: teeth.length, showPlus: teeth.length > 2, ...cfg };
+      const cfg = MOBILE_STATE_CONFIG[state] ?? {
+        label: state,
+        bg: '#EEEEEE',
+        border: '#A8A29E',
+        color: '#57534E',
+      };
+      return {
+        state,
+        sample: teeth.slice(0, 2),
+        count: teeth.length,
+        showPlus: teeth.length > 2,
+        ...cfg,
+      };
     });
   });
 

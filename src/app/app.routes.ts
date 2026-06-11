@@ -49,24 +49,31 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'tratamentos/:id/novo',
+    path: 'treatments',
     loadComponent: () =>
-      import('./features/tratamentos/pages/cadastro-procedimento-page/cadastro-procedimento-page.component').then(
-        (m) => m.CadastroProcedimentoPageComponent,
+      import('./features/treatments/pages/treatments-list-page/treatments-list-page.component').then(
+        (m) => m.TreatmentsListPageComponent,
       ),
   },
   {
-    path: 'tratamentos/:id/editar',
+    path: 'treatments/:id/new',
     loadComponent: () =>
-      import('./features/tratamentos/pages/edicao-procedimento-page/edicao-procedimento-page.component').then(
-        (m) => m.EdicaoProcedimentoPageComponent,
+      import('./features/treatments/pages/create-procedure-page/create-procedure-page.component').then(
+        (m) => m.CreateProcedurePageComponent,
       ),
   },
   {
-    path: 'tratamentos/:id',
+    path: 'treatments/:id/edit',
     loadComponent: () =>
-      import('./features/tratamentos/pages/gestao-page/gestao-page.component').then(
-        (m) => m.GestaoPageComponent,
+      import('./features/treatments/pages/edit-procedure-page/edit-procedure-page.component').then(
+        (m) => m.EditProcedurePageComponent,
+      ),
+  },
+  {
+    path: 'treatments/:id',
+    loadComponent: () =>
+      import('./features/treatments/pages/management-page/management-page.component').then(
+        (m) => m.TreatmentManagementPageComponent,
       ),
   },
   {

@@ -6,9 +6,7 @@ import { TreatmentSummaryView } from '../../models/patient-record.models';
   selector: 'app-treatment-summary',
   template: `
     <section class="rounded-xl bg-[#F3F3F3] p-6 h-full">
-      <p class="text-xs font-bold uppercase tracking-[1.2px] text-[#69594A]">
-        Resumo do tratamento
-      </p>
+      <p class="text-xs font-bold uppercase tracking-[1.2px] text-[#69594A]">Resumo do Treatment</p>
 
       @if (summary(); as s) {
         <div class="mt-4">

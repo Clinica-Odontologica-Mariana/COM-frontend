@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { ProcedureStatus } from '../../models/tratamento.model';
+import { ProcedureStatus } from '../../models/treatment.model';
 
 interface BadgeConfig {
   label: string;
@@ -8,11 +8,11 @@ interface BadgeConfig {
 }
 
 const BADGE_CONFIGS: Record<ProcedureStatus, BadgeConfig> = {
-  concluido: { label: 'Concluído', color: '#16A34A', bg: '#DCFCE7' },
-  pendente: { label: 'Pendente', color: '#92400E', bg: '#FEF3C7' },
-  em_andamento: { label: 'Em andamento', color: '#FFFFFF', bg: '#7C5145' },
-  interrompido: { label: 'Interrompido', color: '#B20000', bg: 'rgba(178,0,0,0.10)' },
-  planejado: { label: 'Planejado', color: '#1E40AF', bg: '#DBEAFE' },
+  completed: { label: 'Concluído', color: '#16A34A', bg: '#DCFCE7' },
+  pending: { label: 'Pendente', color: '#92400E', bg: '#FEF3C7' },
+  in_progress: { label: 'Em andamento', color: '#FFFFFF', bg: '#7C5145' },
+  interrupted: { label: 'Interrompido', color: '#B20000', bg: 'rgba(178,0,0,0.10)' },
+  planned: { label: 'Planejado', color: '#1E40AF', bg: '#DBEAFE' },
 };
 
 @Component({

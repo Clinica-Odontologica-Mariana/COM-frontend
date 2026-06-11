@@ -8,9 +8,9 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { getMockTratamento } from '../../data/mock-tratamento';
-import { Procedure, ProcedureStatus, TratamentoData } from '../../models/tratamento.model';
-import { TratamentoService } from '../../services/tratamento.service';
+import { getMockTreatment } from '../../data/mock-treatment';
+import { Procedure, ProcedureStatus, TreatmentData } from '../../models/treatment.model';
+import { TreatmentService } from '../../services/treatment.service';
 import { BudgetCardComponent } from '../../components/budget-card/budget-card.component';
 import { JourneyTrackerComponent } from '../../components/journey-tracker/journey-tracker.component';
 import { OdontogramGridComponent } from '../../components/odontogram-grid/odontogram-grid.component';
@@ -20,15 +20,15 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
 type ConfirmType = 'complete' | 'start';
 
 const STATUS_ORDER: Record<ProcedureStatus, number> = {
-  em_andamento: 0,
-  pendente: 1,
-  planejado: 1,
-  concluido: 2,
-  interrompido: 3,
+  in_progress: 0,
+  pending: 1,
+  planned: 1,
+  completed: 2,
+  interrupted: 3,
 };
 
 @Component({
-  selector: 'app-gestao-page',
+  selector: 'app-management-page',
   imports: [
     RouterLink,
     CurrencyPipe,
@@ -52,9 +52,9 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
           <div class="mt-2 flex flex-wrap items-center gap-2">
             <span class="text-sm text-[#78716C]">Paciente:</span>
             <span class="rounded-full bg-[#F3F3F3] px-3 py-1 text-sm font-semibold text-[#1A1C1C]">
-              {{ tratamento().patient.nome }}
+              {{ treatment().patient.name }}
             </span>
-            <span class="text-sm text-[#78716C]">ID: #{{ tratamento().patient.codigo }}</span>
+            <span class="text-sm text-[#78716C]">ID: #PAC-{{ treatment().patient.id.slice(0, 4).toUpperCase() }}</span>
           </div>
         </div>
 
@@ -82,8 +82,8 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
           <!-- Odontogram card -->
           <div class="rounded-4xl bg-white p-6 shadow-(--shadow-card)">
             <app-odontogram-grid
-              [toothStates]="tratamento().toothStates"
-              [procedures]="tratamento().procedures"
+              [toothStates]="treatment().toothStates"
+              [procedures]="treatment().procedures"
               [readonly]="true"
             />
           </div>
@@ -112,16 +112,16 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
                 </svg>
               </button>
             </div>
-            <p class="text-sm leading-relaxed text-[#69594A]">{{ tratamento().observacoes }}</p>
+            <p class="text-sm leading-relaxed text-[#69594A]">{{ treatment().notes }}</p>
           </div>
 
-          <!-- Plano de execução header -->
+          <!-- Execution plan header -->
           <div class="mt-8 flex items-center justify-between">
             <h2 class="[font-family:var(--font-family-serif)] text-[20px] font-bold text-[#1A1C1C]">
               Plano de Execução
             </h2>
             <a
-              [routerLink]="['/tratamentos', id(), 'novo']"
+              [routerLink]="['/treatments', id(), 'new']"
               class="flex items-center gap-2 rounded-xl bg-[#7C5145] px-5 py-2.5 text-sm font-bold text-white shadow-(--shadow-btn) transition hover:opacity-90"
             >
               <span class="text-lg leading-none">+</span>
@@ -147,9 +147,9 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
         <!-- Right column -->
         <div class="flex w-full shrink-0 flex-col gap-8 lg:w-72">
           <app-budget-card
-            [total]="tratamento().totalOrcamento"
-            [executado]="tratamento().executado"
-            [aPagar]="tratamento().aPagar"
+            [total]="treatment().totalBudget"
+            [executed]="treatment().executed"
+            [toPay]="treatment().toPay"
             (viewDetails)="showBudgetDialog.set(true)"
           />
 
@@ -177,12 +177,12 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
                 </svg>
               </button>
             </div>
-            <p class="text-sm leading-relaxed text-[#69594A]">{{ tratamento().observacoes }}</p>
+            <p class="text-sm leading-relaxed text-[#69594A]">{{ treatment().notes }}</p>
           </div>
 
           <app-journey-tracker
-            [currentStep]="tratamento().journeyStep"
-            [proximoPasso]="'Iniciar extração dos sisos superiores (dentes 18 e 28)'"
+            [currentStep]="treatment().journeyStep"
+            [nextStep]="'Iniciar extração dos sisos superiores (dentes 18 e 28)'"
           />
         </div>
       </div>
@@ -228,7 +228,7 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
                 : 'Tem certeza que deseja iniciar este procedimento?'
             }}
           </p>
-          <p class="mb-6 text-sm font-semibold text-[#1A1C1C]">{{ confirmProcedure()!.nome }}</p>
+          <p class="mb-6 text-sm font-semibold text-[#1A1C1C]">{{ confirmProcedure()!.name }}</p>
 
           <div class="flex justify-end gap-3">
             <button
@@ -292,23 +292,23 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
                 <div class="min-w-0 flex-1 pr-4">
                   <p
                     class="[font-family:var(--font-family-sans)] m-0 text-sm font-bold text-[#1A1C1C]"
-                    [class.line-through]="proc.status === 'concluido'"
+                    [class.line-through]="proc.status === 'completed'"
                   >
-                    {{ proc.nome }}
+                    {{ proc.name }}
                   </p>
                   <p
                     class="[font-family:var(--font-family-sans)] mb-1.5 mt-1 text-xs text-[#69594A]"
                   >
-                    {{ proc.tipo }}
+                    {{ proc.type }}
                   </p>
                   <app-status-badge [status]="proc.status" />
                 </div>
                 <div class="shrink-0 text-right">
                   <p
                     class="[font-family:var(--font-family-sans)] m-0 text-base font-bold"
-                    [class]="proc.status === 'concluido' ? 'text-[#16A34A]' : 'text-[#1A1C1C]'"
+                    [class]="proc.status === 'completed' ? 'text-[#16A34A]' : 'text-[#1A1C1C]'"
                   >
-                    {{ proc.valor | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+                    {{ proc.value | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
                   </p>
                 </div>
               </div>
@@ -321,7 +321,7 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
                 >Total do orçamento</span
               >
               <span class="[font-family:var(--font-family-sans)] text-sm font-bold text-[#1A1C1C]">
-                {{ tratamento().totalOrcamento | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+                {{ treatment().totalBudget | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
               </span>
             </div>
             <div class="mb-2 flex items-center justify-between">
@@ -329,7 +329,7 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
                 >Executado</span
               >
               <span class="[font-family:var(--font-family-sans)] text-sm font-bold text-[#16A34A]">
-                {{ tratamento().executado | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+                {{ treatment().executed | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
               </span>
             </div>
             <div class="my-2 h-px bg-[#E7E5E4]"></div>
@@ -341,7 +341,7 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
               <span
                 class="[font-family:var(--font-family-serif)] text-[18px] font-bold text-[#7C5145]"
               >
-                {{ tratamento().aPagar | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+                {{ treatment().toPay | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
               </span>
             </div>
           </div>
@@ -382,8 +382,8 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
 
           <textarea
             class="min-h-36 w-full resize-none rounded-xl bg-[#F3F3F3] p-4 text-sm leading-relaxed text-[#1A1C1C] focus:outline-none focus:ring-2 focus:ring-[#7C5145]/30"
-            [value]="editingObs()"
-            (input)="editingObs.set($any($event.target).value)"
+            [value]="editingNotes()"
+            (input)="editingNotes.set($any($event.target).value)"
             rows="6"
             placeholder="Adicione observações sobre o tratamento..."
           ></textarea>
@@ -409,41 +409,41 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
     }
   `,
 })
-export class GestaoPageComponent implements OnInit {
+export class TreatmentManagementPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private location = inject(Location);
-  private tratamentoService = inject(TratamentoService);
+  private treatmentService = inject(TreatmentService);
 
   protected id = computed(() => this.route.snapshot.paramMap.get('id') ?? '1');
 
-  private _data = signal<TratamentoData | null>(null);
-  protected tratamento = computed<TratamentoData>(
-    () => this._data() ?? getMockTratamento(this.id()),
+  private _data = signal<TreatmentData | null>(null);
+  protected treatment = computed<TreatmentData>(
+    () => this._data() ?? getMockTreatment(this.id()),
   );
 
   protected sortedProcedures = computed<Procedure[]>(() => {
-    return [...this.tratamento().procedures].sort((a, b) => {
+    return [...this.treatment().procedures].sort((a, b) => {
       const groupDiff = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
       if (groupDiff !== 0) return groupDiff;
-      return (a.dataInicio ?? '').localeCompare(b.dataInicio ?? '');
+      return (a.startDate ?? '').localeCompare(b.startDate ?? '');
     });
   });
 
   protected showBudgetDialog = signal(false);
   protected showNotesDialog = signal(false);
-  protected editingObs = signal('');
+  protected editingNotes = signal('');
 
   protected confirmProcedure = signal<Procedure | null>(null);
   protected confirmType = signal<ConfirmType>('complete');
 
   ngOnInit(): void {
-    this.tratamentoService.getTratamento(this.id()).subscribe((data) => this._data.set(data));
+    this.treatmentService.getTreatment(this.id()).subscribe((data) => this._data.set(data));
   }
 
   protected navigateToEdit(procedureId: string): void {
-    this.router.navigate(['/tratamentos', this.id(), 'editar'], {
-      queryParams: { procedimento: procedureId },
+    this.router.navigate(['/treatments', this.id(), 'edit'], {
+      queryParams: { procedure: procedureId },
     });
   }
 
@@ -452,15 +452,15 @@ export class GestaoPageComponent implements OnInit {
   }
 
   protected openNotesDialog(): void {
-    this.editingObs.set(this.tratamento().observacoes);
+    this.editingNotes.set(this.treatment().notes);
     this.showNotesDialog.set(true);
   }
 
   protected saveNotes(): void {
-    const obs = this.editingObs().trim();
-    this._data.update((t) => (t ? { ...t, observacoes: obs } : null));
+    const notes = this.editingNotes().trim();
+    this._data.update((t) => (t ? { ...t, notes } : null));
     this.showNotesDialog.set(false);
-    this.tratamentoService.updateObservacoes(this.id(), obs).subscribe();
+    this.treatmentService.updateNotes(this.id(), notes).subscribe();
   }
 
   protected requestConfirm(type: ConfirmType, proc: Procedure): void {
@@ -490,14 +490,14 @@ export class GestaoPageComponent implements OnInit {
     this._data.update((t) => {
       if (!t) return null;
       const updatedProcs = t.procedures.map((p) =>
-        p.id === proc.id ? { ...p, status: 'concluido' as ProcedureStatus, dataFim: today } : p,
+        p.id === proc.id ? { ...p, status: 'completed' as ProcedureStatus, endDate: today } : p,
       );
-      const executado = updatedProcs
-        .filter((p) => p.status === 'concluido')
-        .reduce((sum, p) => sum + p.valor, 0);
-      return { ...t, procedures: updatedProcs, executado, aPagar: t.totalOrcamento - executado };
+      const executed = updatedProcs
+        .filter((p) => p.status === 'completed')
+        .reduce((sum, p) => sum + p.value, 0);
+      return { ...t, procedures: updatedProcs, executed, toPay: t.totalBudget - executed };
     });
-    this.tratamentoService.completeProcedure(proc.id).subscribe();
+    this.treatmentService.completeProcedure(proc.id).subscribe();
   }
 
   private applyStart(proc: Procedure): void {
@@ -506,11 +506,11 @@ export class GestaoPageComponent implements OnInit {
       if (!t) return null;
       const updatedProcs = t.procedures.map((p) =>
         p.id === proc.id
-          ? { ...p, status: 'em_andamento' as ProcedureStatus, dataInicio: today }
+          ? { ...p, status: 'in_progress' as ProcedureStatus, startDate: today }
           : p,
       );
       return { ...t, procedures: updatedProcs };
     });
-    this.tratamentoService.startProcedure(proc.id, proc.nome).subscribe();
+    this.treatmentService.startProcedure(proc.id, proc.name).subscribe();
   }
 }

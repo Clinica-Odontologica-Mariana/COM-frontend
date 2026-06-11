@@ -99,7 +99,7 @@ import { ProcedureView } from '../../models/patient-record.models';
           }
         </div>
       } @else {
-        <p class="mt-6 text-sm text-[#A8A29E]">Nenhum procedimento no plano de tratamento.</p>
+        <p class="mt-6 text-sm text-[#A8A29E]">Nenhum procedimento no plano de Treatment.</p>
       }
     </section>
   `,

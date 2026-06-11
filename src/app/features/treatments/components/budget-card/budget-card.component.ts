@@ -26,13 +26,13 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
           <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-white/70">Executado</p>
             <p class="[font-family:var(--font-family-sans)] mt-1 text-[18px] font-bold text-white">
-              {{ executado() | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+              {{ executed() | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
             </p>
           </div>
           <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-white/70">A Pagar</p>
             <p class="[font-family:var(--font-family-sans)] mt-1 text-[18px] font-bold text-white">
-              {{ aPagar() | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+              {{ toPay() | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
             </p>
           </div>
         </div>
@@ -50,7 +50,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 })
 export class BudgetCardComponent {
   total = input.required<number>();
-  executado = input.required<number>();
-  aPagar = input.required<number>();
+  executed = input.required<number>();
+  toPay = input.required<number>();
   viewDetails = output<void>();
 }

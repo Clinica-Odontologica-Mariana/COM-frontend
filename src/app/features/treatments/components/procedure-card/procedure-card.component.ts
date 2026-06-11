@@ -1,6 +1,6 @@
 import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { Procedure } from '../../models/tratamento.model';
+import { Procedure } from '../../models/treatment.model';
 import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 
 type Variant = 'in_progress' | 'pending' | 'completed';
@@ -28,14 +28,16 @@ type Variant = 'in_progress' | 'pending' | 'completed';
             class="[font-family:var(--font-family-sans)] text-[18px] font-bold leading-7 text-[#1A1C1C]"
             [class.line-through]="variant() === 'completed'"
           >
-            {{ procedure().nome }}
+            {{ procedure().name }}
           </p>
-          <p class="text-sm text-[#69594A]">{{ procedure().subtitulo }}</p>
+          <p class="text-sm text-[#69594A]">{{ procedure().subtitle }}</p>
           <div class="mt-2 flex items-center gap-2">
             <app-status-badge [status]="procedure().status" />
-            @if (procedure().dataInicio && variant() === 'in_progress') {
-              <span class="[font-family:var(--font-family-sans)] text-[12px] font-medium text-[#7C5145]">
-                Iniciado em {{ procedure().dataInicio }}
+            @if (procedure().startDate && variant() === 'in_progress') {
+              <span
+                class="[font-family:var(--font-family-sans)] text-[12px] font-medium text-[#7C5145]"
+              >
+                Iniciado em {{ procedure().startDate }}
               </span>
             }
           </div>
@@ -45,11 +47,14 @@ type Variant = 'in_progress' | 'pending' | 'completed';
       <!-- Right: amount + optional action buttons -->
       <div class="flex shrink-0 flex-col items-end gap-2">
         <div class="text-right">
-          <p class="[font-family:var(--font-family-sans)] text-[20px] font-bold leading-7" [class]="amountColorClass()">
-            {{ procedure().valor | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
+          <p
+            class="[font-family:var(--font-family-sans)] text-[20px] font-bold leading-7"
+            [class]="amountColorClass()"
+          >
+            {{ procedure().value | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
           </p>
-          @if (variant() === 'completed' && procedure().dataFim) {
-            <p class="text-xs text-[#69594A]">Pago em {{ procedure().dataFim }}</p>
+          @if (variant() === 'completed' && procedure().endDate) {
+            <p class="text-xs text-[#69594A]">Pago em {{ procedure().endDate }}</p>
           } @else {
             <p class="text-xs text-[#69594A]">Valor do procedimento</p>
           }
@@ -63,7 +68,13 @@ type Variant = 'in_progress' | 'pending' | 'completed';
             aria-label="Concluir procedimento"
           >
             <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-              <path d="M1.5 5.5L4 8L9.5 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              <path
+                d="M1.5 5.5L4 8L9.5 2.5"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
             Concluir
           </button>
@@ -96,9 +107,9 @@ export class ProcedureCardComponent {
 
   protected variant = computed<Variant>(() => {
     switch (this.procedure().status) {
-      case 'em_andamento':
+      case 'in_progress':
         return 'in_progress';
-      case 'concluido':
+      case 'completed':
         return 'completed';
       default:
         return 'pending';
@@ -137,7 +148,7 @@ export class ProcedureCardComponent {
   );
 
   protected iconSrc = computed(() => {
-    switch (this.procedure().tipo) {
+    switch (this.procedure().type) {
       case 'Ortodontia':
         return '/ortho_icon.svg';
       case 'Endodontia':

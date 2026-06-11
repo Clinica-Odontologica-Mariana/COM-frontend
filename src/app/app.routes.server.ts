@@ -26,15 +26,15 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
-    path: 'tratamentos/:id',
+    path: 'treatments/:id',
     renderMode: RenderMode.Client,
   },
   {
-    path: 'tratamentos/:id/novo',
+    path: 'treatments/:id/new',
     renderMode: RenderMode.Client,
   },
   {
-    path: 'tratamentos/:id/editar',
+    path: 'treatments/:id/edit',
     renderMode: RenderMode.Client,
   },
   {

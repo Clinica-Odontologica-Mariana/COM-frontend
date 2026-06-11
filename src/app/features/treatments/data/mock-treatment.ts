@@ -1,0 +1,282 @@
+import { TreatmentData } from '../models/treatment.model';
+
+export const MOCK_TREATMENTS: Record<string, TreatmentData> = {
+  'c14671c5-976a-4d1e-9567-8a417f778b59': {
+    id: 'c14671c5-976a-4d1e-9567-8a417f778b59',
+    patient: {
+      id: 'c14671c5-976a-4d1e-9567-8a417f778b59',
+      name: 'Beatriz Oliveira Cavalcanti',
+      code: 'PAC-001',
+    },
+    procedures: [
+      {
+        id: 'p1',
+        name: 'Extração de Siso',
+        type: 'Cirurgia',
+        startDate: '10/03/2026',
+        endDate: '10/03/2026',
+        value: 850.0,
+        teeth: [18, 28, 38, 48],
+        materials: [
+          { name: 'Anestésico Local', category: 'Medicamento', quantity: 2 },
+          { name: 'Gaze Estéril', category: 'Material', quantity: 5 },
+        ],
+        status: 'in_progress',
+        subtitle: 'Cirurgia — 4 dentes',
+      },
+      {
+        id: 'p2',
+        name: 'Clareamento Dental',
+        type: 'Estética',
+        startDate: '15/04/2026',
+        endDate: '30/04/2026',
+        value: 1200.0,
+        teeth: [11, 12, 13, 21, 22, 23],
+        materials: [{ name: 'Gel Clareador 35%', category: 'Material', quantity: 1 }],
+        status: 'pending',
+        subtitle: 'Estética — 6 dentes',
+      },
+      {
+        id: 'p3',
+        name: 'Restauração em Resina',
+        type: 'Restauração',
+        startDate: '05/02/2026',
+        endDate: '05/02/2026',
+        value: 320.0,
+        teeth: [36, 37],
+        materials: [
+          { name: 'Resina Composta A2', category: 'Material', quantity: 1 },
+          { name: 'Ácido Fosfórico', category: 'Material', quantity: 1 },
+        ],
+        status: 'completed',
+        subtitle: 'Restauração — 2 dentes',
+      },
+    ],
+    totalBudget: 2370.0,
+    executed: 320.0,
+    toPay: 2050.0,
+    toothStates: {
+      18: 'pending', 28: 'pending', 38: 'pending', 48: 'pending',
+      11: 'note', 12: 'note', 13: 'note', 21: 'note', 22: 'note', 23: 'note',
+      36: 'selected', 37: 'selected',
+    },
+    journeyStep: 1,
+    notes: 'Paciente apresenta bruxismo. Recomendado uso de placa de mordida após conclusão dos tratamentos.',
+  },
+
+  'a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56': {
+    id: 'a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56',
+    patient: {
+      id: 'a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56',
+      name: 'Carlos Eduardo Mendes',
+      code: 'PAC-002',
+    },
+    procedures: [
+      {
+        id: 'q1',
+        name: 'Implante Dentário',
+        type: 'Implante',
+        startDate: '20/01/2026',
+        endDate: '',
+        value: 4500.0,
+        teeth: [46],
+        materials: [
+          { name: 'Implante de Titânio', category: 'Implante', quantity: 1 },
+          { name: 'Anestésico Local', category: 'Medicamento', quantity: 3 },
+        ],
+        status: 'in_progress',
+        subtitle: 'Implante — 1 dente',
+      },
+      {
+        id: 'q2',
+        name: 'Coroa Porcelana',
+        type: 'Prótese',
+        startDate: '',
+        endDate: '',
+        value: 2200.0,
+        teeth: [46],
+        materials: [],
+        status: 'planned',
+        subtitle: 'Prótese — 1 dente',
+      },
+      {
+        id: 'q3',
+        name: 'Limpeza e Profilaxia',
+        type: 'Prevenção',
+        startDate: '10/01/2026',
+        endDate: '10/01/2026',
+        value: 180.0,
+        teeth: [],
+        materials: [{ name: 'Flúor Gel', category: 'Prevenção', quantity: 1 }],
+        status: 'completed',
+        subtitle: 'Prevenção',
+      },
+    ],
+    totalBudget: 6880.0,
+    executed: 180.0,
+    toPay: 6700.0,
+    toothStates: {
+      46: 'pending',
+    },
+    journeyStep: 0,
+    notes: 'Paciente com ausência do dente 46 há 3 anos. Osso em boas condições para implante.',
+  },
+
+  'f82b3d10-1c9e-4a77-b5f6-3e0d2c8a9b41': {
+    id: 'f82b3d10-1c9e-4a77-b5f6-3e0d2c8a9b41',
+    patient: {
+      id: 'f82b3d10-1c9e-4a77-b5f6-3e0d2c8a9b41',
+      name: 'Fernanda Ribeiro Santos',
+      code: 'PAC-003',
+    },
+    procedures: [
+      {
+        id: 'r1',
+        name: 'Tratamento de Canal',
+        type: 'Endodontia',
+        startDate: '02/04/2026',
+        endDate: '16/04/2026',
+        value: 1100.0,
+        teeth: [26],
+        materials: [
+          { name: 'Limas Endodônticas', category: 'Endodontia', quantity: 6 },
+          { name: 'Hidróxido de Cálcio', category: 'Endodontia', quantity: 1 },
+        ],
+        status: 'completed',
+        subtitle: 'Endodontia — 1 dente',
+      },
+      {
+        id: 'r2',
+        name: 'Faceta em Porcelana',
+        type: 'Estética',
+        startDate: '10/05/2026',
+        endDate: '24/05/2026',
+        value: 3600.0,
+        teeth: [11, 12, 21, 22],
+        materials: [],
+        status: 'pending',
+        subtitle: 'Estética — 4 dentes',
+      },
+    ],
+    totalBudget: 4700.0,
+    executed: 1100.0,
+    toPay: 3600.0,
+    toothStates: {
+      26: 'selected',
+      11: 'note', 12: 'note', 21: 'note', 22: 'note',
+    },
+    journeyStep: 2,
+    notes: 'Paciente alérgica à penicilina. Usar amoxicilina com cautela.',
+  },
+
+  'b09e4f62-7a11-4c83-d2e5-5f1a9b0c3d78': {
+    id: 'b09e4f62-7a11-4c83-d2e5-5f1a9b0c3d78',
+    patient: {
+      id: 'b09e4f62-7a11-4c83-d2e5-5f1a9b0c3d78',
+      name: 'Rafael Augusto Lopes',
+      code: 'PAC-004',
+    },
+    procedures: [
+      {
+        id: 's1',
+        name: 'Aparelho Ortodôntico',
+        type: 'Ortodontia',
+        startDate: '15/09/2025',
+        endDate: '',
+        value: 5800.0,
+        teeth: [],
+        materials: [
+          { name: 'Braquete Metálico', category: 'Ortodontia', quantity: 28 },
+          { name: 'Fio Ortodôntico', category: 'Ortodontia', quantity: 4 },
+        ],
+        status: 'in_progress',
+        subtitle: 'Ortodontia',
+      },
+      {
+        id: 's2',
+        name: 'Contenção Fixa',
+        type: 'Ortodontia',
+        startDate: '',
+        endDate: '',
+        value: 800.0,
+        teeth: [31, 32, 33, 41, 42, 43],
+        materials: [],
+        status: 'planned',
+        subtitle: 'Ortodontia — 6 dentes',
+      },
+    ],
+    totalBudget: 6600.0,
+    executed: 0.0,
+    toPay: 6600.0,
+    toothStates: {},
+    journeyStep: 0,
+    notes: 'Tratamento iniciado em setembro/2025. Previsão de conclusão: setembro/2027.',
+  },
+
+  'e51c7a23-9b4d-4e0f-a6c8-1d2b3f8e5c90': {
+    id: 'e51c7a23-9b4d-4e0f-a6c8-1d2b3f8e5c90',
+    patient: {
+      id: 'e51c7a23-9b4d-4e0f-a6c8-1d2b3f8e5c90',
+      name: 'Juliana Martins Alves',
+      code: 'PAC-005',
+    },
+    procedures: [
+      {
+        id: 't1',
+        name: 'Raspagem Periodontal',
+        type: 'Periodontia',
+        startDate: '08/03/2026',
+        endDate: '22/03/2026',
+        value: 750.0,
+        teeth: [],
+        materials: [
+          { name: 'Clorexidina 0,12%', category: 'Medicamento', quantity: 2 },
+        ],
+        status: 'completed',
+        subtitle: 'Periodontia',
+      },
+      {
+        id: 't2',
+        name: 'Clareamento Dental',
+        type: 'Estética',
+        startDate: '12/05/2026',
+        endDate: '26/05/2026',
+        value: 900.0,
+        teeth: [13, 12, 11, 21, 22, 23],
+        materials: [{ name: 'Gel Clareador 35%', category: 'Material', quantity: 2 }],
+        status: 'completed',
+        subtitle: 'Estética — 6 dentes',
+      },
+      {
+        id: 't3',
+        name: 'Manutenção Periodontal',
+        type: 'Periodontia',
+        startDate: '15/06/2026',
+        endDate: '',
+        value: 300.0,
+        teeth: [],
+        materials: [],
+        status: 'pending',
+        subtitle: 'Periodontia',
+      },
+    ],
+    totalBudget: 1950.0,
+    executed: 1650.0,
+    toPay: 300.0,
+    toothStates: {
+      13: 'selected', 12: 'selected', 11: 'selected',
+      21: 'selected', 22: 'selected', 23: 'selected',
+    },
+    journeyStep: 3,
+    notes: 'Paciente com histórico de gengivite crônica. Manutenção trimestral recomendada.',
+  },
+};
+
+export function getMockTreatment(id: string): TreatmentData {
+  const first = Object.values(MOCK_TREATMENTS)[0];
+  return MOCK_TREATMENTS[id] ?? { ...first, id };
+}
+
+export function getAllMockTreatments(): TreatmentData[] {
+  return Object.values(MOCK_TREATMENTS);
+}

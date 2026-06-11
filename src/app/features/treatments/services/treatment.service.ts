@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, forkJoin, map, of, switchMap } from 'rxjs';
-import { Procedure, ProcedureStatus, ToothState, TratamentoData } from '../models/tratamento.model';
-import { getMockTratamento } from '../data/mock-tratamento';
+import { Procedure, ProcedureStatus, ToothState, TreatmentData } from '../models/treatment.model';
+import { getMockTreatment } from '../data/mock-treatment';
 
 const API_BASE = 'http://localhost:8080/api/v1';
 
@@ -63,32 +63,39 @@ interface OdontogramEntryDto {
 // ── Service ───────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
-export class TratamentoService {
+export class TreatmentService {
   private http = inject(HttpClient);
 
-  getTratamento(treatmentPlanId: string): Observable<TratamentoData> {
+  getTreatment(treatmentPlanId: string): Observable<TreatmentData> {
     return forkJoin({
       plan: this.http.get<TreatmentPlanDto>(`${API_BASE}/treatment-plans/${treatmentPlanId}`),
-      items: this.http.get<TreatmentPlanItemDto[]>(`${API_BASE}/treatment-plans/${treatmentPlanId}/items`),
+      items: this.http.get<TreatmentPlanItemDto[]>(
+        `${API_BASE}/treatment-plans/${treatmentPlanId}/items`,
+      ),
     }).pipe(
       switchMap(({ plan, items }) => {
-        const procedureIds = [...new Set(items.map(i => i.procedureId).filter((id): id is string => !!id))];
+        const procedureIds = [
+          ...new Set(items.map((i) => i.procedureId).filter((id): id is string => !!id)),
+        ];
 
-        const clinicalProcs$ = procedureIds.length > 0
-          ? forkJoin(
-              procedureIds.map(id =>
-                this.http
-                  .get<ClinicalProcedureDto>(`${API_BASE}/clinical-procedures/${id}`)
-                  .pipe(catchError(() => of(null))),
-              ),
-            ).pipe(
-              map(results => {
-                const dict: Record<string, ClinicalProcedureDto> = {};
-                results.forEach((p, i) => { if (p) dict[procedureIds[i]] = p; });
-                return dict;
-              }),
-            )
-          : of({} as Record<string, ClinicalProcedureDto>);
+        const clinicalProcs$ =
+          procedureIds.length > 0
+            ? forkJoin(
+                procedureIds.map((id) =>
+                  this.http
+                    .get<ClinicalProcedureDto>(`${API_BASE}/clinical-procedures/${id}`)
+                    .pipe(catchError(() => of(null))),
+                ),
+              ).pipe(
+                map((results) => {
+                  const dict: Record<string, ClinicalProcedureDto> = {};
+                  results.forEach((p, i) => {
+                    if (p) dict[procedureIds[i]] = p;
+                  });
+                  return dict;
+                }),
+              )
+            : of({} as Record<string, ClinicalProcedureDto>);
 
         return forkJoin({
           patient: this.http
@@ -98,31 +105,38 @@ export class TratamentoService {
             .get<MedicalRecordDto>(`${API_BASE}/medical-records/by-patient/${plan.patientId}`)
             .pipe(catchError(() => of(null))),
           odontogramEntries: this.http
-            .get<OdontogramEntryDto[]>(`${API_BASE}/odontogram-entries/by-patient/${plan.patientId}`)
+            .get<
+              OdontogramEntryDto[]
+            >(`${API_BASE}/odontogram-entries/by-patient/${plan.patientId}`)
             .pipe(catchError(() => of([]))),
           clinicalProcs: clinicalProcs$,
         }).pipe(
           map(({ patient, medicalRecord, odontogramEntries, clinicalProcs }) =>
-            this.mapTratamentoData(plan, items, patient, medicalRecord, odontogramEntries, clinicalProcs),
+            this.mapTreatmentData(
+              plan,
+              items,
+              patient,
+              medicalRecord,
+              odontogramEntries,
+              clinicalProcs,
+            ),
           ),
         );
       }),
-      catchError(() => of(getMockTratamento(treatmentPlanId))),
+      catchError(() => of(getMockTreatment(treatmentPlanId))),
     );
   }
 
-  updateObservacoes(treatmentPlanId: string, notes: string): Observable<void> {
-    return this.http
-      .get<TreatmentPlanDto>(`${API_BASE}/treatment-plans/${treatmentPlanId}`)
-      .pipe(
-        switchMap(plan =>
-          this.http.put<void>(`${API_BASE}/treatment-plans/${treatmentPlanId}`, {
-            title: plan.title,
-            notes,
-          }),
-        ),
-        catchError(() => of(undefined)),
-      );
+  updateNotes(treatmentPlanId: string, notes: string): Observable<void> {
+    return this.http.get<TreatmentPlanDto>(`${API_BASE}/treatment-plans/${treatmentPlanId}`).pipe(
+      switchMap((plan) =>
+        this.http.put<void>(`${API_BASE}/treatment-plans/${treatmentPlanId}`, {
+          title: plan.title,
+          notes,
+        }),
+      ),
+      catchError(() => of(undefined)),
+    );
   }
 
   completeProcedure(itemId: string): Observable<void> {
@@ -140,64 +154,105 @@ export class TratamentoService {
       .pipe(catchError(() => of(undefined)));
   }
 
+  createProcedureItem(
+    planId: string,
+    data: {
+      description: string;
+      estimatedPrice?: number;
+      status?: string;
+      toothNumber?: number;
+    },
+  ): Observable<TreatmentPlanItemDto> {
+    return this.http.post<TreatmentPlanItemDto>(`${API_BASE}/treatment-plans/${planId}/items`, {
+      description: data.description,
+      estimatedPrice: data.estimatedPrice ?? 0,
+      status: data.status ?? 'PENDING',
+      toothNumber: data.toothNumber ?? null,
+    });
+  }
+
+  updateProcedureItem(
+    itemId: string,
+    data: {
+      description: string;
+      estimatedPrice?: number;
+      status?: string;
+      toothNumber?: number;
+    },
+  ): Observable<TreatmentPlanItemDto> {
+    return this.http.put<TreatmentPlanItemDto>(`${API_BASE}/treatment-plans/items/${itemId}`, {
+      description: data.description,
+      estimatedPrice: data.estimatedPrice ?? 0,
+      status: data.status ?? 'PENDING',
+      toothNumber: data.toothNumber ?? null,
+    });
+  }
+
+  deleteProcedureItem(itemId: string): Observable<void> {
+    return this.http.delete<void>(`${API_BASE}/treatment-plans/items/${itemId}`);
+  }
+
   // ── Mapping helpers ─────────────────────────────────────────────────────────
 
-  private mapTratamentoData(
+  private mapTreatmentData(
     plan: TreatmentPlanDto,
     items: TreatmentPlanItemDto[],
     patient: PatientDto | null,
     medicalRecord: MedicalRecordDto | null,
     odontogramEntries: OdontogramEntryDto[],
     clinicalProcs: Record<string, ClinicalProcedureDto>,
-  ): TratamentoData {
-    const procedures: Procedure[] = items.map(item => {
+  ): TreatmentData {
+    const procedures: Procedure[] = items.map((item) => {
       const cp = item.procedureId ? clinicalProcs[item.procedureId] : null;
       const status = this.fromApiStatus(item.status);
       const teeth = item.toothNumber != null ? [item.toothNumber] : [];
       return {
         id: item.id,
-        nome: cp?.name ?? item.description,
-        tipo: cp?.category ?? 'Outros',
-        dataInicio: this.fmtDate(item.createdAt),
-        dataFim: this.fmtDate(item.completedAt),
-        valor: item.estimatedPrice ?? 0,
-        dentes: teeth,
-        materiais: [],
+        name: cp?.name ?? item.description,
+        type: cp?.category ?? 'Outros',
+        startDate: this.fmtDate(item.createdAt),
+        endDate: this.fmtDate(item.completedAt),
+        value: item.estimatedPrice ?? 0,
+        teeth,
+        materials: [],
         status,
-        subtitulo: this.buildSubtitulo(cp?.category ?? 'Outros', teeth),
+        subtitle: this.buildSubtitle(cp?.category ?? 'Outros', teeth),
       };
     });
 
-    const executado = procedures
-      .filter(p => p.status === 'concluido')
-      .reduce((sum, p) => sum + p.valor, 0);
+    const executed = procedures
+      .filter((p) => p.status === 'completed')
+      .reduce((sum, p) => sum + p.value, 0);
 
-    const totalOrcamento =
-      plan.totalAmount ?? procedures.reduce((sum, p) => sum + p.valor, 0);
+    const totalBudget = plan.totalAmount ?? procedures.reduce((sum, p) => sum + p.value, 0);
 
     return {
       id: plan.id,
       patient: {
         id: patient?.id ?? plan.patientId,
-        nome: patient?.fullName ?? 'Paciente',
-        codigo: this.buildPatientCode(patient),
+        name: patient?.fullName ?? 'Paciente',
+        code: this.buildPatientCode(patient),
       },
       procedures,
-      totalOrcamento,
-      executado,
-      aPagar: totalOrcamento - executado,
+      totalBudget,
+      executed,
+      toPay: totalBudget - executed,
       toothStates: this.buildToothStates(procedures, odontogramEntries),
       journeyStep: this.calcJourneyStep(procedures),
-      observacoes: plan.notes ?? medicalRecord?.generalObservations ?? '',
+      notes: plan.notes ?? medicalRecord?.generalObservations ?? '',
     };
   }
 
   private fromApiStatus(apiStatus: string): ProcedureStatus {
     switch (apiStatus?.toUpperCase()) {
-      case 'DONE':      return 'concluido';
-      case 'APPROVED':  return 'em_andamento';
-      case 'CANCELLED': return 'interrompido';
-      default:          return 'pendente';
+      case 'DONE':
+        return 'completed';
+      case 'APPROVED':
+        return 'in_progress';
+      case 'CANCELLED':
+        return 'interrupted';
+      default:
+        return 'pending';
     }
   }
 
@@ -206,7 +261,7 @@ export class TratamentoService {
     return new Date(iso).toLocaleDateString('pt-BR');
   }
 
-  private buildSubtitulo(category: string, teeth: number[]): string {
+  private buildSubtitle(category: string, teeth: number[]): string {
     if (!teeth.length) return category;
     return `${category} — ${teeth.length} ${teeth.length === 1 ? 'dente' : 'dentes'}`;
   }
@@ -222,20 +277,26 @@ export class TratamentoService {
   ): Record<number, ToothState> {
     const states: Record<number, ToothState> = {};
 
-    // Derive from treatment plan items
     for (const proc of procedures) {
-      for (const tooth of proc.dentes) {
+      for (const tooth of proc.teeth) {
         switch (proc.status) {
-          case 'em_andamento': states[tooth] = 'pending';   break;
-          case 'concluido':    states[tooth] = 'selected';  break;
-          case 'interrompido': states[tooth] = 'inactive';  break;
-          case 'pendente':
-          default:             states[tooth] = 'note';      break;
+          case 'in_progress':
+            states[tooth] = 'pending';
+            break;
+          case 'completed':
+            states[tooth] = 'selected';
+            break;
+          case 'interrupted':
+            states[tooth] = 'inactive';
+            break;
+          case 'pending':
+          default:
+            states[tooth] = 'note';
+            break;
         }
       }
     }
 
-    // Overlay odontogram entries for teeth not already covered
     for (const entry of odontogramEntries) {
       if (entry.toothNumber != null && !states[entry.toothNumber]) {
         states[entry.toothNumber] = 'note';
@@ -247,9 +308,9 @@ export class TratamentoService {
 
   private calcJourneyStep(procedures: Procedure[]): number {
     if (!procedures.length) return 0;
-    const active = procedures.filter(p => p.status !== 'interrompido');
-    if (active.every(p => p.status === 'concluido')) return 2;
-    if (active.some(p => p.status === 'em_andamento')) return 1;
+    const active = procedures.filter((p) => p.status !== 'interrupted');
+    if (active.every((p) => p.status === 'completed')) return 2;
+    if (active.some((p) => p.status === 'in_progress')) return 1;
     return 0;
   }
 }

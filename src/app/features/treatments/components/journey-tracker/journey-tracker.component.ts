@@ -72,8 +72,8 @@ const STEPS: JourneyStep[] = [
         }
       </div>
 
-      <!-- Próximo Passo card -->
-      @if (proximoPasso()) {
+      <!-- Next step card -->
+      @if (nextStep()) {
         <div
           style="background: #FFFFFF; border-top: 4px solid #69594A; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;"
         >
@@ -94,7 +94,7 @@ const STEPS: JourneyStep[] = [
           <p
             style="font-family: Manrope, sans-serif; font-size: 12px; font-weight: 400; line-height: 20px; color: #514440; margin: 0;"
           >
-            {{ proximoPasso() }}
+            {{ nextStep() }}
           </p>
         </div>
       }
@@ -103,7 +103,7 @@ const STEPS: JourneyStep[] = [
 })
 export class JourneyTrackerComponent {
   currentStep = input<number>(0);
-  proximoPasso = input<string>('');
+  nextStep = input<string>('');
 
   protected readonly steps = STEPS;
 

@@ -11,8 +11,6 @@ interface SidebarItem {
   match: readonly string[];
 }
 
-const SEED_TREATMENT_PLAN_ID = '14d37daa-a0b2-4e11-9e20-5efc9c3d703e';
-
 @Component({
   selector: 'app-global-sidebar',
   imports: [RouterLink, NgOptimizedImage],
@@ -127,19 +125,39 @@ export class GlobalSidebarComponent {
   );
 
   protected readonly items: SidebarItem[] = [
-    { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1', match: ['/dashboard'] },
-    { label: 'Pacientes', icon: '/pacientes.svg', link: '/medical-records/1', match: ['/patients'] },
+    {
+      label: 'Painel',
+      icon: '/Painel_icon.svg',
+      link: '/medical-records/1',
+      match: ['/dashboard'],
+    },
+    {
+      label: 'Pacientes',
+      icon: '/pacientes.svg',
+      link: '/medical-records/1',
+      match: ['/patients'],
+    },
     { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', match: ['/agenda'] },
-    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/medical-records/1', match: ['/medical-records'] },
+    {
+      label: 'Prontuários',
+      icon: '/prontuarios.svg',
+      link: '/medical-records/1',
+      match: ['/medical-records'],
+    },
     {
       label: 'Tratamentos',
       icon: '/tratamentos.svg',
-      link: `/tratamentos/${SEED_TREATMENT_PLAN_ID}`,
-      match: ['/tratamentos', '/treatments', '/patients/'],
+      link: '/treatments',
+      match: ['/treatments'],
     },
     { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', match: ['/stock'] },
     { label: 'Clínicas', icon: '/Clinicas.svg', link: '/clinics', match: ['/clinics'] },
-    { label: 'Certificados', icon: '/certificados.svg', link: '/medical-records/1', match: ['/certificates'] },
+    {
+      label: 'Certificados',
+      icon: '/certificados.svg',
+      link: '/medical-records/1',
+      match: ['/certificates'],
+    },
   ];
   protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
 
