@@ -67,13 +67,48 @@ export interface ClinicCardViewModel extends ClinicRecord {
 }
 
 export const CLINIC_SCHEDULE_TEMPLATE: WorkingDay[] = [
-  { dayKey: 'monday', label: 'Segunda-feira', enabled: true, intervals: [{ startTime: '08:00', endTime: '18:00' }] },
-  { dayKey: 'tuesday', label: 'Terça-feira', enabled: true, intervals: [{ startTime: '08:00', endTime: '18:00' }] },
-  { dayKey: 'wednesday', label: 'Quarta-feira', enabled: true, intervals: [{ startTime: '08:00', endTime: '18:00' }] },
-  { dayKey: 'thursday', label: 'Quinta-feira', enabled: true, intervals: [{ startTime: '08:00', endTime: '18:00' }] },
-  { dayKey: 'friday', label: 'Sexta-feira', enabled: true, intervals: [{ startTime: '08:00', endTime: '18:00' }] },
-  { dayKey: 'saturday', label: 'Sábado', enabled: false, intervals: [{ startTime: '08:00', endTime: '12:00' }] },
-  { dayKey: 'sunday', label: 'Domingo', enabled: false, intervals: [{ startTime: '08:00', endTime: '12:00' }] },
+  {
+    dayKey: 'monday',
+    label: 'Segunda-feira',
+    enabled: true,
+    intervals: [{ startTime: '08:00', endTime: '18:00' }],
+  },
+  {
+    dayKey: 'tuesday',
+    label: 'Terça-feira',
+    enabled: true,
+    intervals: [{ startTime: '08:00', endTime: '18:00' }],
+  },
+  {
+    dayKey: 'wednesday',
+    label: 'Quarta-feira',
+    enabled: true,
+    intervals: [{ startTime: '08:00', endTime: '18:00' }],
+  },
+  {
+    dayKey: 'thursday',
+    label: 'Quinta-feira',
+    enabled: true,
+    intervals: [{ startTime: '08:00', endTime: '18:00' }],
+  },
+  {
+    dayKey: 'friday',
+    label: 'Sexta-feira',
+    enabled: true,
+    intervals: [{ startTime: '08:00', endTime: '18:00' }],
+  },
+  {
+    dayKey: 'saturday',
+    label: 'Sábado',
+    enabled: false,
+    intervals: [{ startTime: '08:00', endTime: '12:00' }],
+  },
+  {
+    dayKey: 'sunday',
+    label: 'Domingo',
+    enabled: false,
+    intervals: [{ startTime: '08:00', endTime: '12:00' }],
+  },
 ];
 
 export function cloneWorkingDays(days: WorkingDay[]): WorkingDay[] {

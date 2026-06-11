@@ -25,7 +25,7 @@ type Variant = 'in_progress' | 'pending' | 'completed';
 
         <div class="min-w-0">
           <p
-            class="[font-family:var(--font-family-sans)] text-[18px] font-bold leading-7 text-[#1A1C1C]"
+            class="font-family-sans text-[18px] font-bold leading-7 text-[#1A1C1C]"
             [class.line-through]="variant() === 'completed'"
           >
             {{ procedure().name }}
@@ -34,9 +34,7 @@ type Variant = 'in_progress' | 'pending' | 'completed';
           <div class="mt-2 flex items-center gap-2">
             <app-status-badge [status]="procedure().status" />
             @if (procedure().startDate && variant() === 'in_progress') {
-              <span
-                class="[font-family:var(--font-family-sans)] text-[12px] font-medium text-[#7C5145]"
-              >
+              <span class="font-family-sans text-[12px] font-medium text-[#7C5145]">
                 Iniciado em {{ procedure().startDate }}
               </span>
             }
@@ -47,10 +45,7 @@ type Variant = 'in_progress' | 'pending' | 'completed';
       <!-- Right: amount + optional action buttons -->
       <div class="flex shrink-0 flex-col items-end gap-2">
         <div class="text-right">
-          <p
-            class="[font-family:var(--font-family-sans)] text-[20px] font-bold leading-7"
-            [class]="amountColorClass()"
-          >
+          <p class="font-family-sans text-[20px] font-bold leading-7" [class]="amountColorClass()">
             {{ procedure().value | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
           </p>
           @if (variant() === 'completed' && procedure().endDate) {

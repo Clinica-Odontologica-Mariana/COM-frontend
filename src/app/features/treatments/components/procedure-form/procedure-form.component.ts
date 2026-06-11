@@ -38,9 +38,9 @@ const PROCEDURE_TYPES = [
 type StatusOption = { value: ProcedureStatus; label: string };
 
 const STATUS_OPTIONS: StatusOption[] = [
-  { value: 'planned', label: 'Planejado' },
+  { value: 'pending', label: 'Pendente' },
   { value: 'in_progress', label: 'Em andamento' },
-  { value: 'completed', label: 'Finalizado' },
+  { value: 'completed', label: 'Concluído' },
   { value: 'interrupted', label: 'Interrompido' },
 ];
 
@@ -58,7 +58,6 @@ const MOCK_MATERIALS: Omit<Material, 'quantity'>[] = [
 ];
 
 const API_STATUS: Record<ProcedureStatus, string> = {
-  planned: 'PENDING',
   pending: 'PENDING',
   in_progress: 'APPROVED',
   completed: 'DONE',
@@ -275,7 +274,9 @@ interface ProcedureFormGroup {
                   class="px-3 py-4.25 text-lg font-bold text-[#7C5145] transition hover:bg-[#E4DCD9] disabled:opacity-30"
                   [disabled]="materialQty() <= 1"
                   (click)="materialQty.update((q) => Math.max(1, q - 1))"
-                >−</button>
+                >
+                  −
+                </button>
                 <input
                   type="number"
                   min="1"
@@ -288,7 +289,9 @@ interface ProcedureFormGroup {
                   type="button"
                   class="px-3 py-4.25 text-lg font-bold text-[#7C5145] transition hover:bg-[#E4DCD9]"
                   (click)="materialQty.update((q) => q + 1)"
-                >+</button>
+                >
+                  +
+                </button>
               </div>
 
               <button

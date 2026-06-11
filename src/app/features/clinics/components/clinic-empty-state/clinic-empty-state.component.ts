@@ -12,10 +12,7 @@ import { ChangeDetectionStrategy, Component, output } from '@angular/core';
         +
       </div>
 
-      <h3
-        class="mt-6 text-2xl font-bold text-[#7C5145]"
-        style="font-family: 'Noto Serif', serif"
-      >
+      <h3 class="mt-6 text-2xl font-bold text-[#7C5145]" style="font-family: 'Noto Serif', serif">
         Nenhuma clínica ativa no momento
       </h3>
 

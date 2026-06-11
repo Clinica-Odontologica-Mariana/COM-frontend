@@ -32,7 +32,9 @@ export class MedicalRecordApi {
 
   getMedicalRecord(patientId: string): Observable<MedicalRecordDTO> {
     return unwrap(
-      this.http.get<ApiResponse<MedicalRecordDTO>>(`${this.base}/medical-records/by-patient/${patientId}`),
+      this.http.get<ApiResponse<MedicalRecordDTO>>(
+        `${this.base}/medical-records/by-patient/${patientId}`,
+      ),
     );
   }
 
@@ -44,7 +46,10 @@ export class MedicalRecordApi {
     );
   }
 
-  createNote(patientId: string, payload: MedicalRecordNoteCreateDTO): Observable<MedicalRecordNoteDTO> {
+  createNote(
+    patientId: string,
+    payload: MedicalRecordNoteCreateDTO,
+  ): Observable<MedicalRecordNoteDTO> {
     return unwrap(
       this.http.post<ApiResponse<MedicalRecordNoteDTO>>(
         `${this.base}/medical-records/by-patient/${patientId}/notes`,
@@ -116,7 +121,12 @@ export class MedicalRecordApi {
 
   createTreatmentPlanItem(
     planId: string,
-    payload: { description: string; toothNumber: number | null; estimatedPrice: number; status: string },
+    payload: {
+      description: string;
+      toothNumber: number | null;
+      estimatedPrice: number;
+      status: string;
+    },
   ): Observable<TreatmentPlanItemDTO> {
     return unwrap(
       this.http.post<ApiResponse<TreatmentPlanItemDTO>>(
@@ -129,7 +139,12 @@ export class MedicalRecordApi {
   updateTreatmentPlanItem(
     planId: string,
     itemId: string,
-    payload: { description: string; toothNumber: number | null; estimatedPrice: number; status: string },
+    payload: {
+      description: string;
+      toothNumber: number | null;
+      estimatedPrice: number;
+      status: string;
+    },
   ): Observable<TreatmentPlanItemDTO> {
     return unwrap(
       this.http.put<ApiResponse<TreatmentPlanItemDTO>>(
@@ -147,10 +162,18 @@ export class MedicalRecordApi {
 
   updateMedicalRecord(
     recordId: string,
-    payload: Partial<Pick<MedicalRecordDTO, 'allergies' | 'chronicConditions' | 'continuousMedications' | 'generalObservations'>>,
+    payload: Partial<
+      Pick<
+        MedicalRecordDTO,
+        'allergies' | 'chronicConditions' | 'continuousMedications' | 'generalObservations'
+      >
+    >,
   ): Observable<MedicalRecordDTO> {
     return unwrap(
-      this.http.put<ApiResponse<MedicalRecordDTO>>(`${this.base}/medical-records/${recordId}`, payload),
+      this.http.put<ApiResponse<MedicalRecordDTO>>(
+        `${this.base}/medical-records/${recordId}`,
+        payload,
+      ),
     );
   }
 

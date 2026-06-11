@@ -42,7 +42,13 @@ const STEPS: JourneyStep[] = [
               @if (i < currentStep()) {
                 <!-- Checkmark for completed -->
                 <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                  <path d="M1 3.5L3.5 6L8 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path
+                    d="M1 3.5L3.5 6L8 1"
+                    stroke="white"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
               }
             </div>
@@ -80,9 +86,9 @@ const STEPS: JourneyStep[] = [
           <!-- Header row -->
           <div style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <circle cx="6" cy="6" r="5.5" stroke="#69594A"/>
-              <path d="M6 5.5V8.5" stroke="#69594A" stroke-width="1.2" stroke-linecap="round"/>
-              <circle cx="6" cy="3.5" r="0.6" fill="#69594A"/>
+              <circle cx="6" cy="6" r="5.5" stroke="#69594A" />
+              <path d="M6 5.5V8.5" stroke="#69594A" stroke-width="1.2" stroke-linecap="round" />
+              <circle cx="6" cy="3.5" r="0.6" fill="#69594A" />
             </svg>
             <span
               style="font-family: Manrope, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #69594A;"

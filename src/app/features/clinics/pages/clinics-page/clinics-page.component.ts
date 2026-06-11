@@ -1,5 +1,12 @@
 import { Location } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { ConfirmDeleteModalComponent } from '../../../../shared/components/feedback/confirm-delete-modal/confirm-delete-modal.component';
 import { ClinicCardComponent } from '../../components/clinic-card/clinic-card.component';

@@ -30,25 +30,22 @@ function getDominantStatus(treatment: TreatmentData): ProcedureStatus {
   const procs = treatment.procedures;
   if (procs.some((p) => p.status === 'in_progress')) return 'in_progress';
   if (procs.some((p) => p.status === 'pending')) return 'pending';
-  if (procs.some((p) => p.status === 'planned')) return 'planned';
   if (procs.every((p) => p.status === 'completed')) return 'completed';
   return 'interrupted';
 }
 
 const STATUS_LABEL: Record<ProcedureStatus, string> = {
-  in_progress: 'Em andamento',
   pending: 'Pendente',
-  planned: 'Planejado',
+  in_progress: 'Em andamento',
   completed: 'Concluído',
   interrupted: 'Interrompido',
 };
 
 const STATUS_COLORS: Record<ProcedureStatus, { bg: string; text: string; dot: string }> = {
-  in_progress: { bg: '#FFF7ED', text: '#C2610C', dot: '#F97316' },
-  pending: { bg: '#EFF6FF', text: '#1D4ED8', dot: '#3B82F6' },
-  planned: { bg: '#F3F4F6', text: '#374151', dot: '#9CA3AF' },
-  completed: { bg: '#F0FDF4', text: '#15803D', dot: '#22C55E' },
-  interrupted: { bg: '#FFF1F2', text: '#BE123C', dot: '#F43F5E' },
+  pending:     { bg: '#FEF3C7', text: '#92400E', dot: '#D97706' },
+  in_progress: { bg: '#F0E4DF', text: '#7C5145', dot: '#9B6B5F' },
+  completed:   { bg: '#DCFCE7', text: '#166534', dot: '#22C55E' },
+  interrupted: { bg: '#DBEAFE', text: '#1E40AF', dot: '#3B82F6' },
 };
 
 @Component({
@@ -67,16 +64,29 @@ const STATUS_COLORS: Record<ProcedureStatus, { bg: string; text: string; dot: st
             Tratamentos
           </h1>
           <p class="mt-1 text-sm text-[#78716C]">
-            {{ filteredPatients().length }} paciente{{ filteredPatients().length !== 1 ? 's' : '' }} encontrado{{ filteredPatients().length !== 1 ? 's' : '' }}
+            {{ filteredPatients().length }} paciente{{
+              filteredPatients().length !== 1 ? 's' : ''
+            }}
+            encontrado{{ filteredPatients().length !== 1 ? 's' : '' }}
           </p>
         </div>
       </div>
 
       <!-- Search bar -->
       <div class="mt-6 flex items-center gap-3 rounded-2xl px-4 py-3" style="background: #F3F3F3;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#78716C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="M21 21l-4.35-4.35"/>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#78716C"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="shrink-0"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="M21 21l-4.35-4.35" />
         </svg>
         <input
           type="text"
@@ -92,7 +102,12 @@ const STATUS_COLORS: Record<ProcedureStatus, { bg: string; text: string; dot: st
             (click)="clearSearch()"
           >
             <svg width="10" height="10" viewBox="0 0 14 14" fill="none">
-              <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path
+                d="M1 1l12 12M13 1L1 13"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
         }
@@ -101,10 +116,22 @@ const STATUS_COLORS: Record<ProcedureStatus, { bg: string; text: string; dot: st
       <!-- Patient list -->
       <div class="mt-6 space-y-3">
         @if (filteredPatients().length === 0) {
-          <div class="flex flex-col items-center gap-3 rounded-3xl py-16 text-center" style="background: #F3F3F3;">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C4B5AC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="M21 21l-4.35-4.35"/>
+          <div
+            class="flex flex-col items-center gap-3 rounded-3xl py-16 text-center"
+            style="background: #F3F3F3;"
+          >
+            <svg
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#C4B5AC"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
             </svg>
             <p class="text-sm font-semibold text-[#78716C]">Nenhum paciente encontrado</p>
             <p class="text-xs text-[#A8A29E]">Tente buscar com outro nome</p>
@@ -129,7 +156,9 @@ const STATUS_COLORS: Record<ProcedureStatus, { bg: string; text: string; dot: st
             <!-- Patient info -->
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
-                <span class="text-base font-bold text-[#1A1C1C] transition group-hover:text-[#7C5145]">
+                <span
+                  class="text-base font-bold text-[#1A1C1C] transition group-hover:text-[#7C5145]"
+                >
                   {{ p.patientName }}
                 </span>
                 <span class="text-xs text-[#78716C]">
@@ -154,7 +183,9 @@ const STATUS_COLORS: Record<ProcedureStatus, { bg: string; text: string; dot: st
 
                 <!-- Procedure progress -->
                 <span class="text-xs text-[#78716C]">
-                  {{ p.completedCount }}/{{ p.procedureCount }} procedimento{{ p.procedureCount !== 1 ? 's' : '' }}
+                  {{ p.completedCount }}/{{ p.procedureCount }} procedimento{{
+                    p.procedureCount !== 1 ? 's' : ''
+                  }}
                 </span>
 
                 <!-- Progress bar -->
@@ -180,10 +211,16 @@ const STATUS_COLORS: Record<ProcedureStatus, { bg: string; text: string; dot: st
             <!-- Arrow -->
             <svg
               class="ml-1 shrink-0 text-[#C4B5AC] transition group-hover:translate-x-0.5 group-hover:text-[#7C5145]"
-              width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
-              <path d="M9 18l6-6-6-6"/>
+              <path d="M9 18l6-6-6-6" />
             </svg>
           </button>
         }

@@ -1,5 +1,5 @@
 export type ToothState = 'default' | 'selected' | 'pending' | 'note' | 'inactive';
-export type ProcedureStatus = 'completed' | 'pending' | 'in_progress' | 'interrupted' | 'planned';
+export type ProcedureStatus = 'completed' | 'pending' | 'in_progress' | 'interrupted';
 
 export interface Material {
   name: string;

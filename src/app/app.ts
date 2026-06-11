@@ -27,7 +27,7 @@ export class App {
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-        takeUntilDestroyed()
+        takeUntilDestroyed(),
       )
       .subscribe((event) => this.currentUrl.set(event.urlAfterRedirects));
   }

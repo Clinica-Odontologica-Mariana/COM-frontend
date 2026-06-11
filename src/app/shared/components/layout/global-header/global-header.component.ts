@@ -11,11 +11,14 @@ import { RouterLink } from '@angular/router';
           <img
             src="/mariana-dias-logo.png"
             alt="Mariana Dias Odontologia Estética"
-            class="h-auto w-[190px] max-w-[44vw] object-contain sm:w-[130px]"
+            class="h-auto w-47.5 max-w-[44vw] object-contain sm:w-32.5"
           />
         </a>
 
-        <nav class="hidden items-center gap-12 text-base font-semibold text-[#5E514B] md:flex" aria-label="Principal">
+        <nav
+          class="hidden items-center gap-12 text-base font-semibold text-[#5E514B] md:flex"
+          aria-label="Principal"
+        >
           @for (item of navItems; track item.label) {
             <a
               [routerLink]="item.link"

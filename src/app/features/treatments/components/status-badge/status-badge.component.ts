@@ -8,11 +8,10 @@ interface BadgeConfig {
 }
 
 const BADGE_CONFIGS: Record<ProcedureStatus, BadgeConfig> = {
-  completed: { label: 'Concluído', color: '#16A34A', bg: '#DCFCE7' },
-  pending: { label: 'Pendente', color: '#92400E', bg: '#FEF3C7' },
-  in_progress: { label: 'Em andamento', color: '#FFFFFF', bg: '#7C5145' },
-  interrupted: { label: 'Interrompido', color: '#B20000', bg: 'rgba(178,0,0,0.10)' },
-  planned: { label: 'Planejado', color: '#1E40AF', bg: '#DBEAFE' },
+  pending:      { label: 'Pendente',      color: '#92400E', bg: '#FEF3C7' },
+  in_progress:  { label: 'Em andamento',  color: '#7C5145', bg: '#F0E4DF' },
+  completed:    { label: 'Concluído',     color: '#166534', bg: '#BBFCC7' },
+  interrupted:  { label: 'Interrompido',  color: '#1E40AF', bg: '#DBEAFE' },
 };
 
 @Component({

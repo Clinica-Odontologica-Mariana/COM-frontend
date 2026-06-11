@@ -22,7 +22,6 @@ type ConfirmType = 'complete' | 'start';
 const STATUS_ORDER: Record<ProcedureStatus, number> = {
   in_progress: 0,
   pending: 1,
-  planned: 1,
   completed: 2,
   interrupted: 3,
 };
@@ -54,7 +53,9 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
             <span class="rounded-full bg-[#F3F3F3] px-3 py-1 text-sm font-semibold text-[#1A1C1C]">
               {{ treatment().patient.name }}
             </span>
-            <span class="text-sm text-[#78716C]">ID: #PAC-{{ treatment().patient.id.slice(0, 4).toUpperCase() }}</span>
+            <span class="text-sm text-[#78716C]"
+              >ID: #PAC-{{ treatment().patient.id.slice(0, 4).toUpperCase() }}</span
+            >
           </div>
         </div>
 
@@ -89,11 +90,9 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
           </div>
 
           <!-- Mobile-only: Clinical notes (between odontogram and plan) -->
-          <div class="mt-6 rounded-[32px] bg-white p-6 shadow-[var(--shadow-card)] lg:hidden">
+          <div class="mt-6 rounded-4xl bg-white p-6 shadow-(--shadow-card) lg:hidden">
             <div class="mb-3 flex items-center justify-between">
-              <p
-                class="[font-family:var(--font-family-sans)] text-sm font-bold uppercase tracking-[1px] text-[#78716C]"
-              >
+              <p class="font-family-sans text-sm font-bold uppercase tracking-[1px] text-[#78716C]">
                 Anotações Clínicas
               </p>
               <button
@@ -117,7 +116,7 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
 
           <!-- Execution plan header -->
           <div class="mt-8 flex items-center justify-between">
-            <h2 class="[font-family:var(--font-family-serif)] text-[20px] font-bold text-[#1A1C1C]">
+            <h2 class="font-family-serif text-[20px] font-bold text-[#1A1C1C]">
               Plano de Execução
             </h2>
             <a
@@ -154,11 +153,9 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
           />
 
           <!-- Clinical notes (desktop only) -->
-          <div class="hidden rounded-4xl bg-white p-6 shadow-[var(--shadow-card)] lg:block">
+          <div class="hidden rounded-4xl bg-white p-6 shadow-(--shadow-card) lg:block">
             <div class="mb-3 flex items-center justify-between">
-              <p
-                class="[font-family:var(--font-family-sans)] text-sm font-bold uppercase tracking-[1px] text-[#78716C]"
-              >
+              <p class="font-family-sans text-sm font-bold uppercase tracking-[1px] text-[#78716C]">
                 Anotações Clínicas
               </p>
               <button
@@ -195,13 +192,11 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
         (click)="cancelConfirm()"
       >
         <div
-          class="w-full max-w-sm rounded-[32px] bg-white p-8 shadow-[0_24px_64px_rgba(0,0,0,0.15)]"
+          class="w-full max-w-sm rounded-4xl bg-white p-8 shadow-[0_24px_64px_rgba(0,0,0,0.15)]"
           (click)="$event.stopPropagation()"
         >
           <div class="mb-2 flex items-center justify-between">
-            <h2
-              class="[font-family:var(--font-family-serif)] m-0 text-xl font-normal text-[#1A1C1C]"
-            >
+            <h2 class="font-family-serif m-0 text-xl font-normal text-[#1A1C1C]">
               {{ confirmType() === 'complete' ? 'Concluir Procedimento' : 'Iniciar Procedimento' }}
             </h2>
             <button
@@ -258,13 +253,11 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
         (click)="showBudgetDialog.set(false)"
       >
         <div
-          class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[32px] bg-white p-8 shadow-[0_24px_64px_rgba(0,0,0,0.15)]"
+          class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-4xl bg-white p-8 shadow-[0_24px_64px_rgba(0,0,0,0.15)]"
           (click)="$event.stopPropagation()"
         >
           <div class="mb-6 flex items-center justify-between">
-            <h2
-              class="[font-family:var(--font-family-serif)] m-0 text-xl font-normal text-[#1A1C1C]"
-            >
+            <h2 class="font-family-serif m-0 text-xl font-normal text-[#1A1C1C]">
               Detalhes do Orçamento
             </h2>
             <button
@@ -286,26 +279,22 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
 
           <div class="flex flex-col gap-2">
             @for (proc of sortedProcedures(); track proc.id) {
-              <div
-                class="flex items-center justify-between rounded-2xl bg-[#F9F9F9] px-4 py-[14px]"
-              >
+              <div class="flex items-center justify-between rounded-2xl bg-[#F9F9F9] px-4 py-3.5">
                 <div class="min-w-0 flex-1 pr-4">
                   <p
-                    class="[font-family:var(--font-family-sans)] m-0 text-sm font-bold text-[#1A1C1C]"
+                    class="font-family-sans m-0 text-sm font-bold text-[#1A1C1C]"
                     [class.line-through]="proc.status === 'completed'"
                   >
                     {{ proc.name }}
                   </p>
-                  <p
-                    class="[font-family:var(--font-family-sans)] mb-1.5 mt-1 text-xs text-[#69594A]"
-                  >
+                  <p class="font-family-sans mb-1.5 mt-1 text-xs text-[#69594A]">
                     {{ proc.type }}
                   </p>
                   <app-status-badge [status]="proc.status" />
                 </div>
                 <div class="shrink-0 text-right">
                   <p
-                    class="[font-family:var(--font-family-sans)] m-0 text-base font-bold"
+                    class="font-family-sans m-0 text-base font-bold"
                     [class]="proc.status === 'completed' ? 'text-[#16A34A]' : 'text-[#1A1C1C]'"
                   >
                     {{ proc.value | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
@@ -317,30 +306,21 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
 
           <div class="mt-6 rounded-2xl bg-[#F3F3F3] p-4">
             <div class="mb-2 flex items-center justify-between">
-              <span class="[font-family:var(--font-family-sans)] text-xs text-[#78716C]"
-                >Total do orçamento</span
-              >
-              <span class="[font-family:var(--font-family-sans)] text-sm font-bold text-[#1A1C1C]">
+              <span class="font-family-sans text-xs text-[#78716C]">Total do orçamento</span>
+              <span class="font-family-sans text-sm font-bold text-[#1A1C1C]">
                 {{ treatment().totalBudget | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
               </span>
             </div>
             <div class="mb-2 flex items-center justify-between">
-              <span class="[font-family:var(--font-family-sans)] text-xs text-[#78716C]"
-                >Executado</span
-              >
-              <span class="[font-family:var(--font-family-sans)] text-sm font-bold text-[#16A34A]">
+              <span class="font-family-sans text-xs text-[#78716C]">Executado</span>
+              <span class="font-family-sans text-sm font-bold text-[#16A34A]">
                 {{ treatment().executed | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
               </span>
             </div>
             <div class="my-2 h-px bg-[#E7E5E4]"></div>
             <div class="flex items-center justify-between">
-              <span
-                class="[font-family:var(--font-family-sans)] text-[13px] font-bold text-[#7C5145]"
-                >A pagar</span
-              >
-              <span
-                class="[font-family:var(--font-family-serif)] text-[18px] font-bold text-[#7C5145]"
-              >
+              <span class="font-family-sans text-[13px] font-bold text-[#7C5145]">A pagar</span>
+              <span class="font-family-serif text-[18px] font-bold text-[#7C5145]">
                 {{ treatment().toPay | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
               </span>
             </div>
@@ -356,7 +336,7 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
         (click)="showNotesDialog.set(false)"
       >
         <div
-          class="w-full max-w-md rounded-[32px] bg-white p-8 shadow-[0_24px_64px_rgba(0,0,0,0.15)]"
+          class="w-full max-w-md rounded-4xl bg-white p-8 shadow-[0_24px_64px_rgba(0,0,0,0.15)]"
           (click)="$event.stopPropagation()"
         >
           <div class="mb-5 flex items-center justify-between">
@@ -418,9 +398,7 @@ export class TreatmentManagementPageComponent implements OnInit {
   protected id = computed(() => this.route.snapshot.paramMap.get('id') ?? '1');
 
   private _data = signal<TreatmentData | null>(null);
-  protected treatment = computed<TreatmentData>(
-    () => this._data() ?? getMockTreatment(this.id()),
-  );
+  protected treatment = computed<TreatmentData>(() => this._data() ?? getMockTreatment(this.id()));
 
   protected sortedProcedures = computed<Procedure[]>(() => {
     return [...this.treatment().procedures].sort((a, b) => {
@@ -505,9 +483,7 @@ export class TreatmentManagementPageComponent implements OnInit {
     this._data.update((t) => {
       if (!t) return null;
       const updatedProcs = t.procedures.map((p) =>
-        p.id === proc.id
-          ? { ...p, status: 'in_progress' as ProcedureStatus, startDate: today }
-          : p,
+        p.id === proc.id ? { ...p, status: 'in_progress' as ProcedureStatus, startDate: today } : p,
       );
       return { ...t, procedures: updatedProcs };
     });

@@ -40,17 +40,15 @@ export class AuthService {
 
   login(username: string, password: string): Observable<LoginResponse> {
     const credentials: LoginRequest = { username, password };
-    return this.http.post<LoginResponse>(AUTH_LOGIN_URL, credentials).pipe(
-      tap((res) => this.storeToken(res)),
-    );
+    return this.http
+      .post<LoginResponse>(AUTH_LOGIN_URL, credentials)
+      .pipe(tap((res) => this.storeToken(res)));
   }
 
   initDevSession(): Observable<LoginResponse | null> {
     if (!isPlatformBrowser(this.platformId)) return of(null);
     if (this.isTokenValid()) return of(null);
-    return this.login('api-admin', 'admin123').pipe(
-      catchError(() => of(null)),
-    );
+    return this.login('api-admin', 'admin123').pipe(catchError(() => of(null)));
   }
 
   logout(): void {
