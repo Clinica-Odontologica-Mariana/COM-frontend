@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { filter, map, startWith } from 'rxjs';
+import { filter } from 'rxjs';
 import { GlobalFooterComponent } from './shared/components/layout/global-footer/global-footer.component';
 import { GlobalHeaderComponent } from './shared/components/layout/global-header/global-header.component';
 import { GlobalSidebarComponent } from './shared/components/layout/global-sidebar/global-sidebar.component';
@@ -15,15 +15,25 @@ import { GlobalSidebarComponent } from './shared/components/layout/global-sideba
 })
 export class App {
   private readonly router = inject(Router);
-  private readonly publicPaths = new Set(['/unidades']);
 
-  protected readonly isPublicRoute = toSignal(
-    this.router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      map((event) => event.urlAfterRedirects.split('?')[0].split('#')[0]),
-      startWith(this.router.url.split('?')[0].split('#')[0]),
-      map((path) => this.publicPaths.has(path)),
-    ),
-    { initialValue: this.publicPaths.has(this.router.url) },
-  );
+  protected readonly currentUrl = signal(this.normalizedUrl(this.router.url));
+  protected readonly isPublicRoute = computed(() => this.currentUrl() === '/unidades');
+
+  protected readonly hideShell = computed(() => {
+    const url = this.currentUrl();
+    return url === '/' || url === '/home' || url.startsWith('/admin-access');
+  });
+
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe((event) => this.currentUrl.set(this.normalizedUrl(event.urlAfterRedirects)));
+  }
+
+  private normalizedUrl(url: string): string {
+    return url.split('?')[0].split('#')[0];
+  }
 }
