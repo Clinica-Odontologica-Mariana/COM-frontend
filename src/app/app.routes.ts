@@ -14,6 +14,22 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'unidades',
+    loadComponent: () =>
+      import('./features/public/pages/locations/locations-page.component').then(
+        (m) => m.LocationsPageComponent,
+      ),
+    data: { layout: 'public' },
+  },
+  {
+    path: 'attendance',
+    loadComponent: () =>
+      import('./features/attendance/pages/attendance-page/attendance-page.components').then(
+        (m) => m.AttendancePageComponent,
+      ),
+    data: { layout: 'public' },
+  },
+  {
     path: 'admin-access',
     loadComponent: () =>
       import('./features/admin-access/pages/admin-access-page/admin-access-page.component').then(
