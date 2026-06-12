@@ -4,7 +4,7 @@ import { FormGroup } from '@angular/forms';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { PatientFormPageComponent } from './patient-form-page.component';
 import { PatientService } from '../../services/patient.service';
-import { ToastService } from '../../../../shared/services/toast.service';
+import { ToastService } from '../../../../core/services/toast.service';
 
 type PatientFormPageHarness = {
   form: FormGroup;

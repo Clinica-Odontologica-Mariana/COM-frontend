@@ -9,7 +9,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
-import { ToastService } from '../../../../shared/services/toast.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { PatientFiltersComponent } from '../../components/patient-filters/patient-filters.component';
 import {
   BreadcrumbItem,

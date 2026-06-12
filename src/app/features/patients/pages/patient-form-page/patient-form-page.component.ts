@@ -14,7 +14,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ToastService } from '../../../../shared/services/toast.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import {
   BreadcrumbItem,
   PatientPageHeaderComponent,
