@@ -2,12 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { GlobalFooterComponent } from './shared/components/layout/global-footer/global-footer.component';
 import { GlobalSidebarComponent } from './shared/components/layout/global-sidebar/global-sidebar.component';
+import { ToastContainerComponent } from './shared/components/feedback/toast-container/toast-container.component';
 
 @Component({
   selector: 'app-root',
-  imports: [GlobalFooterComponent, GlobalSidebarComponent, RouterOutlet],
+  imports: [GlobalSidebarComponent, RouterOutlet, ToastContainerComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

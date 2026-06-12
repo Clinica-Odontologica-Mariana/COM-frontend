@@ -30,7 +30,7 @@ import { RouterLink } from '@angular/router';
         </nav>
 
         <a
-          routerLink="/medical-records"
+          routerLink="/admin-access"
           class="rounded-lg bg-[#89594C] px-7 py-3 text-base font-medium text-white shadow-sm transition hover:bg-[#744A40] sm:text-lg"
         >
           Entrar

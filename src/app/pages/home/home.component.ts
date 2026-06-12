@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { GlobalFooterComponent } from '../../shared/components/layout/global-footer/global-footer.component';
 import { GlobalHeaderComponent } from '../../shared/components/layout/global-header/global-header.component';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [GlobalHeaderComponent, GlobalFooterComponent, RouterLink],
+  imports: [GlobalHeaderComponent, GlobalFooterComponent],
   template: `
     <app-global-header />
 
