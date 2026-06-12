@@ -10,14 +10,39 @@ import { ClinicCardViewModel } from '../../models/clinic.models';
     <article
       class="group overflow-hidden rounded-4xl bg-white shadow-[0px_1px_2px_rgba(0,0,0,0.05)] transition duration-300 hover:-translate-y-1 hover:shadow-[0px_20px_30px_-12px_rgba(0,0,0,0.12)]"
     >
-      <div class="h-64 overflow-hidden">
-        <img
-          [ngSrc]="clinic().imageUrl"
-          [alt]="clinic().name"
-          width="720"
-          height="320"
-          class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-        />
+      <div class="relative h-64 overflow-hidden">
+        @if (clinic().imageUrl) {
+          <img
+            [ngSrc]="clinic().imageUrl"
+            [alt]="clinic().name"
+            width="720"
+            height="320"
+            class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+          />
+        } @else {
+          <div
+            class="flex h-full w-full items-center justify-center bg-[#F5F1EE] px-6 text-center text-[#8B7E77]"
+          >
+            <div class="space-y-2">
+              <p class="text-base font-semibold">Sem imagem configurada</p>
+              <p class="text-sm">Adicione uma foto da clínica para exibir neste card.</p>
+            </div>
+          </div>
+        }
+
+        @if (clinic().active) {
+          <span
+            class="absolute right-5 top-5 inline-flex h-8 items-center rounded-full border border-emerald-200 bg-emerald-100 px-3 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800"
+          >
+            Ativa
+          </span>
+        } @else {
+          <span
+            class="absolute right-5 top-5 inline-flex h-8 items-center rounded-full border border-red-200 bg-red-100 px-3 text-xs font-semibold uppercase tracking-[0.16em] text-red-700"
+          >
+            Inativa
+          </span>
+        }
       </div>
 
       <div class="space-y-5 p-8">
@@ -29,7 +54,8 @@ import { ClinicCardViewModel } from '../../models/clinic.models';
             {{ clinic().name }}
           </h3>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-col items-end gap-3">
+            <div class="flex items-center gap-3">
             <button
               type="button"
               (click)="edit.emit(clinic())"
@@ -46,7 +72,7 @@ import { ClinicCardViewModel } from '../../models/clinic.models';
 
             <button
               type="button"
-              (click)="inactivate.emit(clinic())"
+              (click)="delete.emit(clinic())"
               class="flex h-7 w-7 items-center justify-center rounded-full bg-[#F9F9F9] transition hover:bg-[#F6EFEC]"
               aria-label="Excluir clínica"
             >
@@ -57,6 +83,7 @@ import { ClinicCardViewModel } from '../../models/clinic.models';
                 [strokeWidth]="2.1"
               ></svg>
             </button>
+            </div>
           </div>
         </div>
 
@@ -92,5 +119,5 @@ import { ClinicCardViewModel } from '../../models/clinic.models';
 export class ClinicCardComponent {
   readonly clinic = input.required<ClinicCardViewModel>();
   readonly edit = output<ClinicCardViewModel>();
-  readonly inactivate = output<ClinicCardViewModel>();
+  readonly delete = output<ClinicCardViewModel>();
 }

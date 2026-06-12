@@ -22,6 +22,7 @@ const INITIAL_CLINICS: ClinicRecord[] = [
     neighborhood: 'Jardim América',
     zipCode: '01418000',
     city: 'São Paulo',
+    state: 'SP',
     imageUrl: CLINIC_IMAGES[0],
     workingDays: cloneWorkingDays(CLINIC_SCHEDULE_TEMPLATE),
     active: true,
@@ -38,6 +39,7 @@ const INITIAL_CLINICS: ClinicRecord[] = [
     neighborhood: 'Cerqueira César',
     zipCode: '01310100',
     city: 'São Paulo',
+    state: 'SP',
     imageUrl: CLINIC_IMAGES[1],
     workingDays: cloneWorkingDays([
       {
@@ -103,6 +105,7 @@ const INITIAL_CLINICS: ClinicRecord[] = [
     neighborhood: 'Vila Madalena',
     zipCode: '05435000',
     city: 'São Paulo',
+    state: 'SP',
     imageUrl: CLINIC_IMAGES[2],
     workingDays: cloneWorkingDays([
       {
@@ -174,8 +177,7 @@ export class ClinicsMockService {
     const clinic: ClinicRecord = {
       id: crypto.randomUUID(),
       ...payload,
-      imageUrl:
-        payload.imageUrl || CLINIC_IMAGES[this.clinicsState().length % CLINIC_IMAGES.length],
+      imageUrl: payload.imageUrl || '',
       workingDays: cloneWorkingDays(payload.workingDays),
       inactiveType: !payload.active ? payload.inactiveType : undefined,
       inactiveFrom:
@@ -198,7 +200,7 @@ export class ClinicsMockService {
     const updated: ClinicRecord = {
       ...current,
       ...payload,
-      imageUrl: payload.imageUrl || current.imageUrl,
+      imageUrl: payload.imageUrl || (payload.imageRemoved ? '' : current.imageUrl),
       workingDays: cloneWorkingDays(payload.workingDays),
       inactiveType: !payload.active ? payload.inactiveType : undefined,
       inactiveFrom:
@@ -214,20 +216,8 @@ export class ClinicsMockService {
     return of(this.cloneClinic(updated)).pipe(delay(180));
   }
 
-  inactivate(id: string): Observable<void> {
-    this.clinicsState.update((clinics) =>
-      clinics.map((clinic) =>
-        clinic.id === id
-          ? {
-              ...clinic,
-              active: false,
-              inactiveType: 'permanent',
-              inactiveFrom: undefined,
-              inactiveTo: undefined,
-            }
-          : clinic,
-      ),
-    );
+  delete(id: string): Observable<void> {
+    this.clinicsState.update((clinics) => clinics.filter((clinic) => clinic.id !== id));
 
     return of(void 0).pipe(delay(160));
   }
