@@ -3,7 +3,6 @@ import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [RouterLink],
   template: `
     <main class="bg-[#FAFAF9] text-[#6B5B52]">
       <!-- HERO -->
