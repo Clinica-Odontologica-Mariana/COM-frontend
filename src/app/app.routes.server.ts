@@ -10,6 +10,10 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Prerender,
   },
   {
+    path: 'unidades',
+    renderMode: RenderMode.Prerender,
+  },
+  {
     path: 'admin-access',
     renderMode: RenderMode.Client,
   },

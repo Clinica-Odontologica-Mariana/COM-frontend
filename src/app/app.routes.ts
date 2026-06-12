@@ -18,59 +18,68 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'unidades',
+    loadComponent: () =>
+      import('./features/public/pages/locations/locations-page.component').then(
+        (m) => m.LocationsPageComponent,
+      ),
+    data: { layout: 'public' },
+  },
+  {
     path: 'attendance',
     loadComponent: () =>
       import('./features/attendance/pages/attendance-page/attendance-page.components').then(
-        (m) => m.AttendancePageComponent
+        (m) => m.AttendancePageComponent,
       ),
+    data: { layout: 'public' },
   },
   {
     path: 'admin-access',
     loadComponent: () =>
       import('./features/admin-access/pages/admin-access-page/admin-access-page.component').then(
-        (m) => m.AdminAccessPageComponent
+        (m) => m.AdminAccessPageComponent,
       ),
   },
   {
     path: 'clinics/new',
     loadComponent: () =>
       import('./features/clinics/pages/clinic-form-page/clinic-form-page.component').then(
-        (m) => m.ClinicFormPageComponent
+        (m) => m.ClinicFormPageComponent,
       ),
   },
   {
     path: 'clinics/:id/edit',
     loadComponent: () =>
       import('./features/clinics/pages/clinic-form-page/clinic-form-page.component').then(
-        (m) => m.ClinicFormPageComponent
+        (m) => m.ClinicFormPageComponent,
       ),
   },
   {
     path: 'clinics',
     loadComponent: () =>
       import('./features/clinics/pages/clinics-page/clinics-page.component').then(
-        (m) => m.ClinicsPageComponent
+        (m) => m.ClinicsPageComponent,
       ),
   },
   {
     path: 'patients/:id/treatments',
     loadComponent: () =>
       import('./features/patients/pages/treatments/treatments-page.component').then(
-        (m) => m.TreatmentsPageComponent
+        (m) => m.TreatmentsPageComponent,
       ),
   },
   {
     path: 'patients/:id/edit',
     loadComponent: () =>
       import('./features/patients/pages/edit-patient/edit-patient.component').then(
-        (m) => m.EditPatientComponent
+        (m) => m.EditPatientComponent,
       ),
   },
   {
     path: 'medical-records/:id',
     loadComponent: () =>
       import('./features/medical-records/pages/patient-record-page/patient-record-page.component').then(
-        (m) => m.PatientRecordPageComponent
+        (m) => m.PatientRecordPageComponent,
       ),
   },
   {

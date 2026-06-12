@@ -4,6 +4,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 interface NavItem {
   label: string;
   link: string;
+  fragment?: string;
   exact: boolean;
 }
 
@@ -54,6 +55,7 @@ interface MobileNavItem extends NavItem {
           @for (item of desktopNavItems; track item.label) {
             <a
               [routerLink]="item.link"
+              [fragment]="item.fragment"
               routerLinkActive="active-link"
               [routerLinkActiveOptions]="{ exact: item.exact }"
               class="nav-link text-stone-600 text-lg transition-colors duration-200 relative group hover:text-[#7C5145]"
@@ -97,6 +99,7 @@ interface MobileNavItem extends NavItem {
             @for (item of mobileNavItems; track item.label) {
               <a
                 [routerLink]="item.link"
+                [fragment]="item.fragment"
                 routerLinkActive
                 #rla="routerLinkActive"
                 [routerLinkActiveOptions]="{ exact: item.exact }"
@@ -151,7 +154,7 @@ export class GlobalHeaderComponent {
   }
 
   protected readonly desktopNavItems: NavItem[] = [
-    { label: 'Sobre', link: '/', exact: true },
+    { label: 'Sobre', link: '/', fragment: 'sobre', exact: true },
     { label: 'Atendimento', link: '/attendance', exact: true },
     { label: 'Unidades', link: '/unidades', exact: true },
   ];
