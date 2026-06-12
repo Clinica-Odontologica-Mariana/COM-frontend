@@ -1,4 +1,7 @@
 @if (hideShell()) {
+  @if (showHeader()) {
+    <app-global-header />
+  }
   <router-outlet />
 } @else {
   <div class="lg:grid lg:grid-cols-[256px_minmax(0,1fr)]">

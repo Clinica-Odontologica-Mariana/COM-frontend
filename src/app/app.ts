@@ -4,10 +4,12 @@ import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GlobalFooterComponent } from './shared/components/layout/global-footer/global-footer.component';
 import { GlobalSidebarComponent } from './shared/components/layout/global-sidebar/global-sidebar.component';
+import { GlobalHeaderComponent } from './shared/components/layout/global-header/global-header.component';
 
 @Component({
   selector: 'app-root',
-  imports: [GlobalFooterComponent, GlobalSidebarComponent, RouterOutlet],
+  standalone: true,
+  imports: [GlobalFooterComponent, GlobalSidebarComponent, GlobalHeaderComponent, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,16 +20,21 @@ export class App {
   protected readonly currentUrl = signal(this.router.url);
 
   // Unificando as regras: esconde a estrutura padrão do app tanto na rota admin quanto na Home de apresentação
+
+  protected readonly isAdminRoute = computed(() => this.currentUrl().startsWith('/admin-access'));
+
   protected readonly hideShell = computed(() => {
     const url = this.currentUrl();
-    return url === '/' || url === '/home' || url.startsWith('/admin-access');
+    return url === '/' || url === '/home' || url === '/attendance' || this.isAdminRoute();
   });
+
+  protected readonly showHeader = computed(() => this.hideShell() && !this.isAdminRoute());
 
   constructor() {
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-        takeUntilDestroyed()
+        takeUntilDestroyed(),
       )
       .subscribe((event) => this.currentUrl.set(event.urlAfterRedirects));
   }

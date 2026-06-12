@@ -18,6 +18,13 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'attendance',
+    loadComponent: () =>
+      import('./features/attendance/pages/attendance-page/attendance-page.components').then(
+        (m) => m.AttendancePageComponent
+      ),
+  },
+  {
     path: 'admin-access',
     loadComponent: () =>
       import('./features/admin-access/pages/admin-access-page/admin-access-page.component').then(
