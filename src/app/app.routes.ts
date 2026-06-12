@@ -26,6 +26,14 @@ export const routes: Routes = [
     data: { layout: 'public' },
   },
   {
+    path: 'attendance',
+    loadComponent: () =>
+      import('./features/attendance/pages/attendance-page/attendance-page.components').then(
+        (m) => m.AttendancePageComponent,
+      ),
+    data: { layout: 'public' },
+  },
+  {
     path: 'admin-access',
     loadComponent: () =>
       import('./features/admin-access/pages/admin-access-page/admin-access-page.component').then(

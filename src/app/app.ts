@@ -8,6 +8,7 @@ import { GlobalSidebarComponent } from './shared/components/layout/global-sideba
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [GlobalFooterComponent, GlobalHeaderComponent, GlobalSidebarComponent, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -17,11 +18,12 @@ export class App {
   private readonly router = inject(Router);
 
   protected readonly currentUrl = signal(this.normalizedUrl(this.router.url));
-  protected readonly isPublicRoute = computed(() => this.currentUrl() === '/unidades');
-
+  protected readonly isPublicRoute = computed(() =>
+    ['/', '/home', '/attendance', '/unidades'].includes(this.currentUrl()),
+  );
+  protected readonly isAdminRoute = computed(() => this.currentUrl().startsWith('/admin-access'));
   protected readonly hideShell = computed(() => {
-    const url = this.currentUrl();
-    return url === '/' || url === '/home' || url.startsWith('/admin-access');
+    return this.isPublicRoute() || this.isAdminRoute();
   });
 
   constructor() {
