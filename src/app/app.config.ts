@@ -18,5 +18,5 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorInterceptor])),
     provideClientHydration(withEventReplay()),
     { provide: LOCALE_ID, useValue: 'pt-BR' },
-  ]
+  ],
 };

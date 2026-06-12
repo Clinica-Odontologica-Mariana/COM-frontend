@@ -14,6 +14,7 @@ import {
 
 @Component({
   selector: 'app-attendance-page',
+  standalone: true,
   imports: [
     AttendanceHeroComponent,
     AttendanceJourneyComponent,
