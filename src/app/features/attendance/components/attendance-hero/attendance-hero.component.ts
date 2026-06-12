@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   selector: 'app-attendance-hero',
   imports: [],
   template: `
-    <section class="bg-white px-6 pt-20 pb-28 md:px-12 md:pt-40 md:pb-0 md:bg-[#F9F9F9]">
+    <section class="bg-white px-6 pt-10 pb-28 md:px-12 md:pt-20 md:pb-0 md:bg-[#F9F9F9]">
       <div class="flex flex-col gap-8 md:hidden">
         <div class="flex flex-col gap-4">
           <h1 class="text-[#714A3E] text-5xl font-serif leading-tight tracking-tight">

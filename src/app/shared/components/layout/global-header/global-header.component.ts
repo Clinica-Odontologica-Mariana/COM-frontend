@@ -17,7 +17,7 @@ interface MobileNavItem extends NavItem {
   imports: [RouterLink, RouterLinkActive],
   template: `
     <header
-      class="fixed top-0 left-0 right-0 z-50 h-24 bg-[#F8F5F2] border-b border-[#E5DCD5]"
+      class="sticky top-0 left-0 right-0 z-50 h-24 bg-[#F8F5F2] border-b border-[#E5DCD5]"
       style="box-shadow: 0px 1px 2px 0px #E7E5E47F"
     >
       <div class="flex justify-between items-center h-full px-8">
