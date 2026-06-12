@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
@@ -13,6 +13,64 @@ interface SidebarItem {
   selector: 'app-global-sidebar',
   imports: [RouterLink, RouterLinkActive, NgOptimizedImage],
   template: `
+    <!-- Mobile header -->
+    <div class="flex items-center justify-between border-b border-[#EEE8E5] bg-[#FAFAF9] px-4 py-3 lg:hidden">
+      <img
+        [ngSrc]="logo.icon"
+        alt=""
+        draggable="false"
+        class="h-8 w-auto"
+        width="20"
+        height="20"
+        aria-hidden="true"
+      />
+      <button
+        type="button"
+        class="rounded-lg p-2 text-[#78716C] hover:bg-[#EDE8E6]"
+        [attr.aria-expanded]="mobileOpen()"
+        aria-label="Abrir menu"
+        (click)="toggleMobile()"
+      >
+        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+
+    @if (mobileOpen()) {
+      <div
+        class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+        role="presentation"
+        (click)="closeMobile()"
+      ></div>
+    }
+
+    <!-- Mobile drawer -->
+  <aside
+      class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-[#FAFAF9] px-4 py-6 transition-transform lg:hidden"
+      [class.translate-x-0]="mobileOpen()"
+      [class.-translate-x-full]="!mobileOpen()"
+      aria-label="Menu de navegação"
+    >
+      <nav class="mt-2 space-y-1" aria-label="Area administrativa">
+        @for (item of items; track item.label) {
+          <a
+            [routerLink]="item.link"
+            routerLinkActive="bg-[#EDE8E6] font-semibold text-[#8B574B]"
+            [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+            #mobileNavLink="routerLinkActive"
+            [attr.aria-current]="mobileNavLink.isActive ? 'page' : null"
+            class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide text-[#78716C] transition"
+            (click)="closeMobile()"
+          >
+            <img [src]="item.icon" alt="" class="h-5 w-5" />
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </nav>
+    </aside>
+
+    <!-- Desktop sidebar -->
     <aside class="hidden h-full min-h-fit bg-[#FAFAF9] px-4 py-6 lg:flex lg:flex-col">
       <div class="pb-8">
         <div class="flex-row items-center gap-4 ">
@@ -82,6 +140,8 @@ interface SidebarItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GlobalSidebarComponent {
+  protected readonly mobileOpen = signal(false);
+
   protected readonly items: SidebarItem[] = [
     { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1', exact: true },
     { label: 'Pacientes', icon: '/pacientes.svg', link: '/pacientes' },
@@ -94,4 +154,12 @@ export class GlobalSidebarComponent {
   ];
 
   protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
+
+  protected toggleMobile(): void {
+    this.mobileOpen.update((open) => !open);
+  }
+
+  protected closeMobile(): void {
+    this.mobileOpen.set(false);
+  }
 }

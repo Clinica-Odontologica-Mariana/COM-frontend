@@ -7,6 +7,9 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
+import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
+import { ToastService } from '../../../../shared/services/toast.service';
 import { PatientFiltersComponent } from '../../components/patient-filters/patient-filters.component';
 import {
   BreadcrumbItem,
@@ -74,6 +77,8 @@ import { PatientService } from '../../services/patient.service';
 export class PatientListPageComponent {
   private readonly patientService = inject(PatientService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly toast = inject(ToastService);
 
   protected readonly breadcrumbs: BreadcrumbItem[] = [
     { label: 'Cadastro de Pacientes', link: '/pacientes' },
@@ -114,13 +119,21 @@ export class PatientListPageComponent {
   protected onDelete(id: string): void {
     const patient = this.patients().find((item) => item.id === id);
     const name = patient?.fullName ?? 'este paciente';
-    if (!confirm(`Deseja excluir ${name}?`)) return;
 
-    this.patientService
-      .delete(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => this.loadPatients(),
+    this.confirmDialog
+      .confirm(`Deseja excluir ${name}?`, 'Excluir paciente')
+      .pipe(filter(Boolean), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.patientService
+          .delete(id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.toast.success('Paciente excluído com sucesso.');
+              this.loadPatients();
+            },
+            error: () => this.toast.error('Não foi possível excluir o paciente.'),
+          });
       });
   }
 

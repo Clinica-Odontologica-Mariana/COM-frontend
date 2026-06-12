@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Patient } from '../../models/patient.model';
-import { formatBirthDate, getInitials } from '../../utils/format.utils';
+import { formatConsultationDate, getInitials } from '../../utils/format.utils';
 
 @Component({
   selector: 'app-patient-table',
@@ -15,8 +15,8 @@ import { formatBirthDate, getInitials } from '../../utils/format.utils';
               <th class="px-8 py-5"></th>
               <th class="px-6 py-5">Nome do paciente</th>
               <th class="px-6 py-5">CPF</th>
-              <th class="px-6 py-5">Data de nascimento</th>
-              <th class="px-6 py-5">Status</th>
+              <th class="px-6 py-5">Última Consulta</th>
+              <th class="px-6 py-5">Próxima Consulta</th>
               <th class="px-8 py-5 text-right">Ações</th>
             </tr>
           </thead>
@@ -44,22 +44,10 @@ import { formatBirthDate, getInitials } from '../../utils/format.utils';
                 </td>
                 <td class="px-6 py-6 text-sm font-medium text-[#78716C]">{{ patient.cpf }}</td>
                 <td class="px-6 py-6 text-sm text-[#78716C]">
-                  {{ formatBirthDate(patient.birthDate) }}
+                  {{ formatConsultationDate(patient.lastConsultationDate) }}
                 </td>
-                <td class="px-6 py-6">
-                  @if (patient.status === 'active') {
-                    <span
-                      class="inline-flex rounded-full bg-[#FFDBD1] px-3 py-1 text-[10px] font-bold text-[#31130A]"
-                    >
-                      Ativo
-                    </span>
-                  } @else {
-                    <span
-                      class="inline-flex rounded-full bg-[#F5F5F4] px-3 py-1 text-[10px] font-bold text-[#A8A29E]"
-                    >
-                      Inativo
-                    </span>
-                  }
+                <td class="px-6 py-6 text-sm text-[#78716C]">
+                  {{ formatConsultationDate(patient.nextConsultationDate) }}
                 </td>
                 <td class="px-8 py-6">
                   <div class="flex items-center justify-end gap-2">
@@ -105,6 +93,6 @@ export class PatientTableComponent {
 
   readonly deletePatient = output<string>();
 
-  protected readonly formatBirthDate = formatBirthDate;
+  protected readonly formatConsultationDate = formatConsultationDate;
   protected readonly getInitials = getInitials;
 }

@@ -15,11 +15,15 @@ import { formatCpf } from '../../utils/format.utils';
     <section class="rounded-3xl bg-white p-8 shadow-sm">
       <div class="grid gap-6 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
         <div class="space-y-2">
-          <label class="px-1 text-[10px] font-bold uppercase tracking-wider text-[#78716C]">
+          <label
+            for="filter-name"
+            class="px-1 text-[10px] font-bold uppercase tracking-wider text-[#78716C]"
+          >
             Nome do paciente
           </label>
           <div class="relative">
             <input
+              id="filter-name"
               type="search"
               class="h-11 w-full rounded-xl bg-[#EEEEEE] px-4 pr-10 text-sm text-[#57534E] placeholder:text-[#A8A29E] outline-none"
               placeholder="Pesquisar por nome..."
@@ -41,10 +45,14 @@ import { formatCpf } from '../../utils/format.utils';
         </div>
 
         <div class="space-y-2">
-          <label class="px-1 text-[10px] font-bold uppercase tracking-wider text-[#78716C]">
+          <label
+            for="filter-cpf"
+            class="px-1 text-[10px] font-bold uppercase tracking-wider text-[#78716C]"
+          >
             CPF
           </label>
           <input
+            id="filter-cpf"
             type="text"
             class="h-11 w-full rounded-xl bg-[#EEEEEE] px-4 text-sm text-[#57534E] placeholder:text-[#A8A29E] outline-none"
             placeholder="000.000.000-00"
@@ -54,10 +62,14 @@ import { formatCpf } from '../../utils/format.utils';
         </div>
 
         <div class="space-y-2">
-          <label class="px-1 text-[10px] font-bold uppercase tracking-wider text-[#78716C]">
+          <label
+            for="filter-status"
+            class="px-1 text-[10px] font-bold uppercase tracking-wider text-[#78716C]"
+          >
             Status
           </label>
           <select
+            id="filter-status"
             class="h-11 w-full appearance-none rounded-xl bg-[#EEEEEE] px-4 text-sm text-[#57534E] outline-none"
             [ngModel]="filters().status ?? ''"
             (ngModelChange)="onStatusChange($event)"

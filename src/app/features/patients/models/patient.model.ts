@@ -37,6 +37,8 @@ export interface Patient {
   email: string;
   whatsappReminders: boolean;
   address: PatientAddress;
+  lastConsultationDate?: string;
+  nextConsultationDate?: string;
 }
 
 export type PatientFormDto = Omit<Patient, 'id' | 'registrationNumber'>;

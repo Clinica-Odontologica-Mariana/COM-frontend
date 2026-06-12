@@ -71,7 +71,7 @@ export class PatientService {
     if (index === -1) {
       return throwError(() => new Error('Paciente não encontrado'));
     }
-    this.patients.splice(index, 1);
+    this.patients = this.patients.filter((p) => p.id !== id);
     return of(undefined).pipe(delay(150));
   }
 

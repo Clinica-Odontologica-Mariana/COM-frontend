@@ -14,6 +14,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ToastService } from '../../../../shared/services/toast.service';
 import {
   BreadcrumbItem,
   PatientPageHeaderComponent,
@@ -27,10 +28,13 @@ import {
 } from '../../models/patient.model';
 import { PatientService } from '../../services/patient.service';
 import {
+  cpfValidator,
   formatCpf,
   formatPhone,
   formatZipCode,
   getInitials,
+  pastDateValidator,
+  todayIsoDate,
 } from '../../utils/format.utils';
 
 interface PatientFormControls {
@@ -97,46 +101,75 @@ interface PatientFormControls {
 
               <div class="grid gap-6 sm:grid-cols-2">
                 <div class="space-y-1 sm:col-span-2">
-                  <label class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]">
+                  <label
+                    for="fullName"
+                    class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                  >
                     Nome completo
                   </label>
                   <input
+                    id="fullName"
                     type="text"
                     formControlName="fullName"
                     class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
                     placeholder="Ex: Ana Silva Oliveira"
                   />
+                  @if (form.controls.fullName.invalid && form.controls.fullName.touched) {
+                    <p class="text-xs text-red-500">Nome completo é obrigatório.</p>
+                  }
                 </div>
 
                 <div class="space-y-1">
-                  <label class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]">
+                  <label
+                    for="cpf"
+                    class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                  >
                     CPF
                   </label>
                   <input
+                    id="cpf"
                     type="text"
                     formControlName="cpf"
                     class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
                     placeholder="000.000.000-00"
                     (input)="onCpfInput($event)"
                   />
+                  @if (form.controls.cpf.touched && form.controls.cpf.hasError('required')) {
+                    <p class="text-xs text-red-500">CPF é obrigatório.</p>
+                  }
+                  @if (form.controls.cpf.touched && form.controls.cpf.hasError('invalidCpf')) {
+                    <p class="text-xs text-red-500">CPF inválido.</p>
+                  }
                 </div>
 
                 <div class="space-y-1">
-                  <label class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]">
+                  <label
+                    for="birthDate"
+                    class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                  >
                     Data de nascimento
                   </label>
                   <input
+                    id="birthDate"
                     type="date"
                     formControlName="birthDate"
+                    [max]="todayIso"
                     class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
                   />
+                  @if (form.controls.birthDate.touched && form.controls.birthDate.hasError('futureDate')) {
+                    <p class="text-xs text-red-500">Data de nascimento não pode ser futura.</p>
+                  }
                 </div>
 
                 <div class="space-y-1">
-                  <label class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]">
+                  <label
+                    for="profession"
+                    class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                  >
                     Profissão
                   </label>
                   <input
+                    id="profession"
                     type="text"
                     formControlName="profession"
                     class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
@@ -145,10 +178,14 @@ interface PatientFormControls {
                 </div>
 
                 <div class="space-y-1">
-                  <label class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]">
+                  <label
+                    for="status"
+                    class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                  >
                     Status
                   </label>
                   <select
+                    id="status"
                     formControlName="status"
                     class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
                   >
@@ -225,6 +262,15 @@ interface PatientFormControls {
               <p class="mt-2 max-w-xs text-sm leading-relaxed text-[#78716C]">
                 Arquivos JPG ou PNG, máximo 2MB. Recomendado para identificação clínica rápida.
               </p>
+              @if (photoPreview()) {
+                <button
+                  type="button"
+                  class="mt-4 text-sm font-semibold text-[#7C5145] underline hover:text-[#6a453b]"
+                  (click)="onRemovePhoto()"
+                >
+                  Remover foto
+                </button>
+              }
             </section>
           </div>
 
@@ -336,7 +382,10 @@ interface PatientFormControls {
               </div>
 
               <div class="space-y-1">
-                <label class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]">
+                <label
+                  for="phone"
+                  class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                >
                   WhatsApp / Telefone
                 </label>
                 <div class="flex gap-2">
@@ -359,6 +408,7 @@ interface PatientFormControls {
                     </svg>
                   </div>
                   <input
+                    id="phone"
                     type="text"
                     formControlName="phone"
                     class="h-14 flex-1 rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
@@ -369,15 +419,22 @@ interface PatientFormControls {
               </div>
 
               <div class="space-y-1">
-                <label class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]">
+                <label
+                  for="email"
+                  class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                >
                   E-mail
                 </label>
                 <input
+                  id="email"
                   type="email"
                   formControlName="email"
                   class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
                   placeholder="paciente@exemplo.com"
                 />
+                @if (form.controls.email.touched && form.controls.email.hasError('email')) {
+                  <p class="text-xs text-red-500">E-mail inválido.</p>
+                }
               </div>
 
               <div class="space-y-2 border-t border-[#E7E5E4] pt-4">
@@ -421,10 +478,14 @@ interface PatientFormControls {
 
               <div class="grid gap-4 sm:grid-cols-[140px_1fr]">
                 <div class="space-y-1">
-                  <label class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]">
+                  <label
+                    for="zipCode"
+                    class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                  >
                     CEP
                   </label>
                   <input
+                    id="zipCode"
                     type="text"
                     formControlName="zipCode"
                     class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
@@ -433,10 +494,14 @@ interface PatientFormControls {
                   />
                 </div>
                 <div class="space-y-1">
-                  <label class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]">
+                  <label
+                    for="street"
+                    class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                  >
                     Logradouro
                   </label>
                   <input
+                    id="street"
                     type="text"
                     formControlName="street"
                     class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
@@ -447,10 +512,14 @@ interface PatientFormControls {
 
               <div class="grid gap-4 sm:grid-cols-[1fr_140px_80px]">
                 <div class="space-y-1">
-                  <label class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]">
+                  <label
+                    for="neighborhood"
+                    class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                  >
                     Bairro
                   </label>
                   <input
+                    id="neighborhood"
                     type="text"
                     formControlName="neighborhood"
                     class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
@@ -458,10 +527,14 @@ interface PatientFormControls {
                   />
                 </div>
                 <div class="space-y-1">
-                  <label class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]">
+                  <label
+                    for="city"
+                    class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                  >
                     Cidade
                   </label>
                   <input
+                    id="city"
                     type="text"
                     formControlName="city"
                     class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
@@ -469,10 +542,14 @@ interface PatientFormControls {
                   />
                 </div>
                 <div class="space-y-1">
-                  <label class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]">
+                  <label
+                    for="state"
+                    class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                  >
                     UF
                   </label>
                   <input
+                    id="state"
                     type="text"
                     formControlName="state"
                     maxlength="2"
@@ -495,6 +572,9 @@ export class PatientFormPageComponent {
   private readonly router = inject(Router);
   private readonly patientService = inject(PatientService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toast = inject(ToastService);
+
+  private static readonly ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png'];
 
   protected readonly healthConditions = HEALTH_CONDITIONS;
   protected readonly genderOptions: { value: PatientGender; label: string }[] = [
@@ -515,17 +595,19 @@ export class PatientFormPageComponent {
   protected selectedConditions = signal<HealthCondition[]>([]);
   protected patientId: string | null = null;
 
+  protected readonly todayIso = todayIsoDate();
+
   protected readonly form: FormGroup<PatientFormControls> = this.fb.group({
     fullName: this.fb.nonNullable.control('', Validators.required),
-    cpf: this.fb.nonNullable.control('', Validators.required),
-    birthDate: this.fb.nonNullable.control(''),
+    cpf: this.fb.nonNullable.control('', [Validators.required, cpfValidator]),
+    birthDate: this.fb.nonNullable.control('', pastDateValidator),
     profession: this.fb.nonNullable.control(''),
     gender: this.fb.nonNullable.control<PatientGender>('female'),
     status: this.fb.nonNullable.control<PatientStatus>('active'),
     chiefComplaint: this.fb.nonNullable.control(''),
     continuousMedications: this.fb.nonNullable.control(''),
     phone: this.fb.nonNullable.control(''),
-    email: this.fb.nonNullable.control(''),
+    email: this.fb.nonNullable.control('', Validators.email),
     whatsappReminders: this.fb.nonNullable.control(true),
     zipCode: this.fb.nonNullable.control(''),
     street: this.fb.nonNullable.control(''),
@@ -581,8 +663,14 @@ export class PatientFormPageComponent {
     const file = input.files?.[0];
     if (!file) return;
 
+    if (!PatientFormPageComponent.ALLOWED_PHOTO_TYPES.includes(file.type)) {
+      this.toast.error('A foto deve ser JPG ou PNG.');
+      input.value = '';
+      return;
+    }
+
     if (file.size > 2 * 1024 * 1024) {
-      alert('A foto deve ter no máximo 2MB.');
+      this.toast.error('A foto deve ter no máximo 2MB.');
       input.value = '';
       return;
     }
@@ -593,6 +681,10 @@ export class PatientFormPageComponent {
       this.photoPreview.set(result);
     };
     reader.readAsDataURL(file);
+  }
+
+  protected onRemovePhoto(): void {
+    this.photoPreview.set(undefined);
   }
 
   protected onSubmit(): void {
@@ -611,11 +703,14 @@ export class PatientFormPageComponent {
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.saving.set(false);
+        this.toast.success(
+          this.patientId ? 'Paciente atualizado com sucesso.' : 'Paciente cadastrado com sucesso.',
+        );
         void this.router.navigate(['/pacientes']);
       },
       error: () => {
         this.saving.set(false);
-        alert('Não foi possível salvar o paciente.');
+        this.toast.error('Não foi possível salvar o paciente.');
       },
     });
   }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-patient-pagination',
@@ -60,6 +60,10 @@ export class PatientPaginationComponent {
 
   readonly pageChange = output<number>();
 
+  protected readonly pages = computed(() =>
+    Array.from({ length: this.totalPages() }, (_, index) => index + 1),
+  );
+
   protected showingFrom(): number {
     if (this.total() === 0) return 0;
     return (this.page() - 1) * this.pageSize() + 1;
@@ -67,9 +71,5 @@ export class PatientPaginationComponent {
 
   protected showingTo(): number {
     return Math.min(this.page() * this.pageSize(), this.total());
-  }
-
-  protected pages(): number[] {
-    return Array.from({ length: this.totalPages() }, (_, index) => index + 1);
   }
 }
