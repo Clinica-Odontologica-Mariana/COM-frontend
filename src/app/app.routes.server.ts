@@ -2,6 +2,10 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
   {
+    path: '',
+    renderMode: RenderMode.Prerender,
+  },
+  {
     path: 'attendance',
     renderMode: RenderMode.Prerender,
   },
@@ -10,7 +14,7 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Prerender,
   },
   {
-    path: 'unidades',
+    path: 'locations',
     renderMode: RenderMode.Prerender,
   },
   {

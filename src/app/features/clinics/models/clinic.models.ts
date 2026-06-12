@@ -23,6 +23,7 @@ export interface WorkingDay {
 
 export interface ClinicRecord {
   id: string;
+  addressId?: string | null;
   name: string;
   phone: string;
   email: string;
@@ -33,7 +34,9 @@ export interface ClinicRecord {
   neighborhood: string;
   zipCode: string;
   city: string;
+  state: string;
   imageUrl: string;
+  clinicPhotoFileId?: string | null;
   workingDays: WorkingDay[];
   active: boolean;
   inactiveType?: InactiveType;
@@ -52,7 +55,10 @@ export interface ClinicFormValue {
   neighborhood: string;
   zipCode: string;
   city: string;
+  state: string;
   imageUrl: string;
+  imageFile?: File | null;
+  imageRemoved?: boolean;
   workingDays: WorkingDay[];
   active: boolean;
   inactiveType?: InactiveType;
@@ -85,7 +91,6 @@ export function cloneWorkingDays(days: WorkingDay[]): WorkingDay[] {
 
 export function toClinicCardViewModel(clinic: ClinicRecord): ClinicCardViewModel {
   const enabledDays = clinic.workingDays.filter((day) => day.enabled);
-  const firstInterval = enabledDays[0]?.intervals[0];
 
   const addressParts = [
     [clinic.street, clinic.number].filter(Boolean).join(', '),
@@ -97,9 +102,7 @@ export function toClinicCardViewModel(clinic: ClinicRecord): ClinicCardViewModel
     ...clinic,
     addressLabel: addressParts.join(' - '),
     serviceDaysLabel: formatWorkingDays(enabledDays),
-    serviceWindowLabel: firstInterval
-      ? `${firstInterval.startTime} - ${firstInterval.endTime}`
-      : '--:-- - --:--',
+    serviceWindowLabel: formatServiceWindow(enabledDays),
   };
 }
 
@@ -120,4 +123,28 @@ function formatWorkingDays(days: WorkingDay[]): string {
 
   const lastLabel = labels.at(-1);
   return `${labels.slice(0, -1).join(', ')} e ${lastLabel}`;
+}
+
+function formatServiceWindow(days: WorkingDay[]): string {
+  if (!days.length) {
+    return '--:-- - --:--';
+  }
+
+  if (days.length === 1) {
+    return days[0].intervals.map((interval) => `${interval.startTime} - ${interval.endTime}`).join(', ');
+  }
+
+  const serializedIntervals = days.map((day) =>
+    day.intervals.map((interval) => `${interval.startTime}-${interval.endTime}`).join('|'),
+  );
+  const firstSerializedIntervals = serializedIntervals[0];
+  const sameScheduleForAllDays = serializedIntervals.every(
+    (serializedIntervalsForDay) => serializedIntervalsForDay === firstSerializedIntervals,
+  );
+
+  if (!sameScheduleForAllDays) {
+    return 'Horários variados';
+  }
+
+  return days[0].intervals.map((interval) => `${interval.startTime} - ${interval.endTime}`).join(', ');
 }

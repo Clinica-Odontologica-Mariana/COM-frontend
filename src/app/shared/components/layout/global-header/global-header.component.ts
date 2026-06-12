@@ -70,7 +70,7 @@ interface MobileNavItem extends NavItem {
 
         <a
           routerLink="/admin-access"
-          class="hidden lg:flex items-center bg-[#7C5145] text-white py-3 px-6 rounded-xl hover:bg-[#6b4539] transition-colors duration-200"
+          class="rounded-lg bg-[#89594C] px-7 py-3 text-base font-medium text-white shadow-sm transition hover:bg-[#744A40] sm:text-lg"
         >
           <span class="text-base">Entrar</span>
         </a>
@@ -154,14 +154,14 @@ export class GlobalHeaderComponent {
   }
 
   protected readonly desktopNavItems: NavItem[] = [
-    { label: 'Sobre', link: '/', fragment: 'sobre', exact: true },
+    { label: 'Sobre', link: '/', exact: true },
     { label: 'Atendimento', link: '/attendance', exact: true },
-    { label: 'Unidades', link: '/unidades', exact: true },
+    { label: 'Unidades', link: '/locations', exact: true },
   ];
 
   protected readonly mobileNavItems: MobileNavItem[] = [
     { label: 'Início', link: '/', exact: true, icon: '/Painel_icon.svg' },
-    { label: 'Unidades', link: '/unidades', exact: true, icon: '/Clinicas.svg' },
+    { label: 'Unidades', link: '/locations', exact: true, icon: '/Clinicas.svg' },
     { label: 'Atendimento', link: '/attendance', exact: true, icon: '/prontuarios.svg' },
     { label: 'Acesso Administrativo', link: '/admin-access', exact: true, icon: '/pacientes.svg' },
   ];

@@ -7,9 +7,15 @@ import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { AuthService, LoginResponse } from './auth.service';
 
 const mockResponse: LoginResponse = {
-  access_token: 'mock-jwt-token',
-  refresh_token: 'mock-refresh-token',
-  expires_in: 3600,
+  accessToken: 'mock-jwt-token',
+  refreshToken: 'mock-refresh-token',
+  expiresIn: 3600,
+};
+
+const mockApiResponse = {
+  success: true,
+  data: mockResponse,
+  error: null,
 };
 
 describe('AuthService', () => {
@@ -42,14 +48,14 @@ describe('AuthService', () => {
       const req = httpMock.expectOne('/api/v1/auth/login');
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({ username: 'user@test.com', password: 'senha123' });
-      req.flush(mockResponse);
+      req.flush(mockApiResponse);
     });
 
     it('armazena access_token no localStorage após login bem-sucedido', () => {
       service.login('user@test.com', 'senha123').subscribe();
 
       const req = httpMock.expectOne('/api/v1/auth/login');
-      req.flush(mockResponse);
+      req.flush(mockApiResponse);
 
       expect(localStorage.getItem('access_token')).toBe('mock-jwt-token');
     });
@@ -59,7 +65,7 @@ describe('AuthService', () => {
       service.login('user@test.com', 'senha123').subscribe();
 
       const req = httpMock.expectOne('/api/v1/auth/login');
-      req.flush(mockResponse);
+      req.flush(mockApiResponse);
 
       const expiry = Number(localStorage.getItem('access_token_expiry'));
       expect(expiry).toBeGreaterThanOrEqual(before + 3600 * 1000);
@@ -70,7 +76,7 @@ describe('AuthService', () => {
       service.login('user@test.com', 'senha123').subscribe((r) => (result = r));
 
       const req = httpMock.expectOne('/api/v1/auth/login');
-      req.flush(mockResponse);
+      req.flush(mockApiResponse);
 
       expect(result).toEqual(mockResponse);
     });
@@ -120,6 +126,7 @@ describe('AuthService', () => {
 
     it('retorna o token armazenado', () => {
       localStorage.setItem('access_token', 'stored-token');
+      localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
       expect(service.getToken()).toBe('stored-token');
     });
   });
@@ -133,35 +140,7 @@ describe('AuthService', () => {
 
       expect(localStorage.getItem('access_token')).toBeNull();
       expect(localStorage.getItem('access_token_expiry')).toBeNull();
-    });
-  });
-
-  describe('initDevSession()', () => {
-    it('não chama login quando token já é válido', () => {
-      localStorage.setItem('access_token', 'valid-token');
-      localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
-
-      service.initDevSession().subscribe();
-
-      httpMock.expectNone('/api/v1/auth/login');
-    });
-
-    it('chama login com credenciais de dev quando token não é válido', () => {
-      service.initDevSession().subscribe();
-
-      const req = httpMock.expectOne('/api/v1/auth/login');
-      expect(req.request.body).toEqual({ username: 'api-admin', password: 'admin123' });
-      req.flush(mockResponse);
-    });
-
-    it('emite null sem erro quando login falha (catchError)', () => {
-      let result: unknown = 'not-set';
-      service.initDevSession().subscribe((r) => (result = r));
-
-      const req = httpMock.expectOne('/api/v1/auth/login');
-      req.flush({ message: 'error' }, { status: 500, statusText: 'Server Error' });
-
-      expect(result).toBeNull();
+      expect(localStorage.getItem('refresh_token')).toBeNull();
     });
   });
 });

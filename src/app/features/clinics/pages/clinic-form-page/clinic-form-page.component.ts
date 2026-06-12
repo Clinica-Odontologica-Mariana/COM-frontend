@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClinicFormDrawerComponent } from '../../components/clinic-form-drawer/clinic-form-drawer.component';
-import { ClinicsMockService } from '../../data/clinics-mock.service';
+import { ClinicsApi } from '../../api/clinics.api';
 import {
   ClinicCardViewModel,
   ClinicFormValue,
@@ -34,7 +34,7 @@ import {
 export class ClinicFormPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly clinicsMockService = inject(ClinicsMockService);
+  private readonly clinicsApi = inject(ClinicsApi);
 
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
@@ -49,7 +49,7 @@ export class ClinicFormPageComponent implements OnInit {
       return;
     }
 
-    this.clinicsMockService.findById(clinicId).subscribe({
+    this.clinicsApi.findById(clinicId).subscribe({
       next: (clinic) => {
         this.clinic.set(toClinicCardViewModel(clinic));
         this.loading.set(false);
@@ -71,16 +71,16 @@ export class ClinicFormPageComponent implements OnInit {
 
     const clinicId = this.route.snapshot.paramMap.get('id');
     const request = clinicId
-      ? this.clinicsMockService.update(clinicId, payload)
-      : this.clinicsMockService.create(payload);
+      ? this.clinicsApi.update(clinicId, payload, this.clinic()!)
+      : this.clinicsApi.create(payload);
 
     request.subscribe({
       next: () => {
         void this.router.navigate(['/clinics'], {
           state: {
             feedbackMessage: clinicId
-              ? 'Clínica atualizada com sucesso no ambiente mockado.'
-              : 'Clínica cadastrada com sucesso no ambiente mockado.',
+              ? 'Clínica atualizada com sucesso.'
+              : 'Clínica cadastrada com sucesso.',
             feedbackKind: 'success',
           },
         });

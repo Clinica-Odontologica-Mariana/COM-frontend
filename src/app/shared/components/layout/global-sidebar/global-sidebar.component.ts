@@ -1,7 +1,9 @@
 import { NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
+import { AuthService, CurrentUser } from '../../../../core/services/auth.service';
 
 interface SidebarItem {
   label: string;
@@ -14,7 +16,9 @@ interface SidebarItem {
   selector: 'app-global-sidebar',
   imports: [RouterLink, NgOptimizedImage],
   template: `
-    <aside class="hidden h-full min-h-fit bg-[#FAFAF9] px-4 py-6 lg:flex lg:flex-col">
+    <aside
+      class="hidden self-start bg-[#FAFAF9] px-4 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto"
+    >
       <div class="pb-8">
         <div class="flex-row items-center gap-4">
           <img
@@ -27,7 +31,7 @@ interface SidebarItem {
             aria-hidden="true"
           />
           <div>
-            <p class="p-2 text-sm font-bold text-[#7c5145b6]">Olá, Usuário</p>
+            <p class="p-2 text-sm font-bold text-[#7c5145b6]">Olá, {{ displayName() }}</p>
           </div>
         </div>
 
@@ -63,11 +67,10 @@ interface SidebarItem {
           <div
             class="grid h-11 w-11 place-items-center rounded-full bg-[#DFA17C] text-sm font-bold text-[#1F2425]"
           >
-            DM
+            {{ initials() }}
           </div>
           <div>
-            <p class="text-sm font-bold text-[#1F2425]">Dra. Mariana</p>
-            <p class="text-xs text-[#78716C]">Administração</p>
+            <p class="text-sm font-bold text-[#1F2425]">{{ displayName() }}</p>
           </div>
         </div>
 
@@ -78,6 +81,14 @@ interface SidebarItem {
           <span class="text-lg leading-none">+</span>
           Novo Atendimento
         </a>
+
+        <button
+          type="button"
+          class="mt-3 flex h-11 w-full items-center justify-center rounded-lg border border-[#E3D7D1] bg-white px-4 text-sm font-bold text-[#8B574B] transition hover:bg-[#F5EFEC]"
+          (click)="logout()"
+        >
+          Sair
+        </button>
       </div>
     </aside>
   `,
@@ -85,8 +96,10 @@ interface SidebarItem {
 })
 export class GlobalSidebarComponent {
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   protected readonly currentUrl = signal(this.router.url);
+  protected readonly currentUser = signal<CurrentUser | null>(null);
   protected readonly items: SidebarItem[] = [
     { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1', match: ['/dashboard'] },
     { label: 'Pacientes', icon: '/pacientes.svg', link: '/medical-records/1', match: ['/patients'] },
@@ -106,11 +119,68 @@ export class GlobalSidebarComponent {
 
   constructor() {
     this.router.events
-      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
       .subscribe(() => this.currentUrl.set(this.router.url));
+
+    if (this.authService.isTokenValid()) {
+      this.authService
+        .getCurrentUser()
+        .pipe(takeUntilDestroyed())
+        .subscribe({
+          next: (user) => this.currentUser.set(user),
+          error: () => this.currentUser.set(null),
+        });
+    }
   }
 
   protected isItemActive(item: SidebarItem): boolean {
     return item.match.some((prefix) => this.currentUrl().startsWith(prefix));
+  }
+
+  protected logout(): void {
+    this.authService.logout();
+    void this.router.navigateByUrl('/admin-access');
+  }
+
+  protected displayName(): string {
+    const user = this.currentUser();
+    const fullName = this.stringClaim(user?.claims?.['name']);
+    const givenName = this.stringClaim(user?.claims?.['given_name']);
+    const familyName = this.stringClaim(user?.claims?.['family_name']);
+
+    if (fullName) {
+      return fullName;
+    }
+
+    const composedName = [givenName, familyName].filter(Boolean).join(' ').trim();
+    if (composedName) {
+      return composedName;
+    }
+
+    if (user?.username) {
+      return user.username;
+    }
+
+    return 'Usuário';
+  }
+
+  protected initials(): string {
+    const nameParts = this.displayName()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2);
+
+    if (!nameParts.length) {
+      return 'US';
+    }
+
+    return nameParts.map((part) => part[0]?.toUpperCase() ?? '').join('');
+  }
+
+  private stringClaim(value: unknown): string {
+    return typeof value === 'string' ? value.trim() : '';
   }
 }

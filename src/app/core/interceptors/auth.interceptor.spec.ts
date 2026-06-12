@@ -30,6 +30,7 @@ describe('authInterceptor', () => {
 
   it('adiciona Authorization: Bearer quando token está armazenado', () => {
     localStorage.setItem('access_token', 'my-jwt-token');
+    localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
 
     http.get('/api/v1/patients/123').subscribe();
 
@@ -48,6 +49,7 @@ describe('authInterceptor', () => {
 
   it('adiciona Bearer token em requisições para Medical Records API', () => {
     localStorage.setItem('access_token', 'token-records');
+    localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
 
     http.get('/api/v1/medical-records/r1').subscribe();
 
@@ -58,6 +60,7 @@ describe('authInterceptor', () => {
 
   it('adiciona Bearer token em requisições para Patients API', () => {
     localStorage.setItem('access_token', 'token-patients');
+    localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
 
     http.get('/api/v1/patients').subscribe();
 
@@ -68,6 +71,7 @@ describe('authInterceptor', () => {
 
   it('adiciona Bearer token em requisições para Evolutions API', () => {
     localStorage.setItem('access_token', 'token-evolutions');
+    localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
 
     http.get('/api/v1/evolutions').subscribe();
 
@@ -78,6 +82,7 @@ describe('authInterceptor', () => {
 
   it('adiciona Bearer token em requisições para Attachments API', () => {
     localStorage.setItem('access_token', 'token-attachments');
+    localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
 
     http.post('/api/v1/attachments', {}).subscribe();
 
@@ -88,6 +93,7 @@ describe('authInterceptor', () => {
 
   it('adiciona Bearer token na requisição de login (intercepta todos os requests com token)', () => {
     localStorage.setItem('access_token', 'existing-token');
+    localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
 
     http.post('/api/v1/auth/login', { username: 'u', password: 'p' }).subscribe();
 

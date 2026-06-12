@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
+import { ToastContainerComponent } from './shared/components/feedback/toast-container/toast-container.component';
 import { GlobalFooterComponent } from './shared/components/layout/global-footer/global-footer.component';
 import { GlobalHeaderComponent } from './shared/components/layout/global-header/global-header.component';
 import { GlobalSidebarComponent } from './shared/components/layout/global-sidebar/global-sidebar.component';
@@ -9,7 +10,13 @@ import { GlobalSidebarComponent } from './shared/components/layout/global-sideba
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [GlobalFooterComponent, GlobalHeaderComponent, GlobalSidebarComponent, RouterOutlet],
+  imports: [
+    GlobalFooterComponent,
+    GlobalHeaderComponent,
+    GlobalSidebarComponent,
+    RouterOutlet,
+    ToastContainerComponent,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,7 +26,7 @@ export class App {
 
   protected readonly currentUrl = signal(this.normalizedUrl(this.router.url));
   protected readonly isPublicRoute = computed(() =>
-    ['/', '/home', '/attendance', '/unidades'].includes(this.currentUrl()),
+    ['/', '/home', '/attendance', '/locations'].includes(this.currentUrl()),
   );
   protected readonly isAdminRoute = computed(() => this.currentUrl().startsWith('/admin-access'));
   protected readonly hideShell = computed(() => {

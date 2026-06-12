@@ -1,10 +1,6 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './pages/home/home.component';
-
-// Pacientes de teste (seed via database)
-// Beatriz Oliveira Cavalcanti: c14671c5-976a-4d1e-9567-8a417f778b59
-// Carlos Eduardo Mendes:       a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56
-const DEFAULT_PATIENT_ID = 'a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56';
+import { authGuard } from './core/guards/auth.guard';
+import { HomeComponent } from './features/home/pages/home.component';
 
 export const routes: Routes = [
   {
@@ -18,7 +14,7 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'unidades',
+    path: 'locations',
     loadComponent: () =>
       import('./features/public/pages/locations/locations-page.component').then(
         (m) => m.LocationsPageComponent,
@@ -42,6 +38,7 @@ export const routes: Routes = [
   },
   {
     path: 'clinics/new',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/clinics/pages/clinic-form-page/clinic-form-page.component').then(
         (m) => m.ClinicFormPageComponent,
@@ -49,6 +46,7 @@ export const routes: Routes = [
   },
   {
     path: 'clinics/:id/edit',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/clinics/pages/clinic-form-page/clinic-form-page.component').then(
         (m) => m.ClinicFormPageComponent,
@@ -56,6 +54,7 @@ export const routes: Routes = [
   },
   {
     path: 'clinics',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/clinics/pages/clinics-page/clinics-page.component').then(
         (m) => m.ClinicsPageComponent,
@@ -63,6 +62,7 @@ export const routes: Routes = [
   },
   {
     path: 'patients/:id/treatments',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/patients/pages/treatments/treatments-page.component').then(
         (m) => m.TreatmentsPageComponent,
@@ -70,6 +70,7 @@ export const routes: Routes = [
   },
   {
     path: 'patients/:id/edit',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/patients/pages/edit-patient/edit-patient.component').then(
         (m) => m.EditPatientComponent,
@@ -77,16 +78,13 @@ export const routes: Routes = [
   },
   {
     path: 'medical-records/:id',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/medical-records/pages/patient-record-page/patient-record-page.component').then(
         (m) => m.PatientRecordPageComponent,
       ),
   },
-  {
-    path: 'medical-records',
-    pathMatch: 'full',
-    redirectTo: `medical-records/${DEFAULT_PATIENT_ID}`,
-  },
+
   {
     path: '**',
     redirectTo: '',
