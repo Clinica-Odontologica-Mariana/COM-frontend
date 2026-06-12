@@ -20,16 +20,21 @@ export class App {
   protected readonly currentUrl = signal(this.router.url);
 
   // Unificando as regras: esconde a estrutura padrão do app tanto na rota admin quanto na Home de apresentação
+
+  protected readonly isAdminRoute = computed(() => this.currentUrl().startsWith('/admin-access'));
+
   protected readonly hideShell = computed(() => {
     const url = this.currentUrl();
-    return url === '/' || url === '/home' || url === '/attendance' || url.startsWith('/admin-access');
+    return url === '/' || url === '/home' || url === '/attendance' || this.isAdminRoute();
   });
+
+  protected readonly showHeader = computed(() => this.hideShell() && !this.isAdminRoute());
 
   constructor() {
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-        takeUntilDestroyed()
+        takeUntilDestroyed(),
       )
       .subscribe((event) => this.currentUrl.set(event.urlAfterRedirects));
   }
