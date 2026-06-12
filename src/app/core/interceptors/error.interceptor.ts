@@ -21,7 +21,9 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
         }
 
         const message = resolveErrorMessage(error);
-        toastService.error(message);
+        if (!isLoginRequest) {
+          toastService.error(message);
+        }
         return throwError(() => new Error(message));
       }
 

@@ -154,14 +154,14 @@ export class GlobalHeaderComponent {
   }
 
   protected readonly desktopNavItems: NavItem[] = [
-    { label: 'Sobre', link: '/', fragment: 'sobre', exact: true },
+    { label: 'Sobre', link: '/', exact: true },
     { label: 'Atendimento', link: '/attendance', exact: true },
-    { label: 'Unidades', link: '/unidades', exact: true },
+    { label: 'Unidades', link: '/locations', exact: true },
   ];
 
   protected readonly mobileNavItems: MobileNavItem[] = [
     { label: 'Início', link: '/', exact: true, icon: '/Painel_icon.svg' },
-    { label: 'Unidades', link: '/unidades', exact: true, icon: '/Clinicas.svg' },
+    { label: 'Unidades', link: '/locations', exact: true, icon: '/Clinicas.svg' },
     { label: 'Atendimento', link: '/attendance', exact: true, icon: '/prontuarios.svg' },
     { label: 'Acesso Administrativo', link: '/admin-access', exact: true, icon: '/pacientes.svg' },
   ];

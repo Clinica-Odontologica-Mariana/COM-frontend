@@ -26,7 +26,7 @@ export class App {
 
   protected readonly currentUrl = signal(this.normalizedUrl(this.router.url));
   protected readonly isPublicRoute = computed(() =>
-    ['/', '/home', '/attendance', '/unidades'].includes(this.currentUrl()),
+    ['/', '/home', '/attendance', '/locations'].includes(this.currentUrl()),
   );
   protected readonly isAdminRoute = computed(() => this.currentUrl().startsWith('/admin-access'));
   protected readonly hideShell = computed(() => {

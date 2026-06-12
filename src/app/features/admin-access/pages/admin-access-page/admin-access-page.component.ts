@@ -26,17 +26,17 @@ import { AuthService } from '../../../../core/services/auth.service';
       <section class="grid min-h-screen lg:grid-cols-[minmax(0,1.2fr)_minmax(26rem,0.8fr)]">
         <div class="relative hidden overflow-hidden bg-[#734C3E] lg:block">
           <div
-            class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(248,231,212,0.5),_transparent_36%),linear-gradient(180deg,_rgba(119,76,60,0.18),_rgba(84,49,38,0.5))]"
+            class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,231,212,0.5),transparent_36%),linear-gradient(180deg,rgba(119,76,60,0.18),rgba(84,49,38,0.5))]"
           ></div>
           <div
-            class="absolute inset-0 bg-[linear-gradient(135deg,_rgba(255,255,255,0.08),_transparent_30%,_rgba(255,255,255,0.03)_60%,_rgba(55,26,18,0.2))]"
+            class="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_30%,rgba(255,255,255,0.03)_60%,rgba(55,26,18,0.2))]"
           ></div>
           <div
             class="absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-[#CFA186]/20 blur-3xl"
           ></div>
           <div class="absolute right-0 top-0 h-96 w-96 rounded-full bg-[#EAD5C6]/15 blur-3xl"></div>
           <div
-            class="absolute inset-0 bg-[linear-gradient(180deg,_rgba(33,20,14,0.08)_0%,_rgba(33,20,14,0.45)_100%)]"
+            class="absolute inset-0 bg-[linear-gradient(180deg,rgba(33,20,14,0.08)_0%,rgba(33,20,14,0.45)_100%)]"
           ></div>
 
           <div class="relative flex h-full flex-col justify-between px-12 py-14 xl:px-16 xl:py-16">

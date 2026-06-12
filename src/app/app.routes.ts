@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
-import { HomeComponent } from './pages/home/home.component';
+import { HomeComponent } from './features/home/pages/home.component';
 
 export const routes: Routes = [
   {
@@ -14,7 +14,7 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'unidades',
+    path: 'locations',
     loadComponent: () =>
       import('./features/public/pages/locations/locations-page.component').then(
         (m) => m.LocationsPageComponent,

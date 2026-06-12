@@ -1,11 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { GlobalFooterComponent } from '../../shared/components/layout/global-footer/global-footer.component';
-import { GlobalHeaderComponent } from '../../shared/components/layout/global-header/global-header.component';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [GlobalHeaderComponent, GlobalFooterComponent],
+  imports: [],
   template: `
     <main class="bg-[#FAFAF9] text-[#6B5B52]">
       <!-- HERO -->
