@@ -16,8 +16,7 @@ export const JOURNEY_STEPS: JourneyStep[] = [
   {
     number: '03',
     title: 'Tratamento Personalizado',
-    description:
-      'Execução precisa seguindo o plano terapêutico exclusivo desenhado para você.',
+    description: 'Execução precisa seguindo o plano terapêutico exclusivo desenhado para você.',
   },
   {
     number: '04',
@@ -60,8 +59,7 @@ export const BENEFITS: Benefit[] = [
   {
     icon: 'schedule',
     title: 'Agenda Flexível',
-    description:
-      'Horários que se adaptam à sua rotina, sem salas de espera e sem pressa.',
+    description: 'Horários que se adaptam à sua rotina, sem salas de espera e sem pressa.',
   },
 ];
 
