@@ -1,14 +1,14 @@
 import { Appointment } from '../models/appointment.model';
+import { toIsoDate } from '../utils/calendar.utils';
 
 function todayIso(): string {
-  const d = new Date();
-  return d.toISOString().slice(0, 10);
+  return toIsoDate(new Date());
 }
 
 function tomorrowIso(): string {
   const d = new Date();
   d.setDate(d.getDate() + 1);
-  return d.toISOString().slice(0, 10);
+  return toIsoDate(d);
 }
 
 function nextFridayIso(): string {
@@ -16,13 +16,13 @@ function nextFridayIso(): string {
   const day = d.getDay();
   const daysUntilFriday = (5 - day + 7) % 7 || 7;
   d.setDate(d.getDate() + daysUntilFriday);
-  return d.toISOString().slice(0, 10);
+  return toIsoDate(d);
 }
 
 function currentMonthDay(day: number): string {
   const d = new Date();
   d.setDate(day);
-  return d.toISOString().slice(0, 10);
+  return toIsoDate(d);
 }
 
 export const INITIAL_APPOINTMENTS: Appointment[] = [

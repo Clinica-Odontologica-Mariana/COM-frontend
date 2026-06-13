@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
+import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 import { AppointmentStatusPillsComponent } from '../../components/appointment-status-pills/appointment-status-pills.component';
 import {
   Appointment,
@@ -171,6 +173,7 @@ export class AppointmentEditPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly appointmentService = inject(AppointmentService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   protected readonly PROCEDURE_LABELS = PROCEDURE_LABELS;
   protected readonly LOCATION_LABELS = LOCATION_LABELS;
@@ -240,10 +243,15 @@ export class AppointmentEditPageComponent {
     const apt = this.appointment();
     if (!apt) return;
 
-    this.appointmentService
-      .delete(apt.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => void this.router.navigate(['/agenda']));
+    this.confirmDialog
+      .confirm('Deseja excluir este agendamento?', 'Excluir agendamento')
+      .pipe(filter(Boolean), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.appointmentService
+          .delete(apt.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(() => void this.router.navigate(['/agenda']));
+      });
   }
 
   protected onDiscard(): void {

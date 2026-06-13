@@ -172,6 +172,12 @@ import { AppointmentService } from '../../services/appointment.service';
           </div>
 
           <div class="mt-8 flex justify-end gap-6">
+            <a
+              routerLink="/agenda"
+              class="rounded-xl px-6 py-4 text-base font-bold text-[#78716C] transition hover:bg-[#F5F5F4]"
+            >
+              Descartar
+            </a>
             <button
               type="submit"
               [disabled]="form.invalid || !selectedPatient() || submitting()"

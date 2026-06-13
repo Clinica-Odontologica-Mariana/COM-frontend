@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import {
   Appointment,
   BLOCKED_EVENT_COLOR,
@@ -45,21 +45,21 @@ import { getWeekdayHeaders, getWeekdayHeadersShort } from '../../utils/calendar.
             </span>
 
             <div class="flex flex-wrap justify-center gap-0.5 sm:hidden">
-              @for (apt of visibleEvents(day.isoDate, 3); track apt.id) {
+              @for (apt of dayEvents(day.isoDate, 3); track apt.id) {
                 <span
                   class="h-1.5 w-1.5 shrink-0 rounded-full"
                   [style.background-color]="dotColor(apt)"
                 ></span>
               }
-              @if (extraEventCount(day.isoDate, 3) > 0) {
+              @if (extraCount(day.isoDate, 3) > 0) {
                 <span class="text-[8px] font-semibold leading-none text-[#78716C]">
-                  +{{ extraEventCount(day.isoDate, 3) }}
+                  +{{ extraCount(day.isoDate, 3) }}
                 </span>
               }
             </div>
 
             <div class="hidden flex-col gap-1 sm:flex">
-              @for (apt of eventsForDay(day.isoDate); track apt.id) {
+              @for (apt of dayEvents(day.isoDate); track apt.id) {
                 <app-calendar-event-chip [appointment]="apt" />
               }
             </div>
@@ -76,16 +76,24 @@ export class CalendarMonthGridComponent {
   protected readonly weekdayHeaders = getWeekdayHeaders();
   protected readonly weekdayHeadersShort = getWeekdayHeadersShort();
 
-  protected eventsForDay(isoDate: string): Appointment[] {
-    return this.appointments().filter((a) => a.date === isoDate);
+  private readonly eventsByDay = computed(() => {
+    const map = new Map<string, Appointment[]>();
+    for (const apt of this.appointments()) {
+      const list = map.get(apt.date) ?? [];
+      list.push(apt);
+      map.set(apt.date, list);
+    }
+    return map;
+  });
+
+  protected dayEvents(isoDate: string, limit?: number): Appointment[] {
+    const events = this.eventsByDay().get(isoDate) ?? [];
+    return limit != null ? events.slice(0, limit) : events;
   }
 
-  protected visibleEvents(isoDate: string, limit: number): Appointment[] {
-    return this.eventsForDay(isoDate).slice(0, limit);
-  }
-
-  protected extraEventCount(isoDate: string, limit: number): number {
-    return Math.max(0, this.eventsForDay(isoDate).length - limit);
+  protected extraCount(isoDate: string, limit: number): number {
+    const events = this.eventsByDay().get(isoDate) ?? [];
+    return Math.max(0, events.length - limit);
   }
 
   protected dotColor(apt: Appointment): string {

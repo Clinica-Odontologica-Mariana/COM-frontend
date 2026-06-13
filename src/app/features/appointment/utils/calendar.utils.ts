@@ -1,7 +1,7 @@
 import { CalendarDay, WeekDayColumn } from '../models/appointment.model';
 
-const WEEKDAY_HEADERS = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-const WEEKDAY_SHORT = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+const WEEKDAY_LABELS = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+const WEEKDAY_HEADERS_SHORT = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
 export function toIsoDate(date: Date): string {
   const y = date.getFullYear();
@@ -19,11 +19,11 @@ export function isSameDay(a: Date, b: Date): boolean {
 }
 
 export function getWeekdayHeaders(): string[] {
-  return [...WEEKDAY_HEADERS];
+  return [...WEEKDAY_LABELS];
 }
 
 export function getWeekdayHeadersShort(): string[] {
-  return ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+  return [...WEEKDAY_HEADERS_SHORT];
 }
 
 export function formatWeekDayHeading(date: Date): string {
@@ -74,7 +74,7 @@ export function buildWeekColumns(referenceDate: Date): WeekDayColumn[] {
       date,
       isoDate: toIsoDate(date),
       dayNumber: date.getDate(),
-      weekdayLabel: WEEKDAY_SHORT[i],
+      weekdayLabel: WEEKDAY_LABELS[i],
       isToday: isSameDay(date, today),
     });
   }
@@ -93,7 +93,7 @@ export function formatRelativeDayLabel(dateIso: string, time?: string): string {
   if (diffDays === 0) return `HOJE${timePart}`;
   if (diffDays === 1) return `AMANHÃ${timePart}`;
 
-  const weekday = WEEKDAY_SHORT[target.getDay()];
+  const weekday = WEEKDAY_LABELS[target.getDay()];
   if (diffDays > 1 && diffDays <= 7) return `${weekday}${timePart}`;
 
   const day = target.getDate();

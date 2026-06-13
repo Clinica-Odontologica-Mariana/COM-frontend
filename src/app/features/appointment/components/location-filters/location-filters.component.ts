@@ -42,7 +42,7 @@ export class LocationFiltersComponent {
   readonly selectedLocations = input<AppointmentLocation[]>([]);
   readonly selectedLocationsChange = output<AppointmentLocation[]>();
 
-  protected readonly locations: AppointmentLocation[] = ['asa_sul', 'samambaia', 'taguatinga'];
+  protected readonly locations: AppointmentLocation[] = ['asa_sul', 'samambaia', 'taguatinga', 'domiciliar'];
   protected readonly LOCATION_LABELS = LOCATION_LABELS;
   protected readonly LOCATION_COLORS = LOCATION_COLORS;
 

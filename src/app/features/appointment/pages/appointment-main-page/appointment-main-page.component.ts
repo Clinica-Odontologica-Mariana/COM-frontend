@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AppointmentHeaderComponent } from '../../components/appointment-header/appointment-header.component';
 import { CalendarMonthGridComponent } from '../../components/calendar-month-grid/calendar-month-grid.component';
@@ -100,14 +100,13 @@ export class AppointmentMainPageComponent {
   protected readonly monthDays = signal<CalendarDay[]>([]);
   protected readonly weekColumns = signal<WeekDayColumn[]>([]);
 
+  protected readonly monthLabel = computed(() =>
+    formatMonthYear(this.currentDate().getFullYear(), this.currentDate().getMonth()),
+  );
+
   constructor() {
     this.refreshCalendar();
     this.loadUpcoming();
-  }
-
-  protected monthLabel(): string {
-    const d = this.currentDate();
-    return formatMonthYear(d.getFullYear(), d.getMonth());
   }
 
   protected setViewMode(mode: CalendarViewMode): void {

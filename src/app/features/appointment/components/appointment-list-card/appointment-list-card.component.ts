@@ -34,12 +34,6 @@ import { formatRelativeDayLabel } from '../../utils/calendar.utils';
         >
           Editar
         </a>
-        <a
-          [routerLink]="['/agenda', appointment().id, 'editar']"
-          class="rounded-md border border-[#D5C2BD]/20 px-3 py-1.5 text-[9px] font-bold tracking-wide text-[#514440] uppercase"
-        >
-          Reagendar
-        </a>
       </div>
     </article>
   `,
