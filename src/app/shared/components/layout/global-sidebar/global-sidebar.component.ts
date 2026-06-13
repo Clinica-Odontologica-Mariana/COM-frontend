@@ -1,65 +1,63 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
+import { AuthService, CurrentUser } from '../../../../core/services/auth.service';
 
 interface SidebarItem {
   label: string;
   icon: string;
-  link: string | null;
+  link: string;
+  match: readonly string[];
 }
 
 @Component({
   selector: 'app-global-sidebar',
-  imports: [RouterLink, RouterLinkActive, NgOptimizedImage],
+  imports: [RouterLink, NgOptimizedImage],
   template: `
-    <aside class="hidden h-full min-h-fit bg-[#FAFAF9] px-4 py-6 lg:flex lg:flex-col">
+    <aside
+      class="hidden self-start bg-[#FAFAF9] px-4 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto"
+    >
       <div class="pb-8">
-        <div class="flex-row items-center gap-4 ">
+        <div class="flex-row items-center gap-4">
           <img
             [ngSrc]="logo.icon"
             alt=""
             draggable="false"
-            class="h-15 w-auto m-3"
+            class="m-3 h-15 w-auto"
             width="20"
             height="20"
             aria-hidden="true"
           />
           <div>
-            <p class="text-sm font-bold text-[#7c5145b6] p-2">Olá, Usuário</p>
+            <p class="p-2 text-sm font-bold text-[#7c5145b6]">Olá, {{ displayName() }}</p>
           </div>
         </div>
 
         <nav class="mt-5 space-y-1" aria-label="Area administrativa">
           @for (item of items; track item.label) {
-            @if (item.link) {
-              <a
-                [routerLink]="item.link"
-                routerLinkActive="bg-[rgba(124,81,69,0.1)] font-bold text-[#7C5145]"
-                class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide text-[#78716C] transition hover:bg-[#EDE8E6]/50"
-                #rla="routerLinkActive"
-                [attr.aria-current]="rla.isActive ? 'page' : null"
-              >
-                <img
-                  [src]="item.icon"
-                  alt=""
-                  class="h-5 w-5"
-                  [style.filter]="
-                    rla.isActive
-                      ? 'invert(33%) sepia(22%) saturate(560%) hue-rotate(340deg) brightness(95%) contrast(90%)'
-                      : 'none'
-                  "
-                />
-                <span>{{ item.label }}</span>
-              </a>
-            } @else {
-              <a
-                href="#"
-                class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide text-[#78716C] transition hover:bg-[#EDE8E6]/50"
-              >
-                <img [src]="item.icon" alt="" class="h-5 w-5" />
-                <span>{{ item.label }}</span>
-              </a>
-            }
+            <a
+              [routerLink]="item.link"
+              [attr.aria-current]="isItemActive(item) ? 'page' : null"
+              class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide transition"
+              [class.bg-[#EDE8E6]]="isItemActive(item)"
+              [class.font-semibold]="isItemActive(item)"
+              [class.text-[#8B574B]]="isItemActive(item)"
+              [class.text-[#78716C]]="!isItemActive(item)"
+            >
+              <img
+                [src]="item.icon"
+                alt=""
+                class="h-5 w-5"
+                [style.filter]="
+                  isItemActive(item)
+                    ? 'invert(33%) sepia(22%) saturate(560%) hue-rotate(340deg) brightness(95%) contrast(90%)'
+                    : 'none'
+                "
+              />
+              <span>{{ item.label }}</span>
+            </a>
           }
         </nav>
       </div>
@@ -69,11 +67,10 @@ interface SidebarItem {
           <div
             class="grid h-11 w-11 place-items-center rounded-full bg-[#DFA17C] text-sm font-bold text-[#1F2425]"
           >
-            DM
+            {{ initials() }}
           </div>
           <div>
-            <p class="text-sm font-bold text-[#1F2425]">Dra. Mariana</p>
-            <p class="text-xs text-[#78716C]">Administração</p>
+            <p class="text-sm font-bold text-[#1F2425]">{{ displayName() }}</p>
           </div>
         </div>
 
@@ -84,22 +81,106 @@ interface SidebarItem {
           <span class="text-lg leading-none">+</span>
           Novo Atendimento
         </a>
+
+        <button
+          type="button"
+          class="mt-3 flex h-11 w-full items-center justify-center rounded-lg border border-[#E3D7D1] bg-white px-4 text-sm font-bold text-[#8B574B] transition hover:bg-[#F5EFEC]"
+          (click)="logout()"
+        >
+          Sair
+        </button>
       </div>
     </aside>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GlobalSidebarComponent {
-  protected readonly items: SidebarItem[] = [
-    { label: 'Painel', icon: '/Painel_icon.svg', link: null },
-    { label: 'Pacientes', icon: '/pacientes.svg', link: null },
-    { label: 'Agenda', icon: '/agenda.svg', link: '/agenda' },
-    { label: 'Prontuários', icon: '/prontuarios.svg', link: null },
-    { label: 'Tratamentos', icon: '/tratamentos.svg', link: null },
-    { label: 'Estoque', icon: '/estoque.svg', link: null },
-    { label: 'Clínicas', icon: '/Clinicas.svg', link: null },
-    { label: 'Certificados', icon: '/certificados.svg', link: null },
-  ];
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
+  protected readonly currentUrl = signal(this.router.url);
+  protected readonly currentUser = signal<CurrentUser | null>(null);
+  protected readonly items: SidebarItem[] = [
+    { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1', match: ['/dashboard'] },
+    { label: 'Pacientes', icon: '/pacientes.svg', link: '/medical-records/1', match: ['/patients'] },
+    { label: 'Agenda', icon: '/agenda.svg', link: '/agenda', match: ['/agenda'] },
+    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/medical-records/1', match: ['/medical-records'] },
+    {
+      label: 'Tratamentos',
+      icon: '/tratamentos.svg',
+      link: '/patients/a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56/treatments',
+      match: ['/treatments', '/patients/'],
+    },
+    { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', match: ['/stock'] },
+    { label: 'Clínicas', icon: '/Clinicas.svg', link: '/clinics', match: ['/clinics'] },
+    { label: 'Certificados', icon: '/certificados.svg', link: '/medical-records/1', match: ['/certificates'] },
+  ];
   protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
+
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.currentUrl.set(this.router.url));
+
+    if (this.authService.isTokenValid()) {
+      this.authService
+        .getCurrentUser()
+        .pipe(takeUntilDestroyed())
+        .subscribe({
+          next: (user) => this.currentUser.set(user),
+          error: () => this.currentUser.set(null),
+        });
+    }
+  }
+
+  protected isItemActive(item: SidebarItem): boolean {
+    return item.match.some((prefix) => this.currentUrl().startsWith(prefix));
+  }
+
+  protected logout(): void {
+    this.authService.logout();
+    void this.router.navigateByUrl('/admin-access');
+  }
+
+  protected displayName(): string {
+    const user = this.currentUser();
+    const fullName = this.stringClaim(user?.claims?.['name']);
+    const givenName = this.stringClaim(user?.claims?.['given_name']);
+    const familyName = this.stringClaim(user?.claims?.['family_name']);
+
+    if (fullName) {
+      return fullName;
+    }
+
+    const composedName = [givenName, familyName].filter(Boolean).join(' ').trim();
+    if (composedName) {
+      return composedName;
+    }
+
+    if (user?.username) {
+      return user.username;
+    }
+
+    return 'Usuário';
+  }
+
+  protected initials(): string {
+    const nameParts = this.displayName()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2);
+
+    if (!nameParts.length) {
+      return 'US';
+    }
+
+    return nameParts.map((part) => part[0]?.toUpperCase() ?? '').join('');
+  }
+
+  private stringClaim(value: unknown): string {
+    return typeof value === 'string' ? value.trim() : '';
+  }
 }
