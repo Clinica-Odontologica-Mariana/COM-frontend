@@ -112,6 +112,7 @@ export class GlobalSidebarComponent {
       match: ['/treatments', '/patients/'],
     },
     { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', match: ['/stock'] },
+    { label: 'Colaboradores', icon: '/pacientes.svg', link: '/colaboradores', match: ['/colaboradores'] },
     { label: 'Clínicas', icon: '/Clinicas.svg', link: '/clinics', match: ['/clinics'] },
     { label: 'Certificados', icon: '/certificados.svg', link: '/medical-records/1', match: ['/certificates'] },
   ];

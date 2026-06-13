@@ -37,6 +37,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'colaboradores',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/collaborators/pages/collaborators-page/collaborators-page.component').then(
+        (m) => m.CollaboratorsPageComponent,
+      ),
+  },
+  {
     path: 'clinics/new',
     canActivate: [authGuard],
     loadComponent: () =>
