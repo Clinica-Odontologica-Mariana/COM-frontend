@@ -42,6 +42,18 @@ export interface ProcedureOption {
   name: string;
 }
 
+export interface ProfessionalOption {
+  id: string;
+  name: string;
+  specialty: string;
+}
+
+interface ProfessionalApiDto {
+  id: string;
+  name: string;
+  specialty: string;
+}
+
 function unwrap<T>(res: ApiResponse<PageDto<T>>): T[] {
   return res.data?.content ?? [];
 }
@@ -75,6 +87,19 @@ export class ScheduleOptionsApi {
             );
         }),
         catchError(() => of<WorkplaceOption[]>([])),
+      );
+  }
+
+  listProfessionals(): Observable<ProfessionalOption[]> {
+    const params = new HttpParams().set('page', '0').set('size', '50');
+
+    return this.http
+      .get<ApiResponse<PageDto<ProfessionalApiDto>>>(`${this.base}/professionals`, { params })
+      .pipe(
+        map((res) =>
+          unwrap<ProfessionalApiDto>(res).map((p) => ({ id: p.id, name: p.name, specialty: p.specialty })),
+        ),
+        catchError(() => of<ProfessionalOption[]>([])),
       );
   }
 

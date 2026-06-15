@@ -4,7 +4,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { ScheduleOptionsApi, ProcedureOption, WorkplaceOption } from '../api/schedule-options.api';
+import {
+  ScheduleOptionsApi,
+  ProcedureOption,
+  ProfessionalOption,
+  WorkplaceOption,
+} from '../api/schedule-options.api';
 import { AgendaPatientOption } from '../models/appointment.model';
 import { AppointmentService } from '../services/appointment.service';
 
@@ -109,6 +114,44 @@ import { AppointmentService } from '../services/appointment.service';
                 <p class="mt-2 text-sm text-[#7C5145]">
                   Selecionado: {{ selectedPatient()!.name }}
                 </p>
+              }
+            </div>
+
+            <!-- Professional card -->
+            <div class="rounded-xl bg-white p-8 shadow-sm lg:col-span-12">
+              <div class="mb-6 flex items-center gap-3">
+                <svg
+                  class="h-5 w-5 text-[#7C5145]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <h3 class="font-serif text-xl text-[#1A1C1C]">Profissional Responsável</h3>
+              </div>
+
+              @if (loadingOptions()) {
+                <div class="h-12 animate-pulse rounded-lg bg-[#F3F3F3]"></div>
+              } @else if (professionalOptions().length === 0) {
+                <p class="text-sm text-[#78716C]">Nenhum profissional disponível.</p>
+              } @else {
+                <select
+                  formControlName="professionalId"
+                  class="w-full rounded-lg bg-[#EEEEEE] px-4 py-4 text-base outline-none"
+                >
+                  <option value="">Selecionar profissional...</option>
+                  @for (prof of professionalOptions(); track prof.id) {
+                    <option [value]="prof.id">
+                      {{ prof.name }}{{ prof.specialty ? ' — ' + prof.specialty : '' }}
+                    </option>
+                  }
+                </select>
               }
             </div>
 
@@ -315,12 +358,14 @@ export class AppointmentCreatePageComponent {
   protected readonly loadingOptions = signal(true);
   protected readonly procedureOptions = signal<ProcedureOption[]>([]);
   protected readonly workplaceOptions = signal<WorkplaceOption[]>([]);
+  protected readonly professionalOptions = signal<ProfessionalOption[]>([]);
 
   private readonly patientSearch$ = new Subject<string>();
 
   protected readonly form = this.fb.nonNullable.group({
     patientSearch: [''],
     patientId: ['', Validators.required],
+    professionalId: ['', Validators.required],
     procedureId: ['' as string],
     workplaceId: ['', Validators.required],
     date: ['', Validators.required],
@@ -380,6 +425,11 @@ export class AppointmentCreatePageComponent {
       .subscribe({ next: (p) => this.procedureOptions.set(p), error: () => {} });
 
     this.scheduleOptionsApi
+      .listProfessionals()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: (p) => this.professionalOptions.set(p), error: () => {} });
+
+    this.scheduleOptionsApi
       .listWorkplaces()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -408,7 +458,7 @@ export class AppointmentCreatePageComponent {
   protected onSubmit(): void {
     if (this.form.invalid || !this.selectedPatient()) return;
 
-    const { patientId, procedureId, workplaceId, date, startTime, endTime, notes } =
+    const { patientId, professionalId, procedureId, workplaceId, date, startTime, endTime, notes } =
       this.form.getRawValue();
 
     const selectedWorkplace = this.workplaceOptions().find((w) => w.id === workplaceId);
@@ -416,7 +466,17 @@ export class AppointmentCreatePageComponent {
 
     this.submitting.set(true);
     this.appointmentService
-      .create({ patientId, clinicId, workplaceId, procedureId, date, startTime, endTime, notes })
+      .create({
+        patientId,
+        clinicId,
+        workplaceId,
+        professionalId,
+        procedureId,
+        date,
+        startTime,
+        endTime,
+        notes,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

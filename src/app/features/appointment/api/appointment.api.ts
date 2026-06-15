@@ -94,6 +94,7 @@ function toAppointment(dto: AppointmentApiDto): Appointment {
     location: null,
     workplaceId: dto.workplaceId ?? null,
     clinicId: dto.clinicId ?? null,
+    professionalId: dto.professionalId ?? null,
     date,
     startTime,
     endTime,
@@ -192,6 +193,7 @@ export class AppointmentApi {
       patientId: dto.patientId,
       clinicId: dto.clinicId,
       workplaceId: dto.workplaceId,
+      professionalId: dto.professionalId,
       startDatetime: toDatetime(dto.date, dto.startTime),
       endDatetime: toDatetime(dto.date, dto.endTime),
       notes: dto.notes ?? null,
@@ -208,6 +210,7 @@ export class AppointmentApi {
     const body = {
       clinicId: dto.clinicId,
       workplaceId: dto.workplaceId,
+      professionalId: dto.professionalId ?? null,
       startDatetime: toDatetime(date, dto.startTime ?? '00:00'),
       endDatetime: toDatetime(date, dto.endTime ?? '00:00'),
       notes: dto.notes ?? null,

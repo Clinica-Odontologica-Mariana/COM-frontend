@@ -7,7 +7,7 @@ import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.se
 import { Appointment, AppointmentStatus } from '../models/appointment.model';
 import { AppointmentService } from '../services/appointment.service';
 import { AppointmentStatusPillsComponent } from '../components/appointment-status-pills.component';
-import { ProcedureOption, ScheduleOptionsApi, WorkplaceOption } from '../api/schedule-options.api';
+import { ProcedureOption, ProfessionalOption, ScheduleOptionsApi, WorkplaceOption } from '../api/schedule-options.api';
 
 @Component({
   selector: 'app-appointment-edit-page',
@@ -54,6 +54,27 @@ import { ProcedureOption, ScheduleOptionsApi, WorkplaceOption } from '../api/sch
                       <p class="text-sm text-[#78716C]">{{ appointment()!.patientEmail }}</p>
                     </div>
                   </div>
+                </div>
+
+                <div class="mb-6">
+                  <label class="mb-2 block text-sm tracking-widest text-[#78716C] uppercase"
+                    >Profissional Responsável</label
+                  >
+                  @if (loadingOptions()) {
+                    <div class="h-14 animate-pulse rounded-xl bg-[#F3F3F3]"></div>
+                  } @else {
+                    <select
+                      formControlName="professionalId"
+                      class="w-full rounded-xl bg-[#F3F3F3] px-4 py-4 text-base outline-none"
+                    >
+                      <option value="">Selecionar profissional...</option>
+                      @for (prof of professionalOptions(); track prof.id) {
+                        <option [value]="prof.id">
+                          {{ prof.name }}{{ prof.specialty ? ' — ' + prof.specialty : '' }}
+                        </option>
+                      }
+                    </select>
+                  }
                 </div>
 
                 <div class="mb-6 grid gap-6 sm:grid-cols-2">
@@ -257,8 +278,10 @@ export class AppointmentEditPageComponent {
   protected readonly loadingOptions = signal(true);
   protected readonly procedureOptions = signal<ProcedureOption[]>([]);
   protected readonly workplaceOptions = signal<WorkplaceOption[]>([]);
+  protected readonly professionalOptions = signal<ProfessionalOption[]>([]);
 
   protected readonly form = this.fb.nonNullable.group({
+    professionalId: ['', Validators.required],
     procedureId: ['' as string],
     workplaceId: ['', Validators.required],
     date: ['', Validators.required],
@@ -284,6 +307,7 @@ export class AppointmentEditPageComponent {
           }
           this.appointment.set(apt);
           this.form.patchValue({
+            professionalId: apt.professionalId ?? '',
             workplaceId: apt.workplaceId ?? '',
             date: apt.date,
             startTime: apt.startTime,
@@ -303,6 +327,11 @@ export class AppointmentEditPageComponent {
       .subscribe({ next: (p) => this.procedureOptions.set(p), error: () => {} });
 
     this.scheduleOptionsApi
+      .listProfessionals()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: (p) => this.professionalOptions.set(p), error: () => {} });
+
+    this.scheduleOptionsApi
       .listWorkplaces()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -318,13 +347,13 @@ export class AppointmentEditPageComponent {
     const apt = this.appointment();
     if (!apt || this.form.invalid) return;
 
-    const { workplaceId, date, startTime, endTime, notes, status } = this.form.getRawValue();
+    const { professionalId, workplaceId, date, startTime, endTime, notes, status } = this.form.getRawValue();
     const selectedWorkplace = this.workplaceOptions().find((w) => w.id === workplaceId);
     const clinicId = selectedWorkplace?.clinicId ?? apt.clinicId ?? '';
 
     this.saving.set(true);
     this.appointmentService
-      .update(apt.id, { clinicId, workplaceId, date, startTime, endTime, notes, status })
+      .update(apt.id, { clinicId, workplaceId, professionalId, date, startTime, endTime, notes, status })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
