@@ -12,7 +12,7 @@ import { ConfirmDeleteModalComponent } from '../../../../shared/components/feedb
 import { ClinicCardComponent } from '../../components/clinic-card/clinic-card.component';
 import { ClinicEmptyStateComponent } from '../../components/clinic-empty-state/clinic-empty-state.component';
 import { ClinicPageHeaderComponent } from '../../components/clinic-page-header/clinic-page-header.component';
-import { ClinicsMockService } from '../../data/clinics-mock.service';
+import { ClinicsApi } from '../../api/clinics.api';
 import { ClinicCardViewModel, toClinicCardViewModel } from '../../models/clinic.models';
 
 @Component({
@@ -63,7 +63,7 @@ import { ClinicCardViewModel, toClinicCardViewModel } from '../../models/clinic.
               <app-clinic-card
                 [clinic]="clinic"
                 (edit)="openEditPage($event)"
-                (inactivate)="openDeleteModal($event)"
+                (delete)="openDeleteModal($event)"
               />
             }
           </section>
@@ -77,14 +77,14 @@ import { ClinicCardViewModel, toClinicCardViewModel } from '../../models/clinic.
       description="Tem certeza que deseja remover a clínica da sua rede? Esta ação não pode ser desfeita."
       confirmLabel="Sim, Excluir"
       cancelLabel="Cancelar"
-      (confirm)="confirmInactivateClinic()"
+      (confirm)="confirmDeleteClinic()"
       (cancel)="closeDeleteModal()"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ClinicsPageComponent implements OnInit {
-  private readonly clinicsMockService = inject(ClinicsMockService);
+  private readonly clinicsApi = inject(ClinicsApi);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
 
@@ -98,7 +98,6 @@ export class ClinicsPageComponent implements OnInit {
   protected readonly deleteModalOpen = computed(() => !!this.clinicPendingDelete());
   protected readonly visibleClinics = computed(() =>
     this.clinics()
-      .filter((clinic) => clinic.active)
       .sort((left, right) => left.name.localeCompare(right.name, 'pt-BR')),
   );
 
@@ -123,18 +122,18 @@ export class ClinicsPageComponent implements OnInit {
     this.clinicPendingDelete.set(null);
   }
 
-  protected confirmInactivateClinic(): void {
+  protected confirmDeleteClinic(): void {
     const clinic = this.clinicPendingDelete();
 
     if (!clinic) {
       return;
     }
 
-    this.clinicsMockService.inactivate(clinic.id).subscribe({
+    this.clinicsApi.delete(clinic.id).subscribe({
       next: () => {
         this.closeDeleteModal();
         this.feedbackKind.set('success');
-        this.feedback.set(`Clínica "${clinic.name}" excluída do ambiente mockado.`);
+        this.feedback.set(`Clínica "${clinic.name}" excluída com sucesso.`);
         this.loadClinics(false);
       },
       error: (error: Error) => {
@@ -165,7 +164,7 @@ export class ClinicsPageComponent implements OnInit {
       this.loading.set(true);
     }
 
-    this.clinicsMockService.list().subscribe({
+    this.clinicsApi.list().subscribe({
       next: (clinics) => {
         this.clinics.set(clinics.map(toClinicCardViewModel));
         this.loading.set(false);
@@ -173,7 +172,7 @@ export class ClinicsPageComponent implements OnInit {
       error: () => {
         this.loading.set(false);
         this.feedbackKind.set('error');
-        this.feedback.set('Não foi possível carregar as clínicas mockadas.');
+        this.feedback.set('Não foi possível carregar as clínicas.');
       },
     });
   }

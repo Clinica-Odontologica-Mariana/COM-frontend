@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
-import { NgOptimizedImage } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, map, startWith } from 'rxjs';
+import { filter } from 'rxjs';
+import { AuthService, CurrentUser } from '../../../../core/services/auth.service';
 
 interface SidebarItem {
   label: string;
@@ -13,47 +13,75 @@ interface SidebarItem {
 
 @Component({
   selector: 'app-global-sidebar',
-  imports: [RouterLink, NgOptimizedImage],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink],
   template: `
-    <aside [class]="sidebarClass()">
-      <!-- Mobile close row -->
-      <div class="mb-4 flex items-center justify-between lg:hidden">
-        <span
-          style="font-family: Manrope, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #78716C;"
-          >Menu</span
-        >
-        <button
-          type="button"
-          class="grid h-8 w-8 place-items-center rounded-full transition hover:bg-[#EDE8E6]"
-          style="color: #7C5145;"
-          (click)="closeMobile.emit()"
-          aria-label="Fechar menu"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path
-              d="M1 1l12 12M13 1L1 13"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
-      </div>
+    <!-- Mobile header -->
+    <div
+      class="flex items-center justify-between border-b border-[#EEE8E5] bg-[#FAFAF9] px-4 py-3 lg:hidden"
+    >
+      <img src="/Logo_clinica.svg" alt="" draggable="false" class="h-8 w-auto" aria-hidden="true" />
+      <button
+        type="button"
+        class="rounded-lg p-2 text-[#78716C] hover:bg-[#EDE8E6]"
+        [attr.aria-expanded]="mobileOpen()"
+        aria-label="Abrir menu"
+        (click)="toggleMobile()"
+      >
+        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
 
+    @if (mobileOpen()) {
+      <div
+        class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+        role="presentation"
+        (click)="closeMobile()"
+      ></div>
+    }
+
+    <!-- Mobile drawer -->
+    <aside
+      class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-[#FAFAF9] px-4 py-6 transition-transform lg:hidden"
+      [class.translate-x-0]="mobileOpen()"
+      [class.-translate-x-full]="!mobileOpen()"
+      aria-label="Menu de navegação"
+    >
+      <nav class="mt-2 space-y-1" aria-label="Area administrativa">
+        @for (item of items; track item.label) {
+          <a
+            [routerLink]="item.link"
+            [attr.aria-current]="isItemActive(item) ? 'page' : null"
+            class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide transition"
+            [class.bg-[#EDE8E6]]="isItemActive(item)"
+            [class.font-semibold]="isItemActive(item)"
+            [class.text-[#8B574B]]="isItemActive(item)"
+            [class.text-[#78716C]]="!isItemActive(item)"
+            (click)="closeMobile()"
+          >
+            <img [src]="item.icon" alt="" class="h-5 w-5" />
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </nav>
+    </aside>
+
+    <!-- Desktop sidebar -->
+    <aside
+      class="hidden self-start bg-[#FAFAF9] px-4 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto"
+    >
       <div class="pb-8">
         <div class="flex-row items-center gap-4">
           <img
-            [ngSrc]="logo.icon"
+            src="/Logo_clinica.svg"
             alt=""
             draggable="false"
             class="m-3 h-15 w-auto"
-            width="20"
-            height="20"
             aria-hidden="true"
           />
           <div>
-            <p class="p-2 text-sm font-bold text-[#7c5145b6]">Olá, Usuário</p>
+            <p class="p-2 text-sm font-bold text-[#7c5145b6]">Olá, {{ displayName() }}</p>
           </div>
         </div>
 
@@ -67,7 +95,7 @@ interface SidebarItem {
               [class.font-semibold]="isItemActive(item)"
               [class.text-[#8B574B]]="isItemActive(item)"
               [class.text-[#78716C]]="!isItemActive(item)"
-              (click)="closeMobile.emit()"
+              (click)="closeMobile()"
             >
               <img
                 [src]="item.icon"
@@ -90,39 +118,41 @@ interface SidebarItem {
           <div
             class="grid h-11 w-11 place-items-center rounded-full bg-[#DFA17C] text-sm font-bold text-[#1F2425]"
           >
-            DM
+            {{ initials() }}
           </div>
           <div>
-            <p class="text-sm font-bold text-[#1F2425]">Dra. Mariana</p>
-            <p class="text-xs text-[#78716C]">Administração</p>
+            <p class="text-sm font-bold text-[#1F2425]">{{ displayName() }}</p>
           </div>
         </div>
 
         <a
-          routerLink="/medical-records/1"
+          routerLink="/schedule/new"
           class="mt-6 flex h-11 items-center justify-center gap-2 rounded-lg bg-[#8B574B] px-4 text-sm font-bold text-white shadow-lg shadow-[#8B574B]/20 transition hover:bg-[#744A40]"
-          (click)="closeMobile.emit()"
+          (click)="closeMobile()"
         >
           <span class="text-lg leading-none">+</span>
           Novo Atendimento
         </a>
+
+        <button
+          type="button"
+          class="mt-3 flex h-11 w-full items-center justify-center rounded-lg border border-[#E3D7D1] bg-white px-4 text-sm font-bold text-[#8B574B] transition hover:bg-[#F5EFEC]"
+          (click)="logout()"
+        >
+          Sair
+        </button>
       </div>
     </aside>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GlobalSidebarComponent {
-  mobileOpen = input(false);
-  closeMobile = output<void>();
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
-  private router = inject(Router);
-
-  private currentUrl = toSignal(
-    this.router.events.pipe(
-      filter((e) => e instanceof NavigationEnd),
-      map((e) => (e as NavigationEnd).urlAfterRedirects),
-      startWith(this.router.url),
-    ),
-  );
+  protected readonly mobileOpen = signal(false);
+  protected readonly currentUrl = signal(this.router.url);
+  protected readonly currentUser = signal<CurrentUser | null>(null);
 
   protected readonly items: SidebarItem[] = [
     {
@@ -134,14 +164,14 @@ export class GlobalSidebarComponent {
     {
       label: 'Pacientes',
       icon: '/pacientes.svg',
-      link: '/medical-records/1',
+      link: '/patients',
       match: ['/patients'],
     },
-    { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', match: ['/agenda'] },
+    { label: 'Agenda', icon: '/agenda.svg', link: '/schedule', match: ['/schedule'] },
     {
       label: 'Prontuários',
       icon: '/prontuarios.svg',
-      link: '/medical-records/1',
+      link: '/medical-records',
       match: ['/medical-records'],
     },
     {
@@ -150,7 +180,7 @@ export class GlobalSidebarComponent {
       link: '/treatments',
       match: ['/treatments'],
     },
-    { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', match: ['/stock'] },
+    { label: 'Estoque', icon: '/estoque.svg', link: '/inventories', match: ['/inventories'] },
     { label: 'Clínicas', icon: '/Clinicas.svg', link: '/clinics', match: ['/clinics'] },
     {
       label: 'Certificados',
@@ -159,17 +189,78 @@ export class GlobalSidebarComponent {
       match: ['/certificates'],
     },
   ];
-  protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
 
-  protected sidebarClass = computed(() => {
-    const base = 'bg-[#FAFAF9] px-4 py-6 flex-col overflow-y-auto';
-    if (this.mobileOpen()) {
-      return `${base} fixed left-0 top-0 h-screen w-64 z-50 flex shadow-2xl`;
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.currentUrl.set(this.router.url));
+
+    if (this.authService.isTokenValid()) {
+      this.authService
+        .getCurrentUser()
+        .pipe(takeUntilDestroyed())
+        .subscribe({
+          next: (user) => this.currentUser.set(user),
+          error: () => this.currentUser.set(null),
+        });
     }
-    return `${base} hidden lg:flex lg:h-full lg:min-h-fit`;
-  });
+  }
+
+  protected toggleMobile(): void {
+    this.mobileOpen.update((open) => !open);
+  }
+
+  protected closeMobile(): void {
+    this.mobileOpen.set(false);
+  }
 
   protected isItemActive(item: SidebarItem): boolean {
-    return item.match.some((prefix) => (this.currentUrl() ?? '').startsWith(prefix));
+    return item.match.some((prefix) =>
+      prefix === '/' ? this.currentUrl() === '/' : this.currentUrl().startsWith(prefix),
+    );
+  }
+
+  protected logout(): void {
+    this.authService.logout();
+    void this.router.navigateByUrl('/admin-access');
+  }
+
+  protected displayName(): string {
+    const user = this.currentUser();
+    const fullName = this.stringClaim(user?.claims?.['name']);
+    const givenName = this.stringClaim(user?.claims?.['given_name']);
+    const familyName = this.stringClaim(user?.claims?.['family_name']);
+
+    if (fullName) {
+      return fullName;
+    }
+
+    const composedName = [givenName, familyName].filter(Boolean).join(' ').trim();
+    if (composedName) {
+      return composedName;
+    }
+
+    if (user?.username) {
+      return user.username;
+    }
+
+    return 'Usuário';
+  }
+
+  protected initials(): string {
+    const nameParts = this.displayName().split(/\s+/).filter(Boolean).slice(0, 2);
+
+    if (!nameParts.length) {
+      return 'US';
+    }
+
+    return nameParts.map((part) => part[0]?.toUpperCase() ?? '').join('');
+  }
+
+  private stringClaim(value: unknown): string {
+    return typeof value === 'string' ? value.trim() : '';
   }
 }

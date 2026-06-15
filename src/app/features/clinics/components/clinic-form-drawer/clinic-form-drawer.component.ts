@@ -9,18 +9,22 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ToastService } from '../../../../core/services/toast.service';
 import {
   CLINIC_SCHEDULE_TEMPLATE,
   ClinicCardViewModel,
   ClinicDayKey,
   ClinicFormValue,
-  InactiveType,
   WorkingDay,
   cloneWorkingDays,
 } from '../../models/clinic.models';
 
 function zipCodeValidator(value: string): boolean {
   return /^\d{8}$/.test(value.replace(/\D/g, ''));
+}
+
+function stateValidator(value: string): boolean {
+  return /^[A-Z]{2}$/.test(value.trim().toUpperCase());
 }
 
 function timeValueValidator(value: string): boolean {
@@ -42,7 +46,7 @@ function timeValueValidator(value: string): boolean {
     <div class="min-h-screen bg-[#F9F9F9]" style="font-family: 'Manrope', sans-serif">
       <section class="mx-auto flex w-full max-w-350 flex-col gap-10 px-6 py-8 md:px-10 xl:px-12">
         <header
-          class="w-full overflow-hidden rounded-3xl border border-[#F1E7E2] bg-[rgba(250,250,249,0.8)] shadow-[0px_1px_2px_rgba(124,45,18,0.05)] backdrop-blur"
+          class="sticky top-0 z-20 w-full overflow-hidden rounded-3xl border border-[#F1E7E2] bg-[rgba(250,250,249,0.92)] shadow-[0px_1px_2px_rgba(124,45,18,0.05)] backdrop-blur"
         >
           <div
             class="mx-auto flex min-h-23 w-full flex-col gap-5 px-6 py-6 md:px-8 lg:flex-row lg:items-center lg:justify-between"
@@ -94,7 +98,7 @@ function timeValueValidator(value: string): boolean {
             >
               <div class="grid gap-6">
                 <label class="grid gap-2">
-                  <span class="text-sm font-medium text-[#4D4540]">Nome da Clínica</span>
+                  <span class="text-sm font-medium text-[#4D4540]">Nome da Clínica *</span>
                   <input
                     formControlName="name"
                     type="text"
@@ -170,6 +174,54 @@ function timeValueValidator(value: string): boolean {
                     </button>
                   }
                 </div>
+
+                @if (isEditing()) {
+                  <div class="space-y-5 rounded-3xl border border-[#F2E8E2] bg-[#FFFDFC] p-5">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                      <div class="space-y-1">
+                        <p class="text-sm font-semibold text-[#4D4540]">Status da clínica</p>
+                        <p class="text-xs leading-5 text-[#8F827B]">
+                          Controle a disponibilidade da clínica na plataforma.
+                        </p>
+                      </div>
+
+                      <div class="flex gap-2">
+                        <button
+                          type="button"
+                          (click)="clinicActive.set(true)"
+                          class="inline-flex h-10 items-center justify-center rounded-2xl px-5 text-sm font-medium transition"
+                          [class.bg-[#8B5E4E]]="clinicActive()"
+                          [class.text-white]="clinicActive()"
+                          [class.shadow-[0px_4px_12px_-4px_rgba(139,94,78,0.5)]]="clinicActive()"
+                          [class.bg-[#F7F5F4]]="!clinicActive()"
+                          [class.text-[#7A6F69]]="!clinicActive()"
+                        >
+                          Ativa
+                        </button>
+                        <button
+                          type="button"
+                          (click)="clinicActive.set(false)"
+                          class="inline-flex h-10 items-center justify-center rounded-2xl px-5 text-sm font-medium transition"
+                          [class.bg-[#8B5E4E]]="!clinicActive()"
+                          [class.text-white]="!clinicActive()"
+                          [class.shadow-[0px_4px_12px_-4px_rgba(139,94,78,0.5)]]="!clinicActive()"
+                          [class.bg-[#F7F5F4]]="clinicActive()"
+                          [class.text-[#7A6F69]]="clinicActive()"
+                        >
+                          Inativa
+                        </button>
+                      </div>
+                    </div>
+
+                    @if (!clinicActive()) {
+                      <div class="rounded-2xl border border-[#F2E8E2] bg-white p-4">
+                        <p class="text-sm text-[#6B625D]">
+                          Esta clínica não aparecerá para os clientes e agendamentos.
+                        </p>
+                      </div>
+                    }
+                  </div>
+                }
               </div>
             </div>
           </section>
@@ -192,7 +244,7 @@ function timeValueValidator(value: string): boolean {
             >
               <div class="grid gap-5 md:grid-cols-2">
                 <label class="grid gap-2">
-                  <span class="text-sm font-medium text-[#4D4540]">Telefone da Clínica</span>
+                  <span class="text-sm font-medium text-[#4D4540]">Telefone da Clínica *</span>
                   <input
                     formControlName="phone"
                     type="text"
@@ -263,38 +315,9 @@ function timeValueValidator(value: string): boolean {
               class="overflow-hidden rounded-[28px] border border-[#F2E8E2] bg-white p-6 shadow-[0px_1px_2px_rgba(0,0,0,0.05)] md:p-8"
             >
               <div class="grid gap-5">
-                <div class="grid gap-5 md:grid-cols-[343px_163px]">
+                <div class="grid gap-5 md:grid-cols-[180px_minmax(0,1fr)]">
                   <label class="grid gap-2">
-                    <span class="text-sm font-medium text-[#4D4540]">Logradouro (Rua/Av)</span>
-                    <input
-                      formControlName="street"
-                      type="text"
-                      class="h-12 rounded-2xl bg-[#F7F5F4] px-4 text-sm text-[#2D241E] outline-none ring-1 ring-transparent transition focus:ring-[#D9C5BC]"
-                    />
-                  </label>
-
-                  <label class="grid gap-2">
-                    <span class="text-sm font-medium text-[#4D4540]">Número</span>
-                    <input
-                      formControlName="number"
-                      type="text"
-                      class="h-12 rounded-2xl bg-[#F7F5F4] px-4 text-sm text-[#2D241E] outline-none ring-1 ring-transparent transition focus:ring-[#D9C5BC]"
-                    />
-                  </label>
-                </div>
-
-                <div class="grid gap-5 md:grid-cols-2">
-                  <label class="grid gap-2">
-                    <span class="text-sm font-medium text-[#4D4540]">Bairro</span>
-                    <input
-                      formControlName="neighborhood"
-                      type="text"
-                      class="h-12 rounded-2xl bg-[#F7F5F4] px-4 text-sm text-[#2D241E] outline-none ring-1 ring-transparent transition focus:ring-[#D9C5BC]"
-                    />
-                  </label>
-
-                  <label class="grid gap-2">
-                    <span class="text-sm font-medium text-[#4D4540]">CEP</span>
+                    <span class="text-sm font-medium text-[#4D4540]">CEP *</span>
                     <input
                       formControlName="zipCode"
                       type="text"
@@ -304,16 +327,59 @@ function timeValueValidator(value: string): boolean {
                       (input)="onCepInput($event)"
                     />
                   </label>
+
+                  <label class="grid gap-2">
+                    <span class="text-sm font-medium text-[#4D4540]">Logradouro (Rua/Av) *</span>
+                    <input
+                      formControlName="street"
+                      type="text"
+                      class="h-12 rounded-2xl bg-[#F7F5F4] px-4 text-sm text-[#2D241E] outline-none ring-1 ring-transparent transition focus:ring-[#D9C5BC]"
+                    />
+                  </label>
                 </div>
 
-                <label class="grid gap-2">
-                  <span class="text-sm font-medium text-[#4D4540]">Cidade</span>
-                  <input
-                    formControlName="city"
-                    type="text"
-                    class="h-12 rounded-2xl bg-[#F7F5F4] px-4 text-sm text-[#2D241E] outline-none ring-1 ring-transparent transition focus:ring-[#D9C5BC]"
-                  />
-                </label>
+                <div class="grid gap-5 md:grid-cols-[180px_minmax(0,1fr)]">
+                  <label class="grid gap-2">
+                    <span class="text-sm font-medium text-[#4D4540]">Número *</span>
+                    <input
+                      formControlName="number"
+                      type="text"
+                      class="h-12 rounded-2xl bg-[#F7F5F4] px-4 text-sm text-[#2D241E] outline-none ring-1 ring-transparent transition focus:ring-[#D9C5BC]"
+                    />
+                  </label>
+
+                  <label class="grid gap-2">
+                    <span class="text-sm font-medium text-[#4D4540]">Bairro *</span>
+                    <input
+                      formControlName="neighborhood"
+                      type="text"
+                      class="h-12 rounded-2xl bg-[#F7F5F4] px-4 text-sm text-[#2D241E] outline-none ring-1 ring-transparent transition focus:ring-[#D9C5BC]"
+                    />
+                  </label>
+                </div>
+
+                <div class="grid gap-5 md:grid-cols-[110px_minmax(0,1fr)]">
+                  <label class="grid w-full gap-2">
+                    <span class="text-sm font-medium text-[#4D4540]">UF *</span>
+                    <input
+                      formControlName="state"
+                      type="text"
+                      maxlength="2"
+                      class="h-12 w-full rounded-2xl bg-[#F7F5F4] px-4 text-center text-sm font-medium uppercase text-[#2D241E] outline-none ring-1 ring-transparent transition focus:ring-[#D9C5BC]"
+                      placeholder="SP"
+                      (input)="onStateInput($event)"
+                    />
+                  </label>
+
+                  <label class="grid min-w-0 gap-2">
+                    <span class="text-sm font-medium text-[#4D4540]">Cidade *</span>
+                    <input
+                      formControlName="city"
+                      type="text"
+                      class="h-12 w-full min-w-0 rounded-2xl bg-[#F7F5F4] px-4 text-sm text-[#2D241E] outline-none ring-1 ring-transparent transition focus:ring-[#D9C5BC]"
+                    />
+                  </label>
+                </div>
               </div>
             </div>
           </section>
@@ -375,7 +441,7 @@ function timeValueValidator(value: string): boolean {
                               maxlength="5"
                               autocomplete="off"
                               placeholder="08:00"
-                              class="h-11 w-29.5 shrink-0 rounded-2xl bg-[#F7F5F4] px-4 text-center text-sm font-medium text-[#6E6762] outline-none ring-1 ring-transparent transition placeholder:text-[#BBB0AA] focus:ring-[#D9C5BC]"
+                              class="h-11 w-29.5 shrink-0 rounded-2xl bg-[#F7F5F4] px-4 text-center text-sm font-medium text-[#2D241E] outline-none ring-1 ring-transparent transition placeholder:text-[#BBB0AA] focus:ring-[#D9C5BC]"
                               [value]="interval.startTime"
                               (input)="onTimeInput(day.dayKey, $index, 'startTime', $event)"
                             />
@@ -388,7 +454,7 @@ function timeValueValidator(value: string): boolean {
                               maxlength="5"
                               autocomplete="off"
                               placeholder="18:00"
-                              class="h-11 w-29.5 shrink-0 rounded-2xl bg-[#F7F5F4] px-4 text-center text-sm font-medium text-[#6E6762] outline-none ring-1 ring-transparent transition placeholder:text-[#BBB0AA] focus:ring-[#D9C5BC]"
+                              class="h-11 w-29.5 shrink-0 rounded-2xl bg-[#F7F5F4] px-4 text-center text-sm font-medium text-[#2D241E] outline-none ring-1 ring-transparent transition placeholder:text-[#BBB0AA] focus:ring-[#D9C5BC]"
                               [value]="interval.endTime"
                               (input)="onTimeInput(day.dayKey, $index, 'endTime', $event)"
                             />
@@ -430,119 +496,6 @@ function timeValueValidator(value: string): boolean {
               </div>
             </div>
           </section>
-
-          <section class="grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
-            <div class="space-y-3">
-              <h2
-                class="text-3xl font-bold text-[#8B5E4E]"
-                style="font-family: 'Noto Serif', serif"
-              >
-                Status
-              </h2>
-              <p class="max-w-55 text-sm leading-7 text-[#6B625D]">
-                Controle a disponibilidade da clínica na plataforma.
-              </p>
-            </div>
-
-            <div
-              class="overflow-hidden rounded-[28px] border border-[#F2E8E2] bg-white p-6 shadow-[0px_1px_2px_rgba(0,0,0,0.05)] md:p-8"
-            >
-              <div class="space-y-5">
-                <div class="flex gap-2">
-                  <button
-                    type="button"
-                    (click)="clinicActive.set(true)"
-                    class="inline-flex h-10 items-center justify-center rounded-2xl px-5 text-sm font-medium transition"
-                    [class.bg-[#8B5E4E]]="clinicActive()"
-                    [class.text-white]="clinicActive()"
-                    [class.shadow-[0px_4px_12px_-4px_rgba(139,94,78,0.5)]]="clinicActive()"
-                    [class.bg-[#F7F5F4]]="!clinicActive()"
-                    [class.text-[#7A6F69]]="!clinicActive()"
-                  >
-                    Ativa
-                  </button>
-                  <button
-                    type="button"
-                    (click)="clinicActive.set(false)"
-                    class="inline-flex h-10 items-center justify-center rounded-2xl px-5 text-sm font-medium transition"
-                    [class.bg-[#8B5E4E]]="!clinicActive()"
-                    [class.text-white]="!clinicActive()"
-                    [class.shadow-[0px_4px_12px_-4px_rgba(139,94,78,0.5)]]="!clinicActive()"
-                    [class.bg-[#F7F5F4]]="clinicActive()"
-                    [class.text-[#7A6F69]]="clinicActive()"
-                  >
-                    Inativa
-                  </button>
-                </div>
-
-                @if (!clinicActive()) {
-                  <div class="space-y-4 rounded-2xl border border-[#F2E8E2] bg-[#FFFDFC] p-4">
-                    <div class="flex flex-col gap-3">
-                      <label class="flex cursor-pointer items-center gap-3 text-sm text-[#4D4540]">
-                        <input
-                          type="radio"
-                          name="inactiveType"
-                          [checked]="inactiveType() === 'permanent'"
-                          (change)="inactiveType.set('permanent')"
-                          class="accent-[#8B5E4E]"
-                        />
-                        Permanentemente
-                      </label>
-                      <label class="flex cursor-pointer items-center gap-3 text-sm text-[#4D4540]">
-                        <input
-                          type="radio"
-                          name="inactiveType"
-                          [checked]="inactiveType() === 'temporary'"
-                          (change)="inactiveType.set('temporary')"
-                          class="accent-[#8B5E4E]"
-                        />
-                        Por período
-                      </label>
-                    </div>
-
-                    @if (inactiveType() === 'temporary') {
-                      <div class="grid gap-4 md:grid-cols-2">
-                        <label class="grid gap-2">
-                          <span class="text-sm font-medium text-[#4D4540]">Data de início</span>
-                          <input
-                            type="date"
-                            [value]="inactiveFrom()"
-                            (change)="inactiveFrom.set($any($event.target).value)"
-                            class="h-12 rounded-2xl bg-[#F7F5F4] px-4 text-sm text-[#2D241E] outline-none ring-1 ring-transparent transition focus:ring-[#D9C5BC]"
-                          />
-                        </label>
-                        <label class="grid gap-2">
-                          <span class="text-sm font-medium text-[#4D4540]">Data de fim</span>
-                          <input
-                            type="date"
-                            [value]="inactiveTo()"
-                            (change)="inactiveTo.set($any($event.target).value)"
-                            class="h-12 rounded-2xl bg-[#F7F5F4] px-4 text-sm text-[#2D241E] outline-none ring-1 ring-transparent transition focus:ring-[#D9C5BC]"
-                          />
-                        </label>
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-            </div>
-          </section>
-
-          @if (submitted() && validationMessage()) {
-            <div
-              class="rounded-2xl border border-[#E9C9C0] bg-[#FFF6F4] px-4 py-3 text-sm text-[#A34D43]"
-            >
-              {{ validationMessage() }}
-            </div>
-          }
-
-          @if (errorMessage()) {
-            <div
-              class="rounded-2xl border border-[#E9C9C0] bg-[#FFF6F4] px-4 py-3 text-sm text-[#A34D43]"
-            >
-              {{ errorMessage() }}
-            </div>
-          }
         </form>
       </section>
     </div>
@@ -551,6 +504,7 @@ function timeValueValidator(value: string): boolean {
 })
 export class ClinicFormDrawerComponent {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly toastService = inject(ToastService);
 
   readonly clinic = input<ClinicCardViewModel | null>(null);
   readonly saving = input(false);
@@ -562,18 +516,19 @@ export class ClinicFormDrawerComponent {
   protected readonly submitted = signal(false);
   protected readonly imagePreviewUrl = signal('');
   protected readonly imageFileName = signal('');
-  protected readonly workingDays = signal<WorkingDay[]>(cloneWorkingDays(CLINIC_SCHEDULE_TEMPLATE));
+  protected readonly selectedImageFile = signal<File | null>(null);
+  protected readonly imageRemoved = signal(false);
+  protected readonly workingDays = signal<WorkingDay[]>(this.createEmptyWorkingDays());
   protected readonly clinicActive = signal(true);
-  protected readonly inactiveType = signal<InactiveType>('permanent');
-  protected readonly inactiveFrom = signal('');
-  protected readonly inactiveTo = signal('');
+  private readonly lastErrorToast = signal('');
   protected readonly isEditing = computed(() => !!this.clinic());
   protected readonly title = computed(() => (this.isEditing() ? 'Editar Clínica' : 'Nova Clínica'));
+  private lastCepLookup = '';
 
   protected readonly form = this.formBuilder.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(150)]],
     phone: ['', [Validators.required, Validators.maxLength(20)]],
-    email: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
+    email: ['', [Validators.email, Validators.maxLength(150)]],
     whatsapp: ['', [Validators.maxLength(20)]],
     instagram: ['', [Validators.maxLength(60)]],
     street: ['', [Validators.required, Validators.maxLength(150)]],
@@ -581,6 +536,7 @@ export class ClinicFormDrawerComponent {
     neighborhood: ['', [Validators.required, Validators.maxLength(100)]],
     zipCode: ['', [Validators.required]],
     city: ['', [Validators.required, Validators.maxLength(100)]],
+    state: ['SP', [Validators.required]],
     imageUrl: [''],
   });
 
@@ -602,6 +558,10 @@ export class ClinicFormDrawerComponent {
 
     if (!zipCodeValidator(value.zipCode)) {
       return 'Informe um CEP com 8 dígitos.';
+    }
+
+    if (!stateValidator(value.state)) {
+      return 'Informe uma UF válida com 2 letras.';
     }
 
     if (!enabledDays.length) {
@@ -632,16 +592,6 @@ export class ClinicFormDrawerComponent {
       }
     }
 
-    if (!this.clinicActive() && this.inactiveType() === 'temporary') {
-      if (!this.inactiveFrom() || !this.inactiveTo()) {
-        return 'Informe as datas de início e fim do período de inatividade.';
-      }
-
-      if (this.inactiveTo() < this.inactiveFrom()) {
-        return 'A data de fim deve ser posterior à data de início.';
-      }
-    }
-
     return null;
   });
 
@@ -662,15 +612,15 @@ export class ClinicFormDrawerComponent {
           neighborhood: clinic.neighborhood,
           zipCode: this.formatCepValue(clinic.zipCode),
           city: clinic.city,
+          state: clinic.state,
           imageUrl: clinic.imageUrl,
         });
         this.imagePreviewUrl.set(clinic.imageUrl || '');
         this.imageFileName.set('');
+        this.selectedImageFile.set(null);
+        this.imageRemoved.set(false);
         this.workingDays.set(cloneWorkingDays(clinic.workingDays));
         this.clinicActive.set(clinic.active);
-        this.inactiveType.set(clinic.inactiveType ?? 'permanent');
-        this.inactiveFrom.set(clinic.inactiveFrom ?? '');
-        this.inactiveTo.set(clinic.inactiveTo ?? '');
         return;
       }
 
@@ -685,15 +635,31 @@ export class ClinicFormDrawerComponent {
         neighborhood: '',
         zipCode: '',
         city: '',
+        state: 'SP',
         imageUrl: '',
       });
       this.imagePreviewUrl.set('');
       this.imageFileName.set('');
-      this.workingDays.set(cloneWorkingDays(CLINIC_SCHEDULE_TEMPLATE));
+      this.selectedImageFile.set(null);
+      this.imageRemoved.set(false);
+      this.workingDays.set(this.createEmptyWorkingDays());
       this.clinicActive.set(true);
-      this.inactiveType.set('permanent');
-      this.inactiveFrom.set('');
-      this.inactiveTo.set('');
+    });
+
+    effect(() => {
+      const message = this.errorMessage();
+
+      if (!message) {
+        this.lastErrorToast.set('');
+        return;
+      }
+
+      if (message === this.lastErrorToast()) {
+        return;
+      }
+
+      this.lastErrorToast.set(message);
+      this.toastService.error(message);
     });
   }
 
@@ -733,8 +699,27 @@ export class ClinicFormDrawerComponent {
   protected onCepInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const formatted = this.formatCepValue(input.value);
+    const cep = formatted.replace(/\D/g, '');
     input.value = formatted;
     this.form.controls.zipCode.setValue(formatted, { emitEvent: false });
+
+    if (cep.length === 8 && cep !== this.lastCepLookup) {
+      void this.fillAddressFromCep(cep);
+    }
+
+    if (cep.length < 8) {
+      this.lastCepLookup = '';
+    }
+  }
+
+  protected onStateInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const formatted = input.value
+      .replace(/[^a-zA-Z]/g, '')
+      .slice(0, 2)
+      .toUpperCase();
+    input.value = formatted;
+    this.form.controls.state.setValue(formatted, { emitEvent: false });
   }
 
   protected normalizeEmailInput(controlName: 'email'): void {
@@ -780,6 +765,8 @@ export class ClinicFormDrawerComponent {
     }
 
     this.imageFileName.set(file.name);
+    this.selectedImageFile.set(file);
+    this.imageRemoved.set(false);
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -793,28 +780,31 @@ export class ClinicFormDrawerComponent {
   protected removeImage(): void {
     this.imagePreviewUrl.set('');
     this.imageFileName.set('');
+    this.selectedImageFile.set(null);
+    this.imageRemoved.set(true);
     this.form.controls.imageUrl.setValue('');
   }
 
   protected submit(): void {
     this.submitted.set(true);
+    const validationMessage = this.validationMessage();
 
-    if (this.validationMessage()) {
+    if (validationMessage) {
+      this.toastService.error(validationMessage);
       return;
     }
 
     const value = this.form.getRawValue();
-    const active = this.clinicActive();
-    const inactiveType = !active ? this.inactiveType() : undefined;
+    const active = this.isEditing() ? this.clinicActive() : true;
 
     this.save.emit({
       ...value,
       zipCode: value.zipCode.replace(/\D/g, ''),
+      state: value.state.trim().toUpperCase(),
+      imageFile: this.selectedImageFile(),
+      imageRemoved: this.imageRemoved(),
       workingDays: cloneWorkingDays(this.workingDays()),
       active,
-      inactiveType,
-      inactiveFrom: !active && inactiveType === 'temporary' ? this.inactiveFrom() : undefined,
-      inactiveTo: !active && inactiveType === 'temporary' ? this.inactiveTo() : undefined,
     });
   }
 
@@ -881,4 +871,45 @@ export class ClinicFormDrawerComponent {
     const digits = value.replace(/\D/g, '').slice(0, 8);
     return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
   }
+
+  private createEmptyWorkingDays(): WorkingDay[] {
+    return cloneWorkingDays(CLINIC_SCHEDULE_TEMPLATE).map((day) => ({
+      ...day,
+      enabled: false,
+      intervals: [{ startTime: '', endTime: '' }],
+    }));
+  }
+
+  private async fillAddressFromCep(cep: string): Promise<void> {
+    this.lastCepLookup = cep;
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const address = (await response.json()) as ViaCepResponse;
+
+      if (this.lastCepLookup !== cep || address.erro) {
+        return;
+      }
+
+      this.form.patchValue(
+        {
+          street: address.logradouro || this.form.controls.street.value,
+          neighborhood: address.bairro || this.form.controls.neighborhood.value,
+          city: address.localidade || this.form.controls.city.value,
+          state: address.uf || this.form.controls.state.value,
+        },
+        { emitEvent: false },
+      );
+    } catch {
+      // CEP lookup is a convenience; manual address entry remains available.
+    }
+  }
+}
+
+interface ViaCepResponse {
+  logradouro?: string;
+  bairro?: string;
+  localidade?: string;
+  uf?: string;
+  erro?: boolean;
 }

@@ -1,48 +1,21 @@
-@if (hideShell()) {
-  <router-outlet />
-} @else {
-  <div class="min-h-screen bg-[#F9F9F9] text-[#57514d]">
-    <!-- Mobile top bar (hamburger + logo) -->
-    <div
-      class="fixed left-0 right-0 top-0 z-30 flex items-center justify-between px-4 lg:hidden"
-      style="background: #fdf8f6; border-bottom: 1px solid #e8ded8; height: 64px"
-    >
-      <button
-        type="button"
-        class="flex h-10 w-10 flex-col items-center justify-center gap-1.25 rounded-xl transition hover:bg-[#EDE8E6]"
-        (click)="sidebarOpen.set(!sidebarOpen())"
-        aria-label="Abrir menu"
-      >
-        <span class="block h-0.5 w-6 rounded-full" style="background: #7c5145"></span>
-        <span class="block h-0.5 w-6 rounded-full" style="background: #7c5145"></span>
-        <span class="block h-0.5 w-6 rounded-full" style="background: #7c5145"></span>
-      </button>
-
-      <!-- Logo centered -->
-      <img src="/Logo_clinica.svg" alt="Mariana Dias" style="height: 40px; width: auto" />
-
-      <!-- Spacer to balance hamburger -->
-      <div style="width: 40px"></div>
-    </div>
-
-    <!-- Mobile backdrop -->
-    @if (sidebarOpen()) {
-      <div
-        class="fixed inset-0 z-40 lg:hidden"
-        style="background: rgba(0, 0, 0, 0.4)"
-        (click)="sidebarOpen.set(false)"
-      ></div>
-    }
-
-    <!-- Main layout -->
-    <div class="pt-16 lg:grid lg:grid-cols-[256px_minmax(0,1fr)] lg:pt-0">
-      <app-global-sidebar [mobileOpen]="sidebarOpen()" (closeMobile)="sidebarOpen.set(false)" />
+<div class="min-h-screen bg-[#F9F9F9] text-[#57514d]">
+  @if (isPublicRoute()) {
+    <app-global-header />
+    <router-outlet />
+    <app-global-footer />
+  } @else if (hideShell()) {
+    <router-outlet />
+  } @else {
+    <div class="lg:grid lg:grid-cols-[256px_minmax(0,1fr)]">
+      <app-global-sidebar />
 
       <main class="min-w-0">
         <router-outlet />
       </main>
     </div>
-  </div>
-}
 
-<app-global-footer />
+    <app-toast-container />
+    <app-confirm-dialog />
+    <app-global-footer />
+  }
+</div>

@@ -1,17 +1,28 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-access-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   template: `
     <div
       class="min-h-screen bg-[#FBF8F5] text-[#5C5652]"
       style="font-family: 'Manrope', sans-serif"
     >
+      <a
+        routerLink="/"
+        class="fixed left-5 top-5 z-20 inline-flex h-11 items-center gap-2 rounded-full border border-[#E7D7CF] bg-white/90 px-4 text-sm font-semibold text-[#7C5145] shadow-[0_12px_28px_-20px_rgba(28,25,23,0.55)] backdrop-blur transition hover:bg-white hover:text-[#5F3F35] sm:left-6 sm:top-6"
+        aria-label="Voltar para a home"
+      >
+        <svg viewBox="0 0 24 24" class="h-4 w-4 stroke-current" fill="none" stroke-width="2">
+          <path d="M19 12H5"></path>
+          <path d="m12 19-7-7 7-7"></path>
+        </svg>
+      </a>
+
       <section class="grid min-h-screen lg:grid-cols-[minmax(0,1.2fr)_minmax(26rem,0.8fr)]">
         <div class="relative hidden overflow-hidden bg-[#734C3E] lg:block">
           <div
@@ -55,7 +66,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                 class="text-2xl leading-relaxed italic xl:text-[2rem]"
                 style="font-family: 'Noto Serif', serif"
               >
-                “A precisão da odontologia com o acolhimento do ambiente humano.”
+                "A precisão da odontologia com o acolhimento do ambiente humano."
               </p>
               <div
                 class="space-y-1 text-sm font-semibold uppercase tracking-[0.28em] text-[#F8E8DE]/80"
@@ -105,7 +116,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                     class="flex h-15 items-center rounded-full border border-[#E7D7CF] bg-white px-6 transition focus-within:border-[#B48A7C] focus-within:shadow-[0_0_0_4px_rgba(178,140,125,0.12)]"
                   >
                     <input
-                      type="text"
+                      type="email"
                       formControlName="username"
                       placeholder="seuemail@clinica.com"
                       class="h-full flex-1 border-0 bg-transparent text-base text-[#3F3835] outline-none placeholder:text-[#B1A7A2]"
@@ -121,7 +132,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                     </svg>
                   </div>
                   @if (showFieldError('username')) {
-                    <p class="px-3 text-sm text-[#C26E63]">Informe seu e-mail institucional.</p>
+                    <p class="px-3 text-sm text-[#C26E63]">Informe um e-mail válido</p>
                   }
                 </div>
 
@@ -137,20 +148,46 @@ import { AuthService } from '../../../../core/services/auth.service';
                     class="flex h-15 items-center rounded-full border border-[#E7D7CF] bg-white px-6 transition focus-within:border-[#B48A7C] focus-within:shadow-[0_0_0_4px_rgba(178,140,125,0.12)]"
                   >
                     <input
-                      type="password"
+                      [type]="showPassword() ? 'text' : 'password'"
                       formControlName="password"
                       placeholder="Digite sua senha"
                       class="h-full flex-1 border-0 bg-transparent text-base text-[#3F3835] outline-none placeholder:text-[#B1A7A2]"
                     />
-                    <svg
-                      viewBox="0 0 24 24"
-                      class="h-5 w-5 stroke-[#B28C7D]"
-                      fill="none"
-                      stroke-width="1.8"
+                    <button
+                      type="button"
+                      class="flex h-9 w-9 items-center justify-center rounded-full text-[#B28C7D] transition hover:bg-[#F7EFEC] hover:text-[#8B5E4E]"
+                      (click)="togglePasswordVisibility()"
+                      [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
                     >
-                      <rect x="5" y="11" width="14" height="9" rx="2"></rect>
-                      <path d="M8 11V8a4 4 0 1 1 8 0v3"></path>
-                    </svg>
+                      @if (showPassword()) {
+                        <svg
+                          viewBox="0 0 24 24"
+                          class="h-5 w-5 stroke-current"
+                          fill="none"
+                          stroke-width="1.8"
+                        >
+                          <path d="M3 3l18 18"></path>
+                          <path d="M10.6 10.6A2 2 0 0 0 12 14a2 2 0 0 0 1.4-.6"></path>
+                          <path
+                            d="M8.1 5.5A10.7 10.7 0 0 1 12 4c5 0 8.5 4.1 10 8a15.7 15.7 0 0 1-2.3 3.8"
+                          ></path>
+                          <path d="M14.4 14.4A4 4 0 0 1 6.7 11"></path>
+                          <path
+                            d="M6.2 6.2A15.2 15.2 0 0 0 2 12c1.5 3.9 5 8 10 8a10.8 10.8 0 0 0 5.2-1.4"
+                          ></path>
+                        </svg>
+                      } @else {
+                        <svg
+                          viewBox="0 0 24 24"
+                          class="h-5 w-5 stroke-current"
+                          fill="none"
+                          stroke-width="1.8"
+                        >
+                          <path d="M2 12s3.5-8 10-8 10 8 10 8-3.5 8-10 8S2 12 2 12Z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                      }
+                    </button>
                   </div>
                   @if (showFieldError('password')) {
                     <p class="px-3 text-sm text-[#C26E63]">Informe sua senha de acesso.</p>
@@ -209,14 +246,15 @@ export class AdminAccessPageComponent {
 
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal('');
+  protected readonly showPassword = signal(false);
   protected readonly form = this.formBuilder.group({
-    username: ['', Validators.required],
+    username: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
   });
 
   constructor() {
     if (this.authService.isTokenValid()) {
-      void this.router.navigateByUrl('/medical-records');
+      void this.router.navigateByUrl('/clinics');
     }
   }
 
@@ -236,10 +274,11 @@ export class AdminAccessPageComponent {
       .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({
         next: () => {
-          void this.router.navigateByUrl('/medical-records');
+          void this.router.navigateByUrl('/clinics');
         },
         error: (error: Error) => {
-          this.errorMessage.set(error.message || 'Não foi possível realizar o login.');
+          const message = error.message || 'Não foi possível realizar o login.';
+          this.errorMessage.set(message);
         },
       });
   }
@@ -247,5 +286,9 @@ export class AdminAccessPageComponent {
   protected showFieldError(fieldName: 'username' | 'password'): boolean {
     const field = this.form.controls[fieldName];
     return field.invalid && (field.dirty || field.touched);
+  }
+
+  protected togglePasswordVisibility(): void {
+    this.showPassword.update((visible) => !visible);
   }
 }
