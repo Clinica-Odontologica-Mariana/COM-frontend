@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
+import { ConfirmDialogComponent } from './shared/components/confirm-dialog/confirm-dialog.component';
 import { ToastContainerComponent } from './shared/components/feedback/toast-container/toast-container.component';
 import { GlobalFooterComponent } from './shared/components/layout/global-footer/global-footer.component';
 import { GlobalHeaderComponent } from './shared/components/layout/global-header/global-header.component';
@@ -11,6 +12,7 @@ import { GlobalSidebarComponent } from './shared/components/layout/global-sideba
   selector: 'app-root',
   standalone: true,
   imports: [
+    ConfirmDialogComponent,
     GlobalFooterComponent,
     GlobalHeaderComponent,
     GlobalSidebarComponent,
