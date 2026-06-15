@@ -254,7 +254,7 @@ export class AdminAccessPageComponent {
 
   constructor() {
     if (this.authService.isTokenValid()) {
-      void this.router.navigateByUrl('/clinics');
+      void this.router.navigateByUrl('/panel');
     }
   }
 
@@ -274,7 +274,7 @@ export class AdminAccessPageComponent {
       .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({
         next: () => {
-          void this.router.navigateByUrl('/clinics');
+          void this.router.navigateByUrl('/panel');
         },
         error: (error: Error) => {
           const message = error.message || 'Não foi possível realizar o login.';
