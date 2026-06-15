@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { API_BASE_URL } from '../../../core/config/api.config';
+import { ApiResponse } from '../../../core/models/api-response.model';
 import {
   AddressLookupResult,
   Collaborator,
@@ -11,16 +12,12 @@ import {
   CollaboratorRole,
   CollaboratorStatus,
   CollaboratorWorkingHour,
-  ServiceOption,
-  SpecialtyOption,
-  Workplace,
   cloneCollaboratorForm,
   createEmptyCollaboratorForm,
   formatPhoneValue,
   getInitials,
   normalizeDocumentId,
   normalizeEmail,
-  passwordStrengthScore,
 } from '../models/collaborator.models';
 
 @Injectable({ providedIn: 'root' })
@@ -107,7 +104,7 @@ export class CollaboratorsApi {
   }
 
   workplaceName(workplaceId: string): string {
-    return WORKPLACES.find((workplace) => workplace.id === workplaceId)?.name ?? 'Unidade';
+    return this.collections().workplaces.find((workplace) => workplace.id === workplaceId)?.name ?? 'Unidade';
   }
 
   getCollections(): CollaboratorCollections {
@@ -126,4 +123,80 @@ export class CollaboratorsApi {
     return getInitials(fullName);
   }
 
+}
+
+function unwrap<T>(source: Observable<T | ApiResponse<T>>): Observable<T> {
+  return source.pipe(map((response) => (isApiResponse(response) ? response.data : response)));
+}
+
+function isApiResponse<T>(value: T | ApiResponse<T>): value is ApiResponse<T> {
+  return typeof value === 'object' && value !== null && 'data' in value;
+}
+
+function toCreatePayload(formValue: CollaboratorFormValue): CollaboratorPayload {
+  return toPayload(formValue);
+}
+
+function toUpdatePayload(formValue: CollaboratorFormValue): CollaboratorPayload {
+  return toPayload(formValue);
+}
+
+function toPayload(formValue: CollaboratorFormValue): CollaboratorPayload {
+  return {
+    avatarUrl: formValue.avatarPreviewUrl,
+    fullName: formValue.fullName.trim(),
+    documentId: normalizeDocumentId(formValue.documentId),
+    birthDate: formValue.birthDate || null,
+    email: normalizeEmail(formValue.email),
+    phone: formatPhoneValue(formValue.phone),
+    address: {
+      zipCode: formValue.address.zipCode.trim(),
+      street: formValue.address.street.trim(),
+      number: formValue.address.number.trim(),
+      city: formValue.address.city.trim(),
+      state: formValue.address.state.trim(),
+    },
+    roles: [...formValue.roles],
+    workplaceIds: [...formValue.workplaceIds],
+    status: formValue.status,
+    professionalId: formValue.professionalId.trim(),
+    specialties: [...formValue.specialties],
+    servicesProvided: [...formValue.servicesProvided],
+    workingHours: formValue.workingHours.map((workingHour) => ({ ...workingHour })),
+    canManageAppointments: formValue.canManageAppointments,
+    superAdmin: formValue.superAdmin,
+    permissions: { ...formValue.permissions },
+    accessMode: formValue.accessMode,
+    password: formValue.password,
+    notes: formValue.notes.trim(),
+  };
+}
+
+interface CollaboratorPayload {
+  avatarUrl: string;
+  fullName: string;
+  documentId: string;
+  birthDate: string | null;
+  email: string;
+  phone: string;
+  address: {
+    zipCode: string;
+    street: string;
+    number: string;
+    city: string;
+    state: string;
+  };
+  roles: CollaboratorRole[];
+  workplaceIds: string[];
+  status: CollaboratorStatus;
+  professionalId: string;
+  specialties: string[];
+  servicesProvided: string[];
+  workingHours: CollaboratorWorkingHour[];
+  canManageAppointments: boolean;
+  superAdmin: boolean;
+  permissions: CollaboratorFormValue['permissions'];
+  accessMode: CollaboratorAccessMode;
+  password: string;
+  notes: string;
 }

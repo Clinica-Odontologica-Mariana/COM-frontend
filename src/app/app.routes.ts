@@ -45,6 +45,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'meu-perfil',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/profile/pages/my-profile-page/my-profile-page.component').then(
+        (m) => m.MyProfilePageComponent,
+      ),
+  },
+  {
     path: 'clinics/new',
     canActivate: [authGuard],
     loadComponent: () =>

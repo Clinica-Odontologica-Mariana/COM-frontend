@@ -11,17 +11,20 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
   const router = inject(Router);
   const toastService = inject(ToastService);
   const isLoginRequest = request.url.includes('/auth/login');
+  const isProfileRequest = request.url.includes('/users/me') || request.url.includes('/auth/me');
 
   return next(request).pipe(
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse) {
-        if (error.status === 401 && !isLoginRequest) {
+        const shouldForceLogout = error.status === 401 && !isLoginRequest && !isProfileRequest;
+
+        if (shouldForceLogout) {
           authService.logout();
           void router.navigateByUrl('/admin-access');
         }
 
         const message = resolveErrorMessage(error);
-        if (!isLoginRequest) {
+        if (!isLoginRequest && !isProfileRequest) {
           toastService.error(message);
         }
         return throwError(() => new Error(message));
