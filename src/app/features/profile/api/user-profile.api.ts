@@ -3,15 +3,33 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { API_BASE_URL } from '../../../core/config/api.config';
 import { ApiResponse } from '../../../core/models/api-response.model';
-import { CurrentUser } from '../../../core/services/auth.service';
+import {
+  ChangePasswordPayload,
+  UpdateUserProfilePayload,
+  UserProfile,
+  UserProfileUpdateResponse,
+} from '../models/user-profile.models';
 
 @Injectable({ providedIn: 'root' })
 export class UserProfileApi {
   private readonly http = inject(HttpClient);
   private readonly base = inject(API_BASE_URL);
 
-  getMe(): Observable<CurrentUser> {
-    return unwrap(this.http.get<CurrentUser | ApiResponse<CurrentUser>>(`${this.base}/auth/me`));
+  getMe(): Observable<UserProfile> {
+    return unwrap(this.http.get<UserProfile | ApiResponse<UserProfile>>(`${this.base}/users/me`));
+  }
+
+  updateMe(payload: UpdateUserProfilePayload): Observable<UserProfileUpdateResponse> {
+    return unwrap(
+      this.http.patch<UserProfileUpdateResponse | ApiResponse<UserProfileUpdateResponse>>(
+        `${this.base}/users/me`,
+        payload,
+      ),
+    );
+  }
+
+  changePassword(payload: ChangePasswordPayload): Observable<void> {
+    return this.http.post<void>(`${this.base}/users/me/change-password`, payload);
   }
 
   getProfilePhotoDownloadUrl(): Observable<string | null> {

@@ -1,76 +1,106 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
-import { API_BASE_URL } from '../../../core/config/api.config';
-import { ApiResponse } from '../../../core/models/api-response.model';
+import { isPlatformBrowser } from '@angular/common';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import {
   AddressLookupResult,
   Collaborator,
-  CollaboratorAccessMode,
   CollaboratorCollections,
   CollaboratorFormValue,
   CollaboratorRole,
   CollaboratorStatus,
-  CollaboratorWorkingHour,
   cloneCollaboratorForm,
   createEmptyCollaboratorForm,
   formatPhoneValue,
   getInitials,
+  passwordStrengthScore,
   normalizeDocumentId,
   normalizeEmail,
 } from '../models/collaborator.models';
 
+const STORAGE_KEY = 'com-frontend.collaborators';
+
 @Injectable({ providedIn: 'root' })
 export class CollaboratorsApi {
-  private readonly http = inject(HttpClient);
-  private readonly base = inject(API_BASE_URL);
+  private readonly platformId = inject(PLATFORM_ID);
 
   list(): Observable<Collaborator[]> {
-    return unwrap(this.http.get<Collaborator[]>(`${this.base}/collaborators`));
+    return of(this.readAll());
   }
 
   getById(id: string): Observable<Collaborator | null> {
-    return unwrap(this.http.get<Collaborator | null>(`${this.base}/collaborators/${id}`));
+    return of(this.readAll().find((collaborator) => collaborator.id === id) ?? null);
   }
 
   create(formValue: CollaboratorFormValue): Observable<Collaborator> {
-    const payload = toCreatePayload(formValue);
-    return unwrap(this.http.post<Collaborator>(`${this.base}/collaborators`, payload));
+    const collaborator = formValueToCollaborator(formValue);
+    const items = this.readAll();
+    this.writeAll([...items, collaborator]);
+    return of(collaborator);
   }
 
   update(id: string, formValue: CollaboratorFormValue): Observable<Collaborator | null> {
-    const payload = toUpdatePayload(formValue);
-    return unwrap(this.http.put<Collaborator>(`${this.base}/collaborators/${id}`, payload));
+    const items = this.readAll();
+    const index = items.findIndex((collaborator) => collaborator.id === id);
+
+    if (index < 0) {
+      return of(null);
+    }
+
+    const current = items[index];
+    const updated = formValueToCollaborator(formValue, id, current.createdAt);
+    items[index] = updated;
+    this.writeAll(items);
+    return of(updated);
   }
 
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.base}/collaborators/${id}`);
+    this.writeAll(this.readAll().filter((collaborator) => collaborator.id !== id));
+    return of(void 0);
   }
 
   toggleStatus(id: string): Observable<Collaborator | null> {
-    return unwrap(this.http.patch<Collaborator>(`${this.base}/collaborators/${id}/status`, null));
+    const items = this.readAll();
+    const index = items.findIndex((collaborator) => collaborator.id === id);
+
+    if (index < 0) {
+      return of(null);
+    }
+
+    const current = items[index];
+    const updated: Collaborator = {
+      ...current,
+      status: current.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE',
+      updatedAt: new Date().toISOString(),
+    };
+
+    items[index] = updated;
+    this.writeAll(items);
+    return of(updated);
   }
 
   isEmailAvailable(email: string, collaboratorId?: string): Observable<boolean> {
-    const params = new URLSearchParams();
-    params.set('email', normalizeEmail(email));
-    if (collaboratorId) params.set('excludeId', collaboratorId);
-    return unwrap(this.http.get<boolean>(`${this.base}/collaborators/availability/email?${params.toString()}`));
+    const normalizedEmail = normalizeEmail(email);
+    const available = !this.readAll().some(
+      (collaborator) =>
+        collaborator.email.toLowerCase() === normalizedEmail && collaborator.id !== collaboratorId,
+    );
+    return of(available);
   }
 
   isDocumentAvailable(documentId: string, collaboratorId?: string): Observable<boolean> {
-    const params = new URLSearchParams();
-    params.set('documentId', normalizeDocumentId(documentId));
-    if (collaboratorId) params.set('excludeId', collaboratorId);
-    return unwrap(this.http.get<boolean>(`${this.base}/collaborators/availability/document?${params.toString()}`));
+    const normalizedDocumentId = normalizeDocumentId(documentId);
+    const available = !this.readAll().some(
+      (collaborator) =>
+        normalizeDocumentId(collaborator.documentId) === normalizedDocumentId && collaborator.id !== collaboratorId,
+    );
+    return of(available);
   }
 
   lookupZipCode(zipCode: string): Observable<AddressLookupResult | null> {
-    return unwrap(this.http.get<AddressLookupResult | null>(`${this.base}/address/lookup?zip=${zipCode}`));
+    return of(null);
   }
 
   collections(): CollaboratorCollections {
-    // Backend should provide collections; return empty arrays as fallback until integration.
     return {
       workplaces: [],
       specialties: [],
@@ -79,7 +109,7 @@ export class CollaboratorsApi {
   }
 
   fetchCollections(): Observable<CollaboratorCollections> {
-    return unwrap(this.http.get<CollaboratorCollections>(`${this.base}/collaborators/collections`));
+    return of(this.collections());
   }
 
   createDraft(): CollaboratorFormValue {
@@ -115,38 +145,60 @@ export class CollaboratorsApi {
     return ['ADMIN', 'RECEPTIONIST', 'DENTIST', 'ASSISTANT'];
   }
 
-  cloneForm(value: CollaboratorFormValue): CollaboratorFormValue {
-    return cloneCollaboratorForm(value);
+  cloneForm(value: CollaboratorFormValue | Collaborator): CollaboratorFormValue {
+    if (isCollaboratorFormValue(value)) {
+      return cloneCollaboratorForm(value);
+    }
+
+    return collaboratorToFormValue(value);
   }
 
   getInitials(fullName: string): string {
     return getInitials(fullName);
   }
 
+  private readAll(): Collaborator[] {
+    if (!isPlatformBrowser(this.platformId)) {
+      return [];
+    }
+
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as Collaborator[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private writeAll(items: Collaborator[]): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }
+
 }
 
-function unwrap<T>(source: Observable<T | ApiResponse<T>>): Observable<T> {
-  return source.pipe(map((response) => (isApiResponse(response) ? response.data : response)));
-}
+function formValueToCollaborator(
+  formValue: CollaboratorFormValue,
+  id = cryptoRandomId(),
+  createdAt = new Date().toISOString(),
+): Collaborator {
+  const password = formValue.accessMode === 'MANUAL' ? formValue.password.trim() : '';
+  const birthDate = formValue.birthDate || null;
 
-function isApiResponse<T>(value: T | ApiResponse<T>): value is ApiResponse<T> {
-  return typeof value === 'object' && value !== null && 'data' in value;
-}
-
-function toCreatePayload(formValue: CollaboratorFormValue): CollaboratorPayload {
-  return toPayload(formValue);
-}
-
-function toUpdatePayload(formValue: CollaboratorFormValue): CollaboratorPayload {
-  return toPayload(formValue);
-}
-
-function toPayload(formValue: CollaboratorFormValue): CollaboratorPayload {
   return {
+    id,
     avatarUrl: formValue.avatarPreviewUrl,
     fullName: formValue.fullName.trim(),
     documentId: normalizeDocumentId(formValue.documentId),
-    birthDate: formValue.birthDate || null,
+    birthDate,
     email: normalizeEmail(formValue.email),
     phone: formatPhoneValue(formValue.phone),
     address: {
@@ -167,36 +219,48 @@ function toPayload(formValue: CollaboratorFormValue): CollaboratorPayload {
     superAdmin: formValue.superAdmin,
     permissions: { ...formValue.permissions },
     accessMode: formValue.accessMode,
-    password: formValue.password,
+    passwordStrength: passwordStrengthScore(password),
     notes: formValue.notes.trim(),
+    createdAt,
+    updatedAt: new Date().toISOString(),
   };
 }
 
-interface CollaboratorPayload {
-  avatarUrl: string;
-  fullName: string;
-  documentId: string;
-  birthDate: string | null;
-  email: string;
-  phone: string;
-  address: {
-    zipCode: string;
-    street: string;
-    number: string;
-    city: string;
-    state: string;
-  };
-  roles: CollaboratorRole[];
-  workplaceIds: string[];
-  status: CollaboratorStatus;
-  professionalId: string;
-  specialties: string[];
-  servicesProvided: string[];
-  workingHours: CollaboratorWorkingHour[];
-  canManageAppointments: boolean;
-  superAdmin: boolean;
-  permissions: CollaboratorFormValue['permissions'];
-  accessMode: CollaboratorAccessMode;
-  password: string;
-  notes: string;
+function collaboratorToFormValue(collaborator: Collaborator): CollaboratorFormValue {
+  return cloneCollaboratorForm({
+    avatarFile: null,
+    avatarPreviewUrl: collaborator.avatarUrl,
+    fullName: collaborator.fullName,
+    documentId: collaborator.documentId,
+    birthDate: collaborator.birthDate ?? '',
+    email: collaborator.email,
+    phone: collaborator.phone,
+    address: { ...collaborator.address },
+    roles: [...collaborator.roles],
+    workplaceIds: [...collaborator.workplaceIds],
+    status: collaborator.status,
+    professionalId: collaborator.professionalId,
+    specialties: [...collaborator.specialties],
+    servicesProvided: [...collaborator.servicesProvided],
+    workingHours: collaborator.workingHours.map((workingHour) => ({ ...workingHour })),
+    canManageAppointments: collaborator.canManageAppointments,
+    superAdmin: collaborator.superAdmin,
+    permissions: { ...collaborator.permissions },
+    accessMode: collaborator.accessMode,
+    password: '',
+    passwordConfirm: '',
+    notes: collaborator.notes,
+  });
+}
+
+function isCollaboratorFormValue(value: CollaboratorFormValue | Collaborator): value is CollaboratorFormValue {
+  return 'avatarFile' in value && 'passwordConfirm' in value;
+}
+
+function cryptoRandomId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return Math.random().toString(36).slice(2, 11);
 }

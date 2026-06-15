@@ -9,6 +9,7 @@ import {
   Output,
   signal,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   AbstractControl,
   AsyncValidatorFn,
@@ -144,7 +145,7 @@ import { CollaboratorMultiSelectComponent } from './collaborator-multi-select.co
                       class="w-full rounded-xl border border-[#E9DFD9] bg-[#FAF7F5] px-4 py-3 text-sm text-[#3F3835] outline-none transition focus:border-[#B48A7C] focus:shadow-[0_0_0_4px_rgba(178,140,125,0.12)]"
                     />
                     @if (fieldError('fullName')) {
-                      <p class="text-xs text-[#C26E63]">Nome é obrigatório.</p>
+                      <p class="text-xs text-[#C26E63]">{{ fieldMessage('fullName') }}</p>
                     }
                   </label>
 
@@ -166,7 +167,7 @@ import { CollaboratorMultiSelectComponent } from './collaborator-multi-select.co
                       class="w-full rounded-xl border border-[#E9DFD9] bg-[#FAF7F5] px-4 py-3 text-sm text-[#3F3835] outline-none transition focus:border-[#B48A7C] focus:shadow-[0_0_0_4px_rgba(178,140,125,0.12)]"
                     />
                     @if (fieldError('email')) {
-                      <p class="text-xs text-[#C26E63]">E-mail inválido ou já cadastrado.</p>
+                      <p class="text-xs text-[#C26E63]">{{ fieldMessage('email') }}</p>
                     }
                   </label>
 
@@ -187,7 +188,7 @@ import { CollaboratorMultiSelectComponent } from './collaborator-multi-select.co
                       class="w-full rounded-xl border border-[#E9DFD9] bg-[#FAF7F5] px-4 py-3 text-sm text-[#3F3835] outline-none transition focus:border-[#B48A7C] focus:shadow-[0_0_0_4px_rgba(178,140,125,0.12)]"
                     />
                     @if (fieldError('documentId')) {
-                      <p class="text-xs text-[#C26E63]">Documento obrigatório ou já usado.</p>
+                      <p class="text-xs text-[#C26E63]">{{ fieldMessage('documentId') }}</p>
                     }
                   </label>
 
@@ -384,7 +385,7 @@ import { CollaboratorMultiSelectComponent } from './collaborator-multi-select.co
                       class="w-full rounded-xl border border-[#E9DFD9] bg-[#FAF7F5] px-4 py-3 text-sm outline-none transition focus:border-[#B48A7C] focus:shadow-[0_0_0_4px_rgba(178,140,125,0.12)]"
                     />
                     @if (fieldError('password')) {
-                      <p class="text-xs text-[#C26E63]">Senha é obrigatória (mín. 8 caracteres).</p>
+                      <p class="text-xs text-[#C26E63]">{{ fieldMessage('password') }}</p>
                     }
                   </label>
 
@@ -397,7 +398,7 @@ import { CollaboratorMultiSelectComponent } from './collaborator-multi-select.co
                       class="w-full rounded-xl border border-[#E9DFD9] bg-[#FAF7F5] px-4 py-3 text-sm outline-none transition focus:border-[#B48A7C] focus:shadow-[0_0_0_4px_rgba(178,140,125,0.12)]"
                     />
                     @if (fieldError('passwordConfirm')) {
-                      <p class="text-xs text-[#C26E63]">As senhas não correspondem.</p>
+                      <p class="text-xs text-[#C26E63]">{{ fieldMessage('passwordConfirm') }}</p>
                     }
                   </label>
                 </div>
@@ -463,6 +464,7 @@ export class CollaboratorFormComponent implements OnInit {
   @Output() cancelled = new EventEmitter<void>();
 
   protected readonly submitting = signal(false);
+  protected readonly submitError = signal('');
   protected readonly activeTab = signal<'identity' | 'roles' | 'security'>('identity');
   protected collections: CollaboratorCollections = this.api.getCollections();
 
@@ -528,6 +530,49 @@ export class CollaboratorFormComponent implements OnInit {
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
+  protected fieldMessage(name: string): string {
+    const control = this.form.get(name as any);
+    if (!control) {
+      return 'Campo inválido.';
+    }
+
+    const errors = control.errors ?? {};
+    if (errors['required']) {
+      if (name === 'fullName') return 'Nome é obrigatório.';
+      if (name === 'email') return 'E-mail é obrigatório.';
+      if (name === 'documentId') return 'Documento é obrigatório.';
+      if (name === 'password') return 'Senha é obrigatória (mín. 8 caracteres).';
+      if (name === 'passwordConfirm') return 'Confirme a senha.';
+      return 'Campo obrigatório.';
+    }
+
+    if (errors['email']) {
+      return 'E-mail inválido.';
+    }
+
+    if (errors['emailTaken'] || errors['conflict']) {
+      return 'E-mail já cadastrado.';
+    }
+
+    if (errors['documentTaken']) {
+      return 'Documento já cadastrado.';
+    }
+
+    if (errors['passwordMismatch']) {
+      return 'As senhas não correspondem.';
+    }
+
+    if (errors['minlength']) {
+      return 'Senha precisa ter no mínimo 8 caracteres.';
+    }
+
+    if (typeof errors['serverMessage'] === 'string' && errors['serverMessage']) {
+      return errors['serverMessage'];
+    }
+
+    return 'Campo inválido.';
+  }
+
   protected onWorkplacesChange(selected: string[]): void {
     this.form.controls.workplaceIds.setValue(selected);
   }
@@ -549,6 +594,7 @@ export class CollaboratorFormComponent implements OnInit {
     }
 
     this.submitting.set(true);
+    this.submitError.set('');
     const value = this.form.getRawValue() as unknown as CollaboratorFormValue;
 
     const obs = this.editingId ? this.api.update(this.editingId, value) : this.api.create(value);
@@ -558,9 +604,9 @@ export class CollaboratorFormComponent implements OnInit {
         this.toast.success('Colaborador salvo com sucesso.');
         this.saved.emit();
       },
-      error: () => {
+      error: (error) => {
         this.submitting.set(false);
-        this.toast.error('Erro ao salvar colaborador.');
+        this.handleSubmitError(error);
       },
     });
   }
@@ -590,6 +636,69 @@ export class CollaboratorFormComponent implements OnInit {
     });
   }
 
+  private handleSubmitError(error: unknown): void {
+    if (!(error instanceof HttpErrorResponse)) {
+      this.submitError.set('Erro ao salvar colaborador.');
+      this.toast.error('Erro ao salvar colaborador.');
+      return;
+    }
+
+    const httpError = error;
+    const issues = extractFieldErrors(httpError.error);
+    let appliedFieldErrors = false;
+
+    for (const issue of issues) {
+      const field = (issue.field ?? '').toString();
+      const message = issue.message ?? 'Valor inválido.';
+
+      if (!field) {
+        continue;
+      }
+
+      const control = this.form.get(field as any);
+      if (!control) {
+        continue;
+      }
+
+      const nextErrors = { ...(control.errors ?? {}) };
+      if (field === 'email' && httpError.status === 409) {
+        nextErrors['conflict'] = true;
+      }
+
+      nextErrors['serverMessage'] = message;
+      control.setErrors(nextErrors);
+      control.markAsTouched();
+      appliedFieldErrors = true;
+    }
+
+    if (httpError.status === 409 && !this.form.controls.email.errors) {
+      this.form.controls.email.setErrors({ conflict: true, serverMessage: 'E-mail já cadastrado.' });
+      this.form.controls.email.markAsTouched();
+      appliedFieldErrors = true;
+    }
+
+    if (httpError.status === 429) {
+      const message = 'Muitas tentativas. Aguarde um momento antes de tentar novamente.';
+      this.submitError.set(message);
+      this.toast.error(message);
+      return;
+    }
+
+    if (httpError.status >= 500) {
+      const message = resolveDetailedSubmitMessage(httpError);
+      this.submitError.set(message);
+      return;
+    }
+
+    if (appliedFieldErrors) {
+      return;
+    }
+
+    const fallback = resolveSubmitMessage(httpError);
+    this.submitError.set(fallback);
+    this.toast.error(fallback);
+  }
+
   private emailUniqueValidator(): AsyncValidatorFn {
     return (control: AbstractControl) =>
       of(control.value).pipe(
@@ -611,4 +720,84 @@ export class CollaboratorFormComponent implements OnInit {
         map((available) => (available ? null : { documentTaken: true })),
       );
   }
+}
+
+function extractFieldErrors(payload: unknown): Array<{ field?: string; message?: string }> {
+  if (Array.isArray(payload)) {
+    return payload.filter(isFieldErrorLike);
+  }
+
+  if (isObject(payload)) {
+    const candidate = payload as { errors?: unknown; error?: { details?: unknown }; message?: unknown };
+    if (Array.isArray(candidate.errors)) {
+      return candidate.errors.filter(isFieldErrorLike);
+    }
+
+    if (Array.isArray(candidate.error?.details)) {
+      return candidate.error.details.filter(isFieldErrorLike);
+    }
+  }
+
+  return [];
+}
+
+function isFieldErrorLike(value: unknown): value is { field?: string; message?: string } {
+  return isObject(value) && ('field' in value || 'message' in value);
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function resolveSubmitMessage(error: HttpErrorResponse): string {
+  const detailedMessage = resolveDetailedSubmitMessage(error);
+
+  if (error.status === 400) {
+    return detailedMessage === 'Ocorreu um erro inesperado ao salvar o colaborador.'
+      ? 'Corrija os campos destacados e tente novamente.'
+      : detailedMessage;
+  }
+
+  if (error.status === 409) {
+    return detailedMessage === 'Ocorreu um erro inesperado ao salvar o colaborador.'
+      ? 'Já existe um colaborador com esses dados.'
+      : detailedMessage;
+  }
+
+  if (error.status >= 500) {
+    return detailedMessage;
+  }
+
+  return detailedMessage || 'Erro ao salvar colaborador.';
+}
+
+function resolveDetailedSubmitMessage(error: HttpErrorResponse): string {
+  const body = error.error;
+
+  if (typeof body === 'string' && body.trim()) {
+    return body.trim();
+  }
+
+  if (isObject(body)) {
+    const candidate = body as {
+      message?: unknown;
+      error?: {
+        message?: unknown;
+      };
+    };
+
+    if (typeof candidate.message === 'string' && candidate.message.trim()) {
+      return candidate.message.trim();
+    }
+
+    if (typeof candidate.error?.message === 'string' && candidate.error.message.trim()) {
+      return candidate.error.message.trim();
+    }
+  }
+
+  if (error.status >= 500) {
+    return 'Ocorreu um erro inesperado ao salvar o colaborador.';
+  }
+
+  return error.message || 'Erro ao salvar colaborador.';
 }

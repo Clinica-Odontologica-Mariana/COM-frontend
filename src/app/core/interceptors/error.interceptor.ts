@@ -24,10 +24,12 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
         }
 
         const message = resolveErrorMessage(error);
-        if (!isLoginRequest && !isProfileRequest) {
+        const shouldToast = !isLoginRequest && !isProfileRequest && ![400, 409, 429].includes(error.status);
+
+        if (shouldToast) {
           toastService.error(message);
         }
-        return throwError(() => new Error(message));
+        return throwError(() => error);
       }
 
       return throwError(() => error);

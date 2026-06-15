@@ -37,18 +37,23 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'colaboradores',
+    path: 'profissionais',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/collaborators/pages/collaborators-page/collaborators-page.component').then(
-        (m) => m.CollaboratorsPageComponent,
+      import('./features/professionals/pages/professionals-page/professionals-page.component').then(
+        (m) => m.ProfessionalsPageComponent,
       ),
+  },
+  {
+    path: 'colaboradores',
+    redirectTo: 'profissionais',
+    pathMatch: 'full',
   },
   {
     path: 'meu-perfil',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/profile/pages/my-profile-page/my-profile-page.component').then(
+      import('./features/profile/pages/my-profile-page/profile-page.component').then(
         (m) => m.MyProfilePageComponent,
       ),
   },

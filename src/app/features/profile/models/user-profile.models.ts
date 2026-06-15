@@ -8,6 +8,16 @@ export interface UserProfile {
   createdAt: string;
 }
 
+export interface UserProfileUpdateResponse {
+  id: string;
+  username: string;
+  name: string;
+  email: string;
+  phone: string;
+  roles: string[];
+  createdAt: string;
+}
+
 export interface UpdateUserProfilePayload {
   name: string;
   email: string;
@@ -22,5 +32,14 @@ export interface ChangePasswordPayload {
 
 export interface ApiFieldError {
   field?: string;
+  message?: string;
+}
+
+export interface ApiFieldErrorResponse {
+  errors?: ApiFieldError[];
+  error?: {
+    details?: ApiFieldError[];
+    message?: string;
+  };
   message?: string;
 }
