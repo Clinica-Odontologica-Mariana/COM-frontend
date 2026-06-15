@@ -33,8 +33,15 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
 };
 
 function resolveErrorMessage(error: HttpErrorResponse): string {
+<<<<<<< HEAD
   if (error.status === 401) {
     return 'Sessão expirada. Faça login novamente.';
+=======
+  const backendMessage = readBackendErrorMessage(error.error);
+
+  if (backendMessage) {
+    return backendMessage;
+>>>>>>> 6df08fd267776f9631072319f26d88dae077328c
   }
 
   if (error.status === 403) {
@@ -57,6 +64,22 @@ function resolveErrorMessage(error: HttpErrorResponse): string {
   }
 
   return 'Ocorreu um erro inesperado.';
+}
+
+function readBackendErrorMessage(payload: unknown): string | null {
+  if (!payload || typeof payload !== 'object' || !('error' in payload)) {
+    return null;
+  }
+
+  const apiError = (payload as { error?: unknown }).error;
+
+  if (!apiError || typeof apiError !== 'object' || !('message' in apiError)) {
+    return null;
+  }
+
+  const message = (apiError as { message?: unknown }).message;
+
+  return typeof message === 'string' && message.trim() ? message : null;
 }
 
 function isApiErrorResponse(value: unknown): value is {
