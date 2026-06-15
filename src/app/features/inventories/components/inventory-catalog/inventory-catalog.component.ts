@@ -1,5 +1,5 @@
 import { DecimalPipe, NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { InventoryItem, InventoryStatus } from '../../models/inventory.model';
 
@@ -19,8 +19,12 @@ import { InventoryItem, InventoryStatus } from '../../models/inventory.model';
         </div>
 
         <div class="flex gap-3">
-          <button class="h-10 rounded-full bg-[#ECEBEA] px-5 text-sm font-bold text-[#6F6661] transition hover:bg-[#E1DDDA]">
-            Filtros
+          <button
+            type="button"
+            class="h-10 rounded-full bg-[#ECEBEA] px-5 text-sm font-bold text-[#6F6661] transition hover:bg-[#E1DDDA]"
+            (click)="filtersRequested.emit()"
+          >
+            Filtros{{ activeFiltersCount() ? ' (' + activeFiltersCount() + ')' : '' }}
           </button>
           <a
             routerLink="/inventories/new"
@@ -119,6 +123,8 @@ import { InventoryItem, InventoryStatus } from '../../models/inventory.model';
 })
 export class InventoryCatalogComponent {
   readonly items = input.required<InventoryItem[]>();
+  readonly activeFiltersCount = input(0);
+  readonly filtersRequested = output<void>();
 
   protected readonly statusLabels: Record<InventoryStatus, string> = {
     critico: 'Crítico',

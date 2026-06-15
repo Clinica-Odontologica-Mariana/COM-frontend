@@ -86,7 +86,16 @@ import { ClinicOption, InventoryTypeOption, InventoryUnitOption } from '../../mo
             step="0.01"
             placeholder="0"
             class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#2D2926] outline-none placeholder:text-[#A6A19D] focus:ring-2 focus:ring-[#B98577]"
+            [class.ring-2]="hasError('minimumQuantity')"
+            [class.ring-[#C91920]]="hasError('minimumQuantity')"
+            (keydown)="blockInvalidNumberInput($event)"
+            (paste)="blockInvalidNumberPaste($event)"
           />
+          @if (hasError('minimumQuantity')) {
+            <span class="text-xs font-semibold text-[#C91920]">
+              Informe um número maior ou igual a zero com até duas casas decimais.
+            </span>
+          }
         </label>
 
         @if (showInitialQuantity()) {
@@ -101,7 +110,16 @@ import { ClinicOption, InventoryTypeOption, InventoryUnitOption } from '../../mo
               step="0.01"
               placeholder="0"
               class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#2D2926] outline-none placeholder:text-[#A6A19D] focus:ring-2 focus:ring-[#B98577]"
+              [class.ring-2]="hasError('initialQuantity')"
+              [class.ring-[#C91920]]="hasError('initialQuantity')"
+              (keydown)="blockInvalidNumberInput($event)"
+              (paste)="blockInvalidNumberPaste($event)"
             />
+            @if (hasError('initialQuantity')) {
+              <span class="text-xs font-semibold text-[#C91920]">
+                Informe um número maior ou igual a zero com até duas casas decimais.
+              </span>
+            }
           </label>
         }
 
@@ -117,7 +135,16 @@ import { ClinicOption, InventoryTypeOption, InventoryUnitOption } from '../../mo
               step="0.01"
               placeholder="0"
               class="h-14 rounded-xl border-0 bg-[#EDEDED] px-4 text-sm text-[#2D2926] outline-none placeholder:text-[#A6A19D] focus:ring-2 focus:ring-[#B98577]"
+              [class.ring-2]="hasError('adjustedQuantity')"
+              [class.ring-[#C91920]]="hasError('adjustedQuantity')"
+              (keydown)="blockInvalidNumberInput($event)"
+              (paste)="blockInvalidNumberPaste($event)"
             />
+            @if (hasError('adjustedQuantity')) {
+              <span class="text-xs font-semibold text-[#C91920]">
+                Informe um número maior ou igual a zero com até duas casas decimais.
+              </span>
+            }
           </label>
         }
 
@@ -144,4 +171,24 @@ export class InventoryItemFormComponent {
   readonly showClinicField = input(true);
   readonly showInitialQuantity = input(true);
   readonly showQuantityAdjustment = input(false);
+
+  protected hasError(controlName: string): boolean {
+    const control = this.form().get(controlName);
+
+    return Boolean(control?.invalid && (control.dirty || control.touched));
+  }
+
+  protected blockInvalidNumberInput(event: KeyboardEvent): void {
+    if (['e', 'E', '+', '-'].includes(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  protected blockInvalidNumberPaste(event: ClipboardEvent): void {
+    const pastedValue = event.clipboardData?.getData('text') ?? '';
+
+    if (/[eE+-]/.test(pastedValue)) {
+      event.preventDefault();
+    }
+  }
 }

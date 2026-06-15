@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { NonNullableFormBuilder, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { concatMap, of } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -77,7 +77,7 @@ import { InventoryService } from '../../services/inventory.service';
 })
 export class InventoryItemFormPageComponent implements OnInit {
   private readonly authService = inject(AuthService);
-  private readonly formBuilder = inject(NonNullableFormBuilder);
+  private readonly formBuilder = inject(FormBuilder);
   private readonly inventoryService = inject(InventoryService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -98,9 +98,9 @@ export class InventoryItemFormPageComponent implements OnInit {
     unit: ['', Validators.required],
     sku: [''],
     description: [''],
-    minimumQuantity: [0, [Validators.min(0)]],
-    initialQuantity: [0, [Validators.min(0)]],
-    adjustedQuantity: [0, [Validators.min(0)]],
+    minimumQuantity: [null as number | null, [decimalQuantityValidator()]],
+    initialQuantity: [0 as number | null, [Validators.required, decimalQuantityValidator()]],
+    adjustedQuantity: [0 as number | null, [Validators.required, decimalQuantityValidator()]],
   });
 
   ngOnInit(): void {
@@ -201,12 +201,12 @@ export class InventoryItemFormPageComponent implements OnInit {
 
   private buildCreatePayload(): InventoryItemCreatePayload {
     return {
-      clinicId: this.itemForm.controls.clinicId.value,
+      clinicId: this.itemForm.controls.clinicId.value ?? '',
       itemType: this.itemForm.controls.type.value as InventoryItemCreatePayload['itemType'],
-      name: this.itemForm.controls.name.value.trim(),
-      description: this.emptyToNull(this.itemForm.controls.description.value),
-      sku: this.emptyToNull(this.itemForm.controls.sku.value),
-      unit: this.itemForm.controls.unit.value.trim(),
+      name: (this.itemForm.controls.name.value ?? '').trim(),
+      description: this.emptyToNull(this.itemForm.controls.description.value ?? ''),
+      sku: this.emptyToNull(this.itemForm.controls.sku.value ?? ''),
+      unit: (this.itemForm.controls.unit.value ?? '').trim(),
       minimumQuantity: this.toNullableNumber(this.itemForm.controls.minimumQuantity.value),
     };
   }
@@ -224,12 +224,20 @@ export class InventoryItemFormPageComponent implements OnInit {
     return trimmed ? trimmed : null;
   }
 
-  private toNullableNumber(value: number): number | null {
-    return value === null || Number.isNaN(Number(value)) ? null : Number(value);
+  private toNullableNumber(value: number | string | null): number | null {
+    if (value === null || value === '') {
+      return null;
+    }
+
+    const parsed = Number(value);
+
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
-  private toNumber(value: number): number {
-    return Number(value) || 0;
+  private toNumber(value: number | string | null): number {
+    const parsed = Number(value);
+
+    return Number.isFinite(parsed) ? parsed : 0;
   }
 
   private adjustQuantityIfNeeded(itemId: string) {
@@ -261,4 +269,24 @@ export class InventoryItemFormPageComponent implements OnInit {
     this.isSaving.set(false);
     this.errorMessage.set(error instanceof Error ? error.message : 'Não foi possível salvar o item.');
   }
+}
+
+function decimalQuantityValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value as number | string | null;
+
+    if (value === null || value === '') {
+      return null;
+    }
+
+    const normalized = String(value).replace(',', '.');
+
+    if (!/^\d+(\.\d{1,2})?$/.test(normalized)) {
+      return { decimalQuantity: true };
+    }
+
+    const numericValue = Number(normalized);
+
+    return Number.isFinite(numericValue) && numericValue >= 0 ? null : { decimalQuantity: true };
+  };
 }

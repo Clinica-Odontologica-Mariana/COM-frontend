@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { InventoryItem } from '../../models/inventory.model';
 
 @Component({
@@ -24,18 +23,19 @@ import { InventoryItem } from '../../models/inventory.model';
         </div>
       </div>
 
-      <a
-        routerLink="/inventories/new"
+      <button
+        type="button"
         class="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#C91920] px-6 text-sm font-bold text-white shadow-lg shadow-[#B1111D]/25 transition hover:bg-[#A9141A] lg:mt-0"
+        (click)="restockRequested.emit()"
       >
         <span aria-hidden="true">+</span>
         Cadastrar reposição
-      </a>
+      </button>
     </article>
   `,
-  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InventoryLowStockAlertComponent {
   readonly items = input.required<InventoryItem[]>();
+  readonly restockRequested = output<void>();
 }
