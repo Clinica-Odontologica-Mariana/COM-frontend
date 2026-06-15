@@ -54,6 +54,14 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'panel',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'panel/history',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: '**',
     renderMode: RenderMode.Prerender,
   },

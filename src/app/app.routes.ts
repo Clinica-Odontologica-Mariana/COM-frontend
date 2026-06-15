@@ -62,6 +62,7 @@ export const routes: Routes = [
   },
   {
     path: 'patients',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/patients/pages/patient-list-page/patient-list-page.component').then(
         (m) => m.PatientListPageComponent,
@@ -69,6 +70,7 @@ export const routes: Routes = [
   },
   {
     path: 'patients/new',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/patients/pages/patient-form-page/patient-form-page.component').then(
         (m) => m.PatientFormPageComponent,
@@ -76,6 +78,7 @@ export const routes: Routes = [
   },
   {
     path: 'patients/:id/editar',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/patients/pages/patient-form-page/patient-form-page.component').then(
         (m) => m.PatientFormPageComponent,
@@ -112,6 +115,22 @@ export const routes: Routes = [
       import('./features/medical-records/pages/patient-record-page/patient-record-page.component').then(
         (m) => m.PatientRecordPageComponent,
       ),
+  },
+  {
+    path: 'panel',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/panel/pages/panel-page/panel-page.component').then(
+        (m) => m.PanelPageComponent,
+      ),
+  }, 
+  {
+    path: 'panel/history',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/panel/pages/panel-history-page/panel-history-page.component').then(
+        (m) => m.HistoryPageComponent,
+    ),  
   },
   {
     path: '**',

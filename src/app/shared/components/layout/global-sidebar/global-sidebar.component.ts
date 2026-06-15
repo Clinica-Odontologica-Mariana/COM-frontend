@@ -155,8 +155,8 @@ export class GlobalSidebarComponent {
     {
       label: 'Painel',
       icon: '/Painel_icon.svg',
-      link: '/medical-records/1',
-      match: ['/dashboard'],
+      link: '/panel',
+      match: ['/panel'],
     },
     {
       label: 'Pacientes',
