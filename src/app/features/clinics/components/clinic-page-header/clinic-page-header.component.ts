@@ -14,8 +14,7 @@ import { ChangeDetectionStrategy, Component, output } from '@angular/core';
           </h1>
 
           <p class="max-w-full text-base leading-7 text-[#78716C] md:text-lg">
-            Administre sua rede de parceiros e organize os horários de atendimento móvel com
-            precisão clínica e sofisticação.
+            Gerencie suas clínicas de forma eficiente e organizada.
           </p>
         </div>
       </div>

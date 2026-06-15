@@ -1,10 +1,6 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './pages/home/home.component';
-
-// Pacientes de teste (seed via database)
-// Beatriz Oliveira Cavalcanti: c14671c5-976a-4d1e-9567-8a417f778b59
-// Carlos Eduardo Mendes:       a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56
-const DEFAULT_PATIENT_ID = 'a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56';
+import { authGuard } from './core/guards/auth.guard';
+import { HomeComponent } from './features/home/pages/home.component';
 
 export const routes: Routes = [
   {
@@ -18,56 +14,108 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'locations',
+    loadComponent: () =>
+      import('./features/public/pages/locations/locations-page.component').then(
+        (m) => m.LocationsPageComponent,
+      ),
+    data: { layout: 'public' },
+  },
+  {
+    path: 'attendance',
+    loadComponent: () =>
+      import('./features/attendance/pages/attendance-page/attendance-page.components').then(
+        (m) => m.AttendancePageComponent,
+      ),
+    data: { layout: 'public' },
+  },
+  {
     path: 'admin-access',
     loadComponent: () =>
       import('./features/admin-access/pages/admin-access-page/admin-access-page.component').then(
-        (m) => m.AdminAccessPageComponent
+        (m) => m.AdminAccessPageComponent,
       ),
   },
   {
     path: 'clinics/new',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/clinics/pages/clinic-form-page/clinic-form-page.component').then(
-        (m) => m.ClinicFormPageComponent
+        (m) => m.ClinicFormPageComponent,
       ),
   },
   {
     path: 'clinics/:id/edit',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/clinics/pages/clinic-form-page/clinic-form-page.component').then(
-        (m) => m.ClinicFormPageComponent
+        (m) => m.ClinicFormPageComponent,
       ),
   },
   {
     path: 'clinics',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/clinics/pages/clinics-page/clinics-page.component').then(
-        (m) => m.ClinicsPageComponent
+        (m) => m.ClinicsPageComponent,
+      ),
+  },
+  {
+    path: 'patients',
+    loadComponent: () =>
+      import('./features/patients/pages/patient-list-page/patient-list-page.component').then(
+        (m) => m.PatientListPageComponent,
+      ),
+  },
+  {
+    path: 'patients/new',
+    loadComponent: () =>
+      import('./features/patients/pages/patient-form-page/patient-form-page.component').then(
+        (m) => m.PatientFormPageComponent,
+      ),
+  },
+  {
+    path: 'patients/:id/editar',
+    loadComponent: () =>
+      import('./features/patients/pages/patient-form-page/patient-form-page.component').then(
+        (m) => m.PatientFormPageComponent,
       ),
   },
   {
     path: 'patients/:id/treatments',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/patients/pages/treatments/treatments-page.component').then(
-        (m) => m.TreatmentsPageComponent
+        (m) => m.TreatmentsPageComponent,
       ),
   },
   {
     path: 'patients/:id/edit',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/patients/pages/edit-patient/edit-patient.component').then(
-        (m) => m.EditPatientComponent
+        (m) => m.EditPatientComponent,
+      ),
+  },
+  {
+    path: 'medical-records',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/medical-records/pages/medical-records-list-page/medical-records-list-page.component').then(
+        (m) => m.MedicalRecordsListPageComponent,
       ),
   },
   {
     path: 'medical-records/:id',
+    canActivate: [authGuard],
     loadComponent: () =>
-      import(
-        './features/medical-records/pages/patient-record-page/patient-record-page.component'
-      ).then((m) => m.PatientRecordPageComponent),
+      import('./features/medical-records/pages/patient-record-page/patient-record-page.component').then(
+        (m) => m.PatientRecordPageComponent,
+      ),
   },
   {
     path: 'inventories/new',
+    canActivate: [authGuard],
     loadComponent: () =>
       import(
         './features/inventories/pages/inventory-item-form-page/inventory-item-form-page.component'
@@ -75,6 +123,7 @@ export const routes: Routes = [
   },
   {
     path: 'inventories/:id/edit',
+    canActivate: [authGuard],
     loadComponent: () =>
       import(
         './features/inventories/pages/inventory-item-form-page/inventory-item-form-page.component'
@@ -82,15 +131,11 @@ export const routes: Routes = [
   },
   {
     path: 'inventories',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/inventories/pages/inventory-page/inventory-page.component').then(
         (m) => m.InventoryPageComponent,
       ),
-  },
-  {
-    path: 'medical-records',
-    pathMatch: 'full',
-    redirectTo: `medical-records/${DEFAULT_PATIENT_ID}`,
   },
   {
     path: '**',

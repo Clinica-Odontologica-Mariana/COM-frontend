@@ -129,6 +129,7 @@ describe('AuthService', () => {
 
     it('retorna o token armazenado', () => {
       localStorage.setItem('access_token', 'stored-token');
+      localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
       expect(service.getToken()).toBe('stored-token');
     });
   });
@@ -136,12 +137,14 @@ describe('AuthService', () => {
   describe('logout()', () => {
     it('remove access_token e access_token_expiry do localStorage', () => {
       localStorage.setItem('access_token', 'token');
+      localStorage.setItem('refresh_token', 'refresh-token');
       localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
 
       service.logout();
 
       expect(localStorage.getItem('access_token')).toBeNull();
       expect(localStorage.getItem('access_token_expiry')).toBeNull();
+      expect(localStorage.getItem('refresh_token')).toBeNull();
     });
   });
 

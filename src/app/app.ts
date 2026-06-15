@@ -1,13 +1,24 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ConfirmDialogComponent } from './shared/components/confirm-dialog/confirm-dialog.component';
+import { ToastContainerComponent } from './shared/components/feedback/toast-container/toast-container.component';
 import { GlobalFooterComponent } from './shared/components/layout/global-footer/global-footer.component';
+import { GlobalHeaderComponent } from './shared/components/layout/global-header/global-header.component';
 import { GlobalSidebarComponent } from './shared/components/layout/global-sidebar/global-sidebar.component';
 
 @Component({
   selector: 'app-root',
-  imports: [GlobalFooterComponent, GlobalSidebarComponent, RouterOutlet],
+  standalone: true,
+  imports: [
+    ConfirmDialogComponent,
+    GlobalFooterComponent,
+    GlobalHeaderComponent,
+    GlobalSidebarComponent,
+    RouterOutlet,
+    ToastContainerComponent,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -15,20 +26,25 @@ import { GlobalSidebarComponent } from './shared/components/layout/global-sideba
 export class App {
   private readonly router = inject(Router);
 
-  protected readonly currentUrl = signal(this.router.url);
-
-  // Unificando as regras: esconde a estrutura padrão do app tanto na rota admin quanto na Home de apresentação
+  protected readonly currentUrl = signal(this.normalizedUrl(this.router.url));
+  protected readonly isPublicRoute = computed(() =>
+    ['/', '/home', '/attendance', '/locations'].includes(this.currentUrl()),
+  );
+  protected readonly isAdminRoute = computed(() => this.currentUrl().startsWith('/admin-access'));
   protected readonly hideShell = computed(() => {
-    const url = this.currentUrl();
-    return url === '/' || url === '/home' || url.startsWith('/admin-access');
+    return this.isPublicRoute() || this.isAdminRoute();
   });
 
   constructor() {
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-        takeUntilDestroyed()
+        takeUntilDestroyed(),
       )
-      .subscribe((event) => this.currentUrl.set(event.urlAfterRedirects));
+      .subscribe((event) => this.currentUrl.set(this.normalizedUrl(event.urlAfterRedirects)));
+  }
+
+  private normalizedUrl(url: string): string {
+    return url.split('?')[0].split('#')[0];
   }
 }

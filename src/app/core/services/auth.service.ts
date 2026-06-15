@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-
 import { API_BASE_URL } from '../config/api.config';
 import { ApiResponse } from '../models/api-response.model';
 
@@ -15,13 +14,22 @@ export interface LoginRequest {
 export interface LoginResponse {
   accessToken: string;
   expiresIn: number;
-  refreshToken: string;
-  refreshExpiresIn: number;
-  tokenType: string;
-  scope: string;
+  refreshToken?: string;
+  refreshExpiresIn?: number;
+  tokenType?: string;
+  scope?: string;
+}
+
+export interface CurrentUser {
+  subject: string;
+  username: string;
+  email: string | null;
+  roles: string[];
+  claims: Record<string, unknown>;
 }
 
 const TOKEN_KEY = 'access_token';
+const REFRESH_TOKEN_KEY = 'refresh_token';
 const TOKEN_EXPIRY_KEY = 'access_token_expiry';
 const DEV_USERNAME = 'api-admin';
 const DEV_PASSWORD = 'api-admin123';
@@ -29,11 +37,15 @@ const DEV_PASSWORD = 'api-admin123';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly apiBaseUrl = inject(API_BASE_URL);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly baseUrl = inject(API_BASE_URL);
 
   getToken(): string | null {
     if (!isPlatformBrowser(this.platformId)) {
+      return null;
+    }
+
+    if (!this.isTokenValid()) {
       return null;
     }
 
@@ -53,13 +65,16 @@ export class AuthService {
 
   login(username: string, password: string): Observable<LoginResponse> {
     const credentials: LoginRequest = { username, password };
+    return this.http.post<AuthLoginPayload>(`${this.baseUrl}/auth/login`, credentials).pipe(
+      map((res) => this.normalizeLoginResponse(res)),
+      tap((res) => this.storeToken(res)),
+    );
+  }
 
+  getCurrentUser(): Observable<CurrentUser> {
     return this.http
-      .post<ApiResponse<LoginResponse>>(`${this.apiBaseUrl}/auth/login`, credentials)
-      .pipe(
-        map((response) => response.data),
-        tap((response) => this.storeToken(response)),
-      );
+      .get<ApiResponse<CurrentUser>>(`${this.baseUrl}/auth/me`)
+      .pipe(map((response) => response.data));
   }
 
   initDevSession(): Observable<LoginResponse | null> {
@@ -84,15 +99,44 @@ export class AuthService {
     }
 
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(TOKEN_EXPIRY_KEY);
   }
 
-  private storeToken(response: LoginResponse): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      return;
+  private normalizeLoginResponse(res: AuthLoginPayload): LoginResponse {
+    const data = 'success' in res ? res.data : res;
+    const accessToken = data.accessToken ?? data.access_token;
+    const refreshToken = data.refreshToken ?? data.refresh_token;
+    const expiresIn = data.expiresIn ?? data.expires_in;
+
+    if (!accessToken || !expiresIn) {
+      throw new Error('Resposta de autenticação inválida.');
     }
 
-    localStorage.setItem(TOKEN_KEY, response.accessToken);
-    localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + response.expiresIn * 1000));
+    return {
+      accessToken,
+      refreshToken,
+      expiresIn,
+    };
   }
+
+  private storeToken(res: LoginResponse): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    localStorage.setItem(TOKEN_KEY, res.accessToken);
+    if (res.refreshToken) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, res.refreshToken);
+    }
+    localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + res.expiresIn * 1000));
+  }
+}
+
+type AuthLoginPayload = ApiResponse<AuthTokenDto> | AuthTokenDto;
+
+interface AuthTokenDto {
+  accessToken?: string;
+  access_token?: string;
+  refreshToken?: string;
+  refresh_token?: string;
+  expiresIn?: number;
+  expires_in?: number;
 }

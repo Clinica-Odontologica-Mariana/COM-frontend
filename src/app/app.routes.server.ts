@@ -6,7 +6,15 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Prerender,
   },
   {
+    path: 'attendance',
+    renderMode: RenderMode.Prerender,
+  },
+  {
     path: 'home',
+    renderMode: RenderMode.Prerender,
+  },
+  {
+    path: 'locations',
     renderMode: RenderMode.Prerender,
   },
   {
@@ -26,11 +34,19 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'patients/**',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'patients/:id/treatments',
     renderMode: RenderMode.Client,
   },
   {
     path: 'patients/:id/edit',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'medical-records',
     renderMode: RenderMode.Client,
   },
   {

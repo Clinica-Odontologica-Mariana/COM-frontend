@@ -1,10 +1,9 @@
-import { NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-global-footer',
-  imports: [RouterLink, NgOptimizedImage],
+  imports: [RouterLink],
   template: `
     <footer class="border-t mt-5 border-[rgba(221,199,180,0.2)] bg-[#E2D8D1] text-[#5D4B3E]">
       <div class="mx-auto flex max-w-7xl flex-col gap-20 px-8 py-20">
@@ -24,7 +23,7 @@ import { RouterLink } from '@angular/router';
                   class="grid h-11 w-11 place-items-center rounded-full border border-[rgba(221,199,180,0.2)] bg-white shadow-[0px_1px_2px_rgba(0,0,0,0.05)] transition hover:-translate-y-0.5 hover:shadow-md"
                   [attr.aria-label]="social.label"
                 >
-                  <img [ngSrc]="social.icon" width="20" height="20" alt="" aria-hidden="true" />
+                  <img [src]="social.icon" width="20" height="20" alt="" aria-hidden="true" />
                 </a>
               }
             </div>
@@ -36,7 +35,10 @@ import { RouterLink } from '@angular/router';
             </h3>
             <nav class="mt-7 space-y-4 text-sm font-medium leading-5" aria-label="Rodapé">
               @for (item of quickLinks; track item.label) {
-                <a routerLink="/" class="flex items-center gap-2 transition hover:text-[#A77769]">
+                <a
+                  [routerLink]="item.href"
+                  class="flex items-center gap-2 transition hover:text-[#A77769]"
+                >
                   <span class="h-1 w-1 rounded-full bg-[rgba(167,119,105,0.4)]"></span>
                   <span>{{ item.label }}</span>
                 </a>
@@ -152,8 +154,8 @@ export class GlobalFooterComponent {
   ];
 
   protected readonly quickLinks = [
-    { label: 'Sobre', href: '' },
-    { label: 'Atendimento', href: '' },
-    { label: 'Unidades', href: '' },
+    { label: 'Sobre', href: '/' },
+    { label: 'Atendimento', href: '/attendance' },
+    { label: 'Unidades', href: '/locations' },
   ];
 }
