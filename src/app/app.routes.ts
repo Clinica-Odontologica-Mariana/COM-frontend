@@ -114,6 +114,30 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'inventories/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import(
+        './features/inventories/pages/inventory-item-form-page/inventory-item-form-page.component'
+      ).then((m) => m.InventoryItemFormPageComponent),
+  },
+  {
+    path: 'inventories/:id/edit',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import(
+        './features/inventories/pages/inventory-item-form-page/inventory-item-form-page.component'
+      ).then((m) => m.InventoryItemFormPageComponent),
+  },
+  {
+    path: 'inventories',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/inventories/pages/inventory-page/inventory-page.component').then(
+        (m) => m.InventoryPageComponent,
+      ),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

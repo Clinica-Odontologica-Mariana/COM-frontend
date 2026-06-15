@@ -91,14 +91,14 @@ describe('authInterceptor', () => {
     req.flush({});
   });
 
-  it('adiciona Bearer token na requisição de login (intercepta todos os requests com token)', () => {
+  it('não adiciona Bearer token na requisição de login', () => {
     localStorage.setItem('access_token', 'existing-token');
     localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
 
     http.post('/api/v1/auth/login', { username: 'u', password: 'p' }).subscribe();
 
     const req = httpMock.expectOne('/api/v1/auth/login');
-    expect(req.request.headers.get('Authorization')).toBe('Bearer existing-token');
+    expect(req.request.headers.has('Authorization')).toBe(false);
     req.flush({});
   });
 });
