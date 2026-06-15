@@ -1,34 +1,50 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
+import { ConfirmDialogComponent } from './shared/components/confirm-dialog/confirm-dialog.component';
+import { ToastContainerComponent } from './shared/components/feedback/toast-container/toast-container.component';
+import { GlobalFooterComponent } from './shared/components/layout/global-footer/global-footer.component';
+import { GlobalHeaderComponent } from './shared/components/layout/global-header/global-header.component';
+import { GlobalSidebarComponent } from './shared/components/layout/global-sidebar/global-sidebar.component';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
+  imports: [
+    ConfirmDialogComponent,
+    GlobalFooterComponent,
+    GlobalHeaderComponent,
+    GlobalSidebarComponent,
+    RouterOutlet,
+    ToastContainerComponent,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
-  protected readonly title = signal('COM-frontend');
+  private readonly router = inject(Router);
 
-  protected readonly highlights = [
-    {
-      title: 'Paleta principal',
-      description: '#cf9c92, #a77769, #efebe9 e #ddc7b4 já estão disponíveis como tokens Tailwind.',
-    },
-    {
-      title: 'Base pronta',
-      description:
-        'O projeto já entra com utilitários, gradientes e cards estruturados para evoluir rápido.',
-    },
-    {
-      title: 'Foco em UI',
-      description:
-        'A tela inicial foi redesenhada para validar a integração visual do Tailwind no app.',
-    },
-  ];
+  protected readonly currentUrl = signal(this.normalizedUrl(this.router.url));
+  protected readonly isPublicRoute = computed(() =>
+    ['/', '/home', '/attendance', '/locations'].includes(this.currentUrl()),
+  );
+  protected readonly isAdminRoute = computed(() => this.currentUrl().startsWith('/admin-access'));
+  protected readonly hideShell = computed(() => {
+    return this.isPublicRoute() || this.isAdminRoute();
+  });
 
-  protected readonly metrics = [
-    { value: '4', label: 'cores principais' },
-    { value: '1', label: 'setup Tailwind' },
-    { value: '100%', label: 'utilitários reutilizáveis' },
-  ];
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe((event) => this.currentUrl.set(this.normalizedUrl(event.urlAfterRedirects)));
+  }
+
+  private normalizedUrl(url: string): string {
+    return url.split('?')[0].split('#')[0];
+  }
 }

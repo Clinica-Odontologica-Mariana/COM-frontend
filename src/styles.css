@@ -7,6 +7,7 @@
   --color-brand-muted: #ddc7b4;
   --color-ink: #4f3f38;
   --color-surface: #fffaf8;
+  --font-serif: 'Noto Serif', ui-serif, Georgia, serif;
 }
 
 :root {
@@ -20,13 +21,10 @@ body {
 
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at top left, rgb(207 156 146 / 0.35), transparent 30%),
-    radial-gradient(circle at top right, rgb(221 199 180 / 0.32), transparent 24%),
-    linear-gradient(180deg, #efebe9 0%, #f8f2ee 58%, #f4e9e2 100%);
-  color: #4f3f38;
+  background: #f9f9f9;
+  color: #57514d;
   font-family:
-    Inter,
+    Manrope,
     ui-sans-serif,
     system-ui,
     -apple-system,
