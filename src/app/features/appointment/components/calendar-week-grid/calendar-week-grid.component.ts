@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Appointment, WeekDayColumn } from '../../models/appointment.model';
 import { CalendarEventChipComponent } from '../calendar-event-chip/calendar-event-chip.component';
 import { formatWeekDayHeading } from '../../utils/calendar.utils';
@@ -102,8 +102,18 @@ export class CalendarWeekGridComponent {
   readonly columns = input.required<WeekDayColumn[]>();
   readonly appointments = input.required<Appointment[]>();
 
+  private readonly eventsByDay = computed(() => {
+    const map = new Map<string, Appointment[]>();
+    for (const apt of this.appointments()) {
+      const list = map.get(apt.date) ?? [];
+      list.push(apt);
+      map.set(apt.date, list);
+    }
+    return map;
+  });
+
   protected eventsForDay(isoDate: string): Appointment[] {
-    return this.appointments().filter((a) => a.date === isoDate);
+    return this.eventsByDay().get(isoDate) ?? [];
   }
 
   protected dayHeading(col: WeekDayColumn): string {

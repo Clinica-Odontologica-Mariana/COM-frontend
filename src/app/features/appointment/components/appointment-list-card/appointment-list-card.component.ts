@@ -34,6 +34,13 @@ import { formatRelativeDayLabel } from '../../utils/calendar.utils';
         >
           Editar
         </a>
+        <a
+          routerLink="/agenda/novo"
+          [queryParams]="{ reschedule: appointment().id }"
+          class="rounded-md border border-[#83746F]/20 bg-[#F5DECB]/30 px-3 py-1.5 text-[9px] font-bold tracking-wide text-[#69594A] uppercase"
+        >
+          Reagendar
+        </a>
       </div>
     </article>
   `,

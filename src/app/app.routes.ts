@@ -61,6 +61,27 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'patients',
+    loadComponent: () =>
+      import('./features/patients/pages/patient-list-page/patient-list-page.component').then(
+        (m) => m.PatientListPageComponent,
+      ),
+  },
+  {
+    path: 'patients/new',
+    loadComponent: () =>
+      import('./features/patients/pages/patient-form-page/patient-form-page.component').then(
+        (m) => m.PatientFormPageComponent,
+      ),
+  },
+  {
+    path: 'patients/:id/editar',
+    loadComponent: () =>
+      import('./features/patients/pages/patient-form-page/patient-form-page.component').then(
+        (m) => m.PatientFormPageComponent,
+      ),
+  },
+  {
     path: 'patients/:id/treatments',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -74,6 +95,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/patients/pages/edit-patient/edit-patient.component').then(
         (m) => m.EditPatientComponent,
+      ),
+  },
+  {
+    path: 'medical-records',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/medical-records/pages/medical-records-list-page/medical-records-list-page.component').then(
+        (m) => m.MedicalRecordsListPageComponent,
       ),
   },
   {

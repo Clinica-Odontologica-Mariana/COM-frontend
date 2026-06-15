@@ -81,15 +81,21 @@ const PAGE_SIZE = 10;
           </div>
         </div>
 
-        <div class="flex flex-col gap-3">
-          @for (apt of paginatedAppointments(); track apt.id) {
-            <app-appointment-list-card [appointment]="apt" [showStatus]="true" />
-          } @empty {
-            <p class="rounded-xl bg-white p-8 text-center text-sm text-[#78716C] shadow-sm">
-              Nenhum agendamento encontrado.
-            </p>
-          }
-        </div>
+        @if (loading()) {
+          <p class="rounded-xl bg-white p-8 text-center text-sm text-[#78716C] shadow-sm">
+            Carregando agendamentos...
+          </p>
+        } @else {
+          <div class="flex flex-col gap-3">
+            @for (apt of paginatedAppointments(); track apt.id) {
+              <app-appointment-list-card [appointment]="apt" [showStatus]="true" />
+            } @empty {
+              <p class="rounded-xl bg-white p-8 text-center text-sm text-[#78716C] shadow-sm">
+                Nenhum agendamento encontrado.
+              </p>
+            }
+          </div>
+        }
 
         @if (total() > 0) {
           <div
@@ -144,6 +150,7 @@ export class AppointmentsListPageComponent {
   protected readonly statusOptions: AppointmentStatus[] = ['confirmed', 'pending', 'cancelled'];
 
   protected readonly allAppointments = signal<Appointment[]>([]);
+  protected readonly loading = signal(true);
   protected readonly searchQuery = signal('');
   protected readonly selectedLocations = signal<AppointmentLocation[]>([]);
   protected readonly statusFilter = signal<AppointmentStatus | ''>('');
@@ -187,7 +194,10 @@ export class AppointmentsListPageComponent {
     this.appointmentService
       .listUpcoming(null)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((items) => this.allAppointments.set(items));
+      .subscribe((items) => {
+        this.allAppointments.set(items);
+        this.loading.set(false);
+      });
   }
 
   protected onSearchChange(event: Event): void {

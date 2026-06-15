@@ -7,7 +7,7 @@
   --color-brand-muted: #ddc7b4;
   --color-ink: #4f3f38;
   --color-surface: #fffaf8;
-  --font-serif: 'Noto Serif', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-serif: 'Noto Serif', ui-serif, Georgia, serif;
 }
 
 :root {

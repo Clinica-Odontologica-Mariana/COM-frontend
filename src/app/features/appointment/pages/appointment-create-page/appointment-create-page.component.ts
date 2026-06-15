@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   AgendaPatientOption,
   AppointmentLocation,
@@ -21,13 +21,13 @@ import { AppointmentService } from '../../services/appointment.service';
         <nav class="mb-4 flex items-center gap-2 text-sm text-[#78716C]" aria-label="Breadcrumb">
           <a routerLink="/agenda" class="transition hover:text-[#7C5145]">Agenda</a>
           <span aria-hidden="true">›</span>
-          <span class="text-[#514440]">Cadastrar Agendamento</span>
+          <span class="text-[#514440]">{{ isRescheduling() ? 'Reagendar' : 'Cadastrar Agendamento' }}</span>
         </nav>
 
         <div class="mb-10">
-          <h1 class="font-serif text-4xl text-[#7C5145] md:text-5xl">Novo Agendamento</h1>
+          <h1 class="font-serif text-4xl text-[#7C5145] md:text-5xl">{{ isRescheduling() ? 'Reagendar Consulta' : 'Novo Agendamento' }}</h1>
           <p class="mt-4 max-w-2xl text-lg leading-7 text-[#69594A]">
-            Preencha os detalhes do atendimento móvel para garantir a melhor experiência ao paciente.
+            {{ isRescheduling() ? 'Ajuste a data e horário para agendar uma nova consulta para este paciente.' : 'Preencha os detalhes do atendimento móvel para garantir a melhor experiência ao paciente.' }}
           </p>
         </div>
 
@@ -183,7 +183,7 @@ import { AppointmentService } from '../../services/appointment.service';
               [disabled]="form.invalid || !selectedPatient() || submitting()"
               class="rounded-xl bg-[#7C5145] px-12 py-4 text-base font-bold text-white shadow-lg shadow-[#7C5145]/20 transition hover:bg-[#6B4539] disabled:opacity-50"
             >
-              Cadastrar
+              {{ isRescheduling() ? 'Confirmar Reagendamento' : 'Cadastrar' }}
             </button>
           </div>
         </form>
@@ -194,6 +194,7 @@ import { AppointmentService } from '../../services/appointment.service';
 export class AppointmentCreatePageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly appointmentService = inject(AppointmentService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -206,6 +207,7 @@ export class AppointmentCreatePageComponent {
   protected readonly patientResults = signal<AgendaPatientOption[]>([]);
   protected readonly selectedPatient = signal<AgendaPatientOption | null>(null);
   protected readonly submitting = signal(false);
+  protected readonly isRescheduling = signal(false);
 
   protected readonly form = this.fb.nonNullable.group({
     patientSearch: [''],
@@ -217,6 +219,34 @@ export class AppointmentCreatePageComponent {
     endTime: ['', Validators.required],
     notes: [''],
   });
+
+  constructor() {
+    const rescheduleId = this.route.snapshot.queryParamMap.get('reschedule');
+    if (rescheduleId) {
+      this.isRescheduling.set(true);
+      this.appointmentService
+        .getById(rescheduleId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((apt) => {
+          if (!apt || apt.isBlocked) return;
+          this.form.patchValue({
+            procedure: apt.procedure,
+            location: apt.location ?? 'asa_sul',
+            date: apt.date,
+            startTime: apt.startTime,
+            endTime: apt.endTime,
+          });
+          const patient: AgendaPatientOption = {
+            id: apt.patientId,
+            name: apt.patientName,
+            email: apt.patientEmail ?? '',
+            initials: apt.patientInitials ?? '',
+          };
+          this.selectedPatient.set(patient);
+          this.form.patchValue({ patientId: patient.id, patientSearch: patient.name });
+        });
+    }
+  }
 
   protected onPatientSearch(): void {
     const query = this.form.controls.patientSearch.value;
