@@ -54,6 +54,22 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'schedule',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'schedule/new',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'schedule/appointments',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'schedule/:id/edit',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'inventories/new',
     renderMode: RenderMode.Client,
   },
