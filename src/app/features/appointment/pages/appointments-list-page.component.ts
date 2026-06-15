@@ -1,15 +1,21 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { AppointmentListCardComponent } from '../../components/appointment-list-card/appointment-list-card.component';
-import { LocationFiltersComponent } from '../../components/location-filters/location-filters.component';
 import {
   Appointment,
-  AppointmentLocation,
   AppointmentStatus,
   STATUS_LABELS,
-} from '../../models/appointment.model';
-import { AppointmentService } from '../../services/appointment.service';
+} from '../models/appointment.model';
+import { AppointmentService } from '../services/appointment.service';
+import { AppointmentListCardComponent } from '../components/appointment-list-card.component';
+import { LocationFiltersComponent } from '../components/location-filters.component';
 
 const PAGE_SIZE = 10;
 
@@ -21,14 +27,16 @@ const PAGE_SIZE = 10;
     <div class="min-h-full bg-[#F9F9F9]">
       <div class="mx-auto max-w-3xl px-6 py-10 lg:px-8">
         <nav class="mb-4 flex items-center gap-2 text-sm text-[#78716C]" aria-label="Breadcrumb">
-          <a routerLink="/agenda" class="transition hover:text-[#7C5145]">Agenda</a>
+          <a routerLink="/schedule" class="transition hover:text-[#7C5145]">Agenda</a>
           <span aria-hidden="true">›</span>
           <span class="text-[#514440]">Agendamentos</span>
         </nav>
 
         <div class="mb-8">
           <h1 class="font-serif text-3xl font-bold text-[#7C5145] md:text-4xl">Agendamentos</h1>
-          <p class="mt-2 text-base text-[#69594A]">Todos os atendimentos futuros, em ordem cronológica.</p>
+          <p class="mt-2 text-base text-[#69594A]">
+            Todos os atendimentos futuros, em ordem cronológica.
+          </p>
         </div>
 
         <div class="mb-6 space-y-4">
@@ -60,10 +68,7 @@ const PAGE_SIZE = 10;
             />
 
             <div class="rounded-2xl border border-[#D5C2BD]/10 bg-white p-4 shadow-sm">
-              <label
-                for="status-filter"
-                class="font-serif text-sm font-bold text-[#7C5145]"
-              >
+              <label for="status-filter" class="font-serif text-sm font-bold text-[#7C5145]">
                 Status
               </label>
               <select
@@ -152,7 +157,7 @@ export class AppointmentsListPageComponent {
   protected readonly allAppointments = signal<Appointment[]>([]);
   protected readonly loading = signal(true);
   protected readonly searchQuery = signal('');
-  protected readonly selectedLocations = signal<AppointmentLocation[]>([]);
+  protected readonly selectedLocations = signal<string[]>([]);
   protected readonly statusFilter = signal<AppointmentStatus | ''>('');
   protected readonly page = signal(1);
 
@@ -162,7 +167,7 @@ export class AppointmentsListPageComponent {
     const locations = this.selectedLocations();
     if (locations.length > 0) {
       items = items.filter(
-        (apt) => apt.isBlocked || (apt.location != null && locations.includes(apt.location)),
+        (apt) => apt.isBlocked || (apt.workplaceId != null && locations.includes(apt.workplaceId)),
       );
     }
 
@@ -176,9 +181,7 @@ export class AppointmentsListPageComponent {
 
   protected readonly total = computed(() => this.filteredAppointments().length);
 
-  protected readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.total() / PAGE_SIZE)),
-  );
+  protected readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / PAGE_SIZE)));
 
   protected readonly paginatedAppointments = computed(() => {
     const safePage = Math.min(this.page(), this.totalPages());
@@ -206,7 +209,7 @@ export class AppointmentsListPageComponent {
     this.page.set(1);
   }
 
-  protected onLocationsChange(locations: AppointmentLocation[]): void {
+  protected onLocationsChange(locations: string[]): void {
     this.selectedLocations.set(locations);
     this.page.set(1);
   }

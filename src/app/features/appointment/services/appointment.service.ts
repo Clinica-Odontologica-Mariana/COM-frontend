@@ -1,125 +1,73 @@
-import { Injectable } from '@angular/core';
-import { Observable, delay, map, of } from 'rxjs';
-import { INITIAL_APPOINTMENTS } from '../data/appointments.mock';
-import { AGENDA_PATIENTS } from '../data/patients.mock';
+import { inject, Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { AppointmentApi } from '../api/appointment.api';
 import {
   AgendaPatientOption,
   Appointment,
   AppointmentFormDto,
-  AppointmentLocation,
-  LOCATION_LABELS,
   PROCEDURE_LABELS,
 } from '../models/appointment.model';
 import { toIsoDate } from '../utils/calendar.utils';
 
 @Injectable({ providedIn: 'root' })
 export class AppointmentService {
-  private appointments: Appointment[] = structuredClone(INITIAL_APPOINTMENTS);
-  private nextId = 100;
+  private readonly api = inject(AppointmentApi);
 
   list(): Observable<Appointment[]> {
-    return of([...this.appointments]).pipe(delay(150));
+    return this.api.list();
   }
 
-  listByMonth(year: number, month: number, locations?: AppointmentLocation[] | null): Observable<Appointment[]> {
-    return this.list().pipe(
-      map((items) =>
-        items.filter((apt) => {
-          const d = new Date(apt.date + 'T00:00:00');
-          if (d.getFullYear() !== year || d.getMonth() !== month) return false;
-          return this.matchesLocation(apt, locations);
-        }),
-      ),
+  listByMonth(year: number, month: number, workplaceIds?: string[] | null): Observable<Appointment[]> {
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 0);
+    return this.api.listByPeriod(start, end).pipe(
+      map((items) => this.filterByWorkplaces(items, workplaceIds)),
     );
   }
 
-  listByDateRange(startIso: string, endIso: string, locations?: AppointmentLocation[] | null): Observable<Appointment[]> {
-    return this.list().pipe(
-      map((items) =>
-        items.filter((apt) => {
-          if (apt.date < startIso || apt.date > endIso) return false;
-          return this.matchesLocation(apt, locations);
-        }),
-      ),
+  listByDateRange(startIso: string, endIso: string, workplaceIds?: string[] | null): Observable<Appointment[]> {
+    return this.api.listByPeriod(new Date(startIso + 'T00:00:00'), new Date(endIso + 'T23:59:59')).pipe(
+      map((items) => this.filterByWorkplaces(items, workplaceIds)),
     );
   }
 
-  listUpcoming(limit: number | null = 5, locations?: AppointmentLocation[] | null): Observable<Appointment[]> {
-    const today = toIsoDate(new Date());
-    return this.list().pipe(
-      map((items) => {
-        const sorted = items
-          .filter((apt) => !apt.isBlocked && apt.date >= today && this.matchesLocation(apt, locations))
-          .sort((a, b) => {
-            const cmp = a.date.localeCompare(b.date);
-            if (cmp !== 0) return cmp;
-            return a.startTime.localeCompare(b.startTime);
-          });
-        return limit != null ? sorted.slice(0, limit) : sorted;
-      }),
+  listUpcoming(limit: number | null = 5, workplaceIds?: string[] | null): Observable<Appointment[]> {
+    return this.api.listUpcoming(limit ?? undefined).pipe(
+      map((items) => this.filterByWorkplaces(items, workplaceIds)),
     );
   }
 
   getById(id: string): Observable<Appointment | undefined> {
-    return of(this.appointments.find((a) => a.id === id)).pipe(delay(100));
+    return this.api.getById(id);
   }
 
+  /**
+   * Creates an appointment.
+   * NOTE: The backend requires clinicId, professionalId, and statusId (UUIDs).
+   * These must be configured before create can succeed.
+   */
   create(dto: AppointmentFormDto): Observable<Appointment> {
-    const patient = AGENDA_PATIENTS.find((p) => p.id === dto.patientId);
-    const appointment: Appointment = {
-      id: `apt-${this.nextId++}`,
-      referenceCode: `#APT-${4090 + this.nextId}-${patient?.initials ?? 'XX'}`,
-      patientId: dto.patientId,
-      patientName: patient?.name ?? 'Paciente',
-      patientEmail: patient?.email,
-      patientInitials: patient?.initials,
-      procedure: dto.procedure,
-      location: dto.location,
-      date: dto.date,
-      startTime: dto.startTime,
-      endTime: dto.endTime,
-      status: dto.status ?? 'pending',
-      notes: dto.notes,
-      clinicalNotes: dto.clinicalNotes,
-    };
-    this.appointments.push(appointment);
-    return of(appointment).pipe(delay(200));
+    return this.api.create(dto);
   }
 
+  /**
+   * Updates an appointment.
+   * NOTE: The backend requires statusId (UUID) for the status mapping.
+   * Status update functionality requires status UUID resolution.
+   */
   update(id: string, dto: Partial<AppointmentFormDto>): Observable<Appointment | undefined> {
-    const index = this.appointments.findIndex((a) => a.id === id);
-    if (index === -1) return of(undefined).pipe(delay(100));
-
-    const current = this.appointments[index];
-    const updated: Appointment = {
-      ...current,
-      procedure: dto.procedure ?? current.procedure,
-      location: dto.location ?? current.location,
-      date: dto.date ?? current.date,
-      startTime: dto.startTime ?? current.startTime,
-      endTime: dto.endTime ?? current.endTime,
-      status: dto.status ?? current.status,
-      notes: dto.notes ?? current.notes,
-      clinicalNotes: dto.clinicalNotes ?? current.clinicalNotes,
-    };
-    this.appointments[index] = updated;
-    return of(updated).pipe(delay(200));
+    return this.api.update(id, dto).pipe(map((apt) => apt ?? undefined));
   }
 
   delete(id: string): Observable<boolean> {
-    const before = this.appointments.length;
-    this.appointments = this.appointments.filter((a) => a.id !== id);
-    return of(this.appointments.length < before).pipe(delay(150));
+    return this.api.delete(id).pipe(map(() => true));
   }
 
   searchPatients(query: string): Observable<AgendaPatientOption[]> {
-    const q = query.trim().toLowerCase();
-    if (!q) return of([]).pipe(delay(80));
-    return of(
-      AGENDA_PATIENTS.filter(
-        (p) => p.name.toLowerCase().includes(q) || p.email.toLowerCase().includes(q),
-      ),
-    ).pipe(delay(120));
+    const q = query.trim();
+    if (!q) return of([]);
+    return this.api.searchPatients(q);
   }
 
   filterBySearch(items: Appointment[], query: string): Appointment[] {
@@ -128,25 +76,22 @@ export class AppointmentService {
     return items.filter((apt) => this.matchesSearch(apt, q));
   }
 
+  private filterByWorkplaces(items: Appointment[], workplaceIds?: string[] | null): Appointment[] {
+    if (!workplaceIds || workplaceIds.length === 0) return items;
+    return items.filter((apt) => apt.isBlocked || (apt.workplaceId != null && workplaceIds.includes(apt.workplaceId)));
+  }
+
   private matchesSearch(apt: Appointment, query: string): boolean {
     if (apt.isBlocked) {
-      return (apt.title?.toLowerCase().includes(query) ?? false);
+      return apt.title?.toLowerCase().includes(query) ?? false;
     }
 
-    const locationLabel = apt.location ? LOCATION_LABELS[apt.location].toLowerCase() : '';
     return (
       apt.patientName.toLowerCase().includes(query) ||
       (apt.patientEmail?.toLowerCase().includes(query) ?? false) ||
       apt.referenceCode.toLowerCase().includes(query) ||
-      PROCEDURE_LABELS[apt.procedure].toLowerCase().includes(query) ||
-      locationLabel.includes(query) ||
+      (apt.procedure ? PROCEDURE_LABELS[apt.procedure].toLowerCase().includes(query) : false) ||
       (apt.notes?.toLowerCase().includes(query) ?? false)
     );
-  }
-
-  private matchesLocation(apt: Appointment, locations?: AppointmentLocation[] | null): boolean {
-    if (!locations || locations.length === 0) return true;
-    if (apt.isBlocked) return true;
-    return apt.location != null && locations.includes(apt.location);
   }
 }

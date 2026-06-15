@@ -1,13 +1,25 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AppointmentHeaderComponent } from '../../components/appointment-header/appointment-header.component';
-import { CalendarMonthGridComponent } from '../../components/calendar-month-grid/calendar-month-grid.component';
-import { CalendarWeekGridComponent } from '../../components/calendar-week-grid/calendar-week-grid.component';
-import { LocationFiltersComponent } from '../../components/location-filters/location-filters.component';
-import { UpcomingAppointmentsComponent } from '../../components/upcoming-appointments/upcoming-appointments.component';
-import { Appointment, AppointmentLocation, CalendarDay, CalendarViewMode, WeekDayColumn } from '../../models/appointment.model';
-import { AppointmentService } from '../../services/appointment.service';
-import { buildMonthGrid, buildWeekColumns, formatMonthYear } from '../../utils/calendar.utils';
+import { AppointmentHeaderComponent } from '../components/appointment-header.component';
+import {
+  Appointment,
+  CalendarDay,
+  CalendarViewMode,
+  WeekDayColumn,
+} from '../models/appointment.model';
+import { AppointmentService } from '../services/appointment.service';
+import { buildMonthGrid, buildWeekColumns, formatMonthYear } from '../utils/calendar.utils';
+import { CalendarWeekGridComponent } from '../components/calendar-week-grid.component';
+import { LocationFiltersComponent } from '../components/location-filters.component';
+import { UpcomingAppointmentsComponent } from '../components/upcoming-appointments.component';
+import { CalendarMonthGridComponent } from '../components/calendar-month-grid.component';
 
 @Component({
   selector: 'app-appointment-main-page',
@@ -31,9 +43,13 @@ import { buildMonthGrid, buildWeekColumns, formatMonthYear } from '../../utils/c
       @if (searchQuery()) {
         <p class="px-4 text-sm text-[#78716C] sm:px-6 lg:px-8">
           @if (hasSearchResults()) {
-            Resultados para "<span class="font-medium text-[#514440]">{{ searchQuery() }}</span>"
+            Resultados para "<span class="font-medium text-[#514440]">{{ searchQuery() }}</span
+            >"
           } @else {
-            Nenhum agendamento encontrado para "<span class="font-medium text-[#514440]">{{ searchQuery() }}</span>"
+            Nenhum agendamento encontrado para "<span class="font-medium text-[#514440]">{{
+              searchQuery()
+            }}</span
+            >"
           }
         </p>
       }
@@ -41,7 +57,9 @@ import { buildMonthGrid, buildWeekColumns, formatMonthYear } from '../../utils/c
       <div class="flex flex-1 flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:px-8">
         <div class="min-w-0 flex-1 lg:pl-2">
           <div class="mb-4 flex items-center justify-between gap-2">
-            <h2 class="font-serif text-base font-bold text-[#514440] sm:text-lg">{{ monthLabel() }}</h2>
+            <h2 class="font-serif text-base font-bold text-[#514440] sm:text-lg">
+              {{ monthLabel() }}
+            </h2>
             <div class="flex shrink-0 gap-1 sm:gap-2">
               <button
                 type="button"
@@ -93,7 +111,7 @@ export class AppointmentMainPageComponent {
 
   protected readonly viewMode = signal<CalendarViewMode>('month');
   protected readonly currentDate = signal(new Date());
-  protected readonly selectedLocations = signal<AppointmentLocation[]>([]);
+  protected readonly selectedLocations = signal<string[]>([]);
   protected readonly searchQuery = signal('');
   protected readonly appointments = signal<Appointment[]>([]);
   protected readonly upcoming = signal<Appointment[]>([]);
@@ -114,7 +132,7 @@ export class AppointmentMainPageComponent {
     this.refreshCalendar();
   }
 
-  protected onLocationsChange(locations: AppointmentLocation[]): void {
+  protected onLocationsChange(locations: string[]): void {
     this.selectedLocations.set(locations);
     this.refreshCalendar();
     this.loadUpcoming();
@@ -171,7 +189,10 @@ export class AppointmentMainPageComponent {
       this.appointmentService
         .listByMonth(year, month, locFilter)
         .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((items) => this.appointments.set(this.applySearch(items)));
+        .subscribe({
+          next: (items) => this.appointments.set(this.applySearch(items)),
+          error: () => this.appointments.set([]),
+        });
     } else {
       const cols = buildWeekColumns(d);
       const start = cols[0].isoDate;
@@ -179,7 +200,10 @@ export class AppointmentMainPageComponent {
       this.appointmentService
         .listByDateRange(start, end, locFilter)
         .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((items) => this.appointments.set(this.applySearch(items)));
+        .subscribe({
+          next: (items) => this.appointments.set(this.applySearch(items)),
+          error: () => this.appointments.set([]),
+        });
     }
   }
 
@@ -190,7 +214,10 @@ export class AppointmentMainPageComponent {
     this.appointmentService
       .listUpcoming(searching ? null : 5, locFilter)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((items) => this.upcoming.set(this.applySearch(items)));
+      .subscribe({
+        next: (items) => this.upcoming.set(this.applySearch(items)),
+        error: () => this.upcoming.set([]),
+      });
   }
 
   private applySearch(items: Appointment[]): Appointment[] {

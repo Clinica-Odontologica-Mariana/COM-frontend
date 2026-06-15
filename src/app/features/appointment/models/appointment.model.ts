@@ -20,7 +20,10 @@ export interface Appointment {
   patientEmail?: string;
   patientInitials?: string;
   procedure: ProcedureType;
+  procedureId?: string | null;
   location: AppointmentLocation | null;
+  workplaceId?: string | null;
+  clinicId?: string | null;
   date: string;
   startTime: string;
   endTime: string;
@@ -33,14 +36,14 @@ export interface Appointment {
 
 export interface AppointmentFormDto {
   patientId: string;
-  procedure: ProcedureType;
-  location: AppointmentLocation;
+  clinicId: string;
+  workplaceId: string;
+  procedureId?: string | null;
   date: string;
   startTime: string;
   endTime: string;
   status?: AppointmentStatus;
   notes?: string;
-  clinicalNotes?: string;
 }
 
 export interface AgendaPatientOption {
@@ -95,4 +98,12 @@ export interface WeekDayColumn {
   dayNumber: number;
   weekdayLabel: string;
   isToday: boolean;
+}
+
+export interface AppointmentFilters {
+  search?: string;
+  location?: AppointmentLocation;
+  status?: AppointmentStatus;
+  startDate?: Date;
+  endDate?: Date;
 }

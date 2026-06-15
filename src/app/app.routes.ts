@@ -75,7 +75,7 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'patients/:id/editar',
+    path: 'patients/:id/edit',
     loadComponent: () =>
       import('./features/patients/pages/patient-form-page/patient-form-page.component').then(
         (m) => m.PatientFormPageComponent,
@@ -114,30 +114,30 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'agenda',
+    path: 'schedule',
     loadComponent: () =>
-      import('./features/appointment/pages/appointment-main-page/appointment-main-page.component').then(
+      import('./features/appointment/pages/appointment-main-page.component').then(
         (m) => m.AppointmentMainPageComponent,
       ),
   },
   {
-    path: 'agenda/novo',
+    path: 'schedule/new',
     loadComponent: () =>
-      import('./features/appointment/pages/appointment-create-page/appointment-create-page.component').then(
+      import('./features/appointment/pages/appointment-create-page.component').then(
         (m) => m.AppointmentCreatePageComponent,
       ),
   },
   {
-    path: 'agenda/agendamentos',
+    path: 'schedule/appointments',
     loadComponent: () =>
-      import('./features/appointment/pages/appointments-list-page/appointments-list-page.component').then(
+      import('./features/appointment/pages/appointments-list-page.component').then(
         (m) => m.AppointmentsListPageComponent,
       ),
   },
   {
-    path: 'agenda/:id/editar',
+    path: 'schedule/:id/edit',
     loadComponent: () =>
-      import('./features/appointment/pages/appointment-edit-page/appointment-edit-page.component').then(
+      import('./features/appointment/pages/appointment-edit-page.component').then(
         (m) => m.AppointmentEditPageComponent,
       ),
   },

@@ -54,7 +54,7 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
-    path: 'agenda/**',
+    path: 'schedule/**',
     renderMode: RenderMode.Client,
   },
   {

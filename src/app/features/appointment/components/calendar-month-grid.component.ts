@@ -4,13 +4,13 @@ import {
   BLOCKED_EVENT_COLOR,
   CalendarDay,
   LOCATION_COLORS,
-} from '../../models/appointment.model';
-import { CalendarEventChipComponent } from '../calendar-event-chip/calendar-event-chip.component';
-import { getWeekdayHeaders, getWeekdayHeadersShort } from '../../utils/calendar.utils';
+} from '../models/appointment.model';
+import { CalendarEventChipComponent } from './calendar-event-chip.component';
+import { getWeekdayHeaders, getWeekdayHeadersShort } from '../utils/calendar.utils';
 
 @Component({
   selector: 'app-calendar-month-grid',
-  imports: [CalendarEventChipComponent],
+  imports: [CalendarEventChipComponent, CalendarEventChipComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="overflow-hidden rounded-2xl border border-[#D5C2BD]/10 bg-white shadow-sm">
@@ -28,7 +28,7 @@ import { getWeekdayHeaders, getWeekdayHeadersShort } from '../../utils/calendar.
       <div class="grid grid-cols-7">
         @for (day of days(); track day.isoDate) {
           <div
-            class="min-h-[52px] border-r border-b border-[#D5C2BD]/10 px-0.5 py-1 last:border-r-0 sm:min-h-[110px] sm:px-3 sm:py-2"
+            class="min-h-13 border-r border-b border-[#D5C2BD]/10 px-0.5 py-1 last:border-r-0 sm:min-h-27.5 sm:px-3 sm:py-2"
             [class.bg-[#F3F3F3]/20]="!day.isCurrentMonth && !day.isToday"
             [class.bg-[#FFDBD1]/70]="day.isToday"
           >

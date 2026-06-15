@@ -6,8 +6,8 @@ import {
   LOCATION_COLORS,
   LOCATION_LABELS,
   PROCEDURE_LABELS,
-} from '../../models/appointment.model';
-import { abbreviateName } from '../../utils/calendar.utils';
+} from '../models/appointment.model';
+import { abbreviateName } from '../utils/calendar.utils';
 
 @Component({
   selector: 'app-calendar-event-chip',
@@ -30,7 +30,7 @@ import { abbreviateName } from '../../utils/calendar.utils';
       </div>
     } @else {
       <a
-        [routerLink]="['/agenda', appointment().id, 'editar']"
+        [routerLink]="['/schedule', appointment().id, 'edit']"
         class="block w-full rounded-md leading-tight transition hover:opacity-90"
         [class.px-1.5]="!compact()"
         [class.py-1.5]="!compact()"

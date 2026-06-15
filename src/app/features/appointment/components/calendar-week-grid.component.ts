@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { Appointment, WeekDayColumn } from '../../models/appointment.model';
-import { CalendarEventChipComponent } from '../calendar-event-chip/calendar-event-chip.component';
-import { formatWeekDayHeading } from '../../utils/calendar.utils';
+import { CalendarEventChipComponent } from './calendar-event-chip.component';
+import { Appointment, WeekDayColumn } from '../models/appointment.model';
+import { formatWeekDayHeading } from '../utils/calendar.utils';
 
 @Component({
   selector: 'app-calendar-week-grid',
@@ -11,9 +11,7 @@ import { formatWeekDayHeading } from '../../utils/calendar.utils';
     <!-- Mobile: lista vertical por dia -->
     <div class="flex flex-col gap-3 sm:hidden">
       @for (col of columns(); track col.isoDate) {
-        <section
-          class="overflow-hidden rounded-2xl border border-[#D5C2BD]/10 bg-white shadow-sm"
-        >
+        <section class="overflow-hidden rounded-2xl border border-[#D5C2BD]/10 bg-white shadow-sm">
           <header
             class="flex items-center gap-3 border-b border-[#D5C2BD]/10 px-4 py-3"
             [class.bg-[#FFDBD1]/70]="col.isToday"
@@ -35,7 +33,9 @@ import { formatWeekDayHeading } from '../../utils/calendar.utils';
               {{ dayHeading(col) }}
             </p>
             @if (col.isToday) {
-              <span class="ml-auto rounded-full bg-[#7C5145] px-2 py-0.5 text-[10px] font-bold text-white">
+              <span
+                class="ml-auto rounded-full bg-[#7C5145] px-2 py-0.5 text-[10px] font-bold text-white"
+              >
                 Hoje
               </span>
             }
@@ -55,7 +55,9 @@ import { formatWeekDayHeading } from '../../utils/calendar.utils';
     </div>
 
     <!-- Desktop: grade semanal -->
-    <div class="hidden overflow-hidden rounded-2xl border border-[#D5C2BD]/10 bg-white shadow-sm sm:block">
+    <div
+      class="hidden overflow-hidden rounded-2xl border border-[#D5C2BD]/10 bg-white shadow-sm sm:block"
+    >
       <div class="grid grid-cols-7 border-b border-[#D5C2BD]/20">
         @for (col of columns(); track col.isoDate) {
           <div
@@ -81,7 +83,7 @@ import { formatWeekDayHeading } from '../../utils/calendar.utils';
         }
       </div>
 
-      <div class="grid min-h-[400px] grid-cols-7">
+      <div class="grid min-h-100 grid-cols-7">
         @for (col of columns(); track col.isoDate) {
           <div
             class="border-r border-[#D5C2BD]/10 p-2 last:border-r-0"
@@ -120,4 +122,3 @@ export class CalendarWeekGridComponent {
     return formatWeekDayHeading(col.date);
   }
 }
-

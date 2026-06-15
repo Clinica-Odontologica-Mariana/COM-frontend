@@ -8,7 +8,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CalendarViewMode } from '../../models/appointment.model';
+import { CalendarViewMode } from '../models/appointment.model';
 
 @Component({
   selector: 'app-appointment-header',
@@ -19,9 +19,11 @@ import { CalendarViewMode } from '../../models/appointment.model';
       class="sticky top-0 z-10 flex flex-col gap-3 bg-[#F9F9F9]/80 px-4 py-3 backdrop-blur-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4 lg:px-8"
     >
       <div class="flex items-center justify-between gap-3 sm:justify-start sm:gap-6">
-        <h1 class="font-serif text-xl font-bold tracking-tight text-[#7C5145] sm:text-2xl">Agenda</h1>
+        <h1 class="font-serif text-xl font-bold tracking-tight text-[#7C5145] sm:text-2xl">
+          Agenda
+        </h1>
 
-        <div class="flex rounded-full bg-[#EEEEEE] p-0.5 sm:order-none">
+        <div class="flex rounded-full bg-[#EEEEEE] p-0.5 sm:order-0">
           <button
             type="button"
             class="rounded-full px-4 py-1 text-xs font-semibold transition"
@@ -53,14 +55,22 @@ import { CalendarViewMode } from '../../models/appointment.model';
           title="Integração com Google Calendar via backend em breve"
         >
           <span class="h-1.5 w-1.5 rounded-full bg-[#10B981]"></span>
-          <span class="text-[10px] font-medium text-[#514440]">Sincronizado com Google Calendar</span>
+          <span class="text-[10px] font-medium text-[#514440]"
+            >Sincronizado com Google Calendar</span
+          >
         </div>
 
         <a
-          routerLink="/agenda/novo"
+          routerLink="/schedule/new"
           class="inline-flex items-center gap-2 rounded-full bg-[#7C5145] px-3 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#6B4539] sm:px-4"
         >
-          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <svg
+            class="h-3.5 w-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
           <span class="hidden font-serif sm:inline">Novo Agendamento</span>
@@ -69,8 +79,16 @@ import { CalendarViewMode } from '../../models/appointment.model';
 
         @if (searchOpen()) {
           <div class="flex w-full min-w-0 flex-1 items-center gap-2 sm:w-auto sm:flex-none">
-            <div class="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-full bg-[#EEEEEE] px-3 sm:min-w-[200px] md:min-w-[240px]">
-              <svg class="h-4 w-4 shrink-0 text-[#7C5145]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <div
+              class="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-full bg-[#EEEEEE] px-3 sm:min-w-50 md:min-w-60"
+            >
+              <svg
+                class="h-4 w-4 shrink-0 text-[#7C5145]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -92,7 +110,13 @@ import { CalendarViewMode } from '../../models/appointment.model';
               aria-label="Fechar busca"
               (click)="closeSearch()"
             >
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -104,7 +128,13 @@ import { CalendarViewMode } from '../../models/appointment.model';
             aria-label="Buscar agendamentos"
             (click)="openSearch()"
           >
-            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg
+              class="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"

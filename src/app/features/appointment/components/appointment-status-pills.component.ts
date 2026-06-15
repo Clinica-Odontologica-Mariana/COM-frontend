@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { AppointmentStatus, STATUS_LABELS } from '../../models/appointment.model';
+import { AppointmentStatus, STATUS_LABELS } from '../models/appointment.model';
 
 @Component({
   selector: 'app-appointment-status-pills',

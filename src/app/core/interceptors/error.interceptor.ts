@@ -33,8 +33,16 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
 };
 
 function resolveErrorMessage(error: HttpErrorResponse): string {
+  if (error.status === 401) {
+    return 'Sessão expirada. Faça login novamente.';
+  }
+
   if (error.status === 403) {
-    return 'Você não tem permissão para essa ação';
+    return 'Você não tem permissão para essa ação.';
+  }
+
+  if (error.status >= 500) {
+    return 'Não foi possível processar a solicitação. Tente novamente mais tarde.';
   }
 
   if (isApiErrorResponse(error.error)) {
@@ -42,18 +50,13 @@ function resolveErrorMessage(error: HttpErrorResponse): string {
       return 'Usuário ou senha inválidos.';
     }
 
-    return error.error.error?.message ?? error.error.message ?? 'Ocorreu um erro inesperado.';
+    const backendMessage = error.error.error?.message ?? error.error.message;
+    if (backendMessage && backendMessage !== 'Unexpected error') {
+      return backendMessage;
+    }
   }
 
-  if (error.status === 401) {
-    return 'Sessão expirada. Faça login novamente.';
-  }
-
-  if (error.status >= 500) {
-    return 'Não foi possível processar a solicitação agora.';
-  }
-
-  return error.message || 'Ocorreu um erro inesperado.';
+  return 'Ocorreu um erro inesperado.';
 }
 
 function isApiErrorResponse(value: unknown): value is {

@@ -125,7 +125,7 @@ interface SidebarItem {
         </div>
 
         <a
-          routerLink="/agenda/novo"
+          routerLink="/schedule/new"
           class="mt-6 flex h-11 items-center justify-center gap-2 rounded-lg bg-[#8B574B] px-4 text-sm font-bold text-white shadow-lg shadow-[#8B574B]/20 transition hover:bg-[#744A40]"
         >
           <span class="text-lg leading-none">+</span>
@@ -164,7 +164,7 @@ export class GlobalSidebarComponent {
       link: '/patients',
       match: ['/patients'],
     },
-    { label: 'Agenda', icon: '/agenda.svg', link: '/agenda', match: ['/agenda'] },
+    { label: 'Agenda', icon: '/agenda.svg', link: '/schedule', match: ['/schedule'] },
     {
       label: 'Prontuários',
       icon: '/prontuarios.svg',

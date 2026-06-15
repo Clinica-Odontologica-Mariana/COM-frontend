@@ -1,7 +1,12 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Appointment, LOCATION_LABELS, PROCEDURE_LABELS, STATUS_LABELS } from '../../models/appointment.model';
-import { formatRelativeDayLabel } from '../../utils/calendar.utils';
+import {
+  Appointment,
+  PROCEDURE_LABELS,
+  LOCATION_LABELS,
+  STATUS_LABELS,
+} from '../models/appointment.model';
+import { formatRelativeDayLabel } from '../utils/calendar.utils';
 
 @Component({
   selector: 'app-appointment-list-card',
@@ -18,24 +23,29 @@ import { formatRelativeDayLabel } from '../../utils/calendar.utils';
           {{ badgeLabel() }}
         </span>
         @if (showStatus()) {
-          <span class="text-[10px] font-medium text-[#78716C]">{{ STATUS_LABELS[appointment().status] }}</span>
+          <span class="text-[10px] font-medium text-[#78716C]">{{
+            STATUS_LABELS[appointment().status]
+          }}</span>
         }
       </div>
 
-      <p class="mt-2 font-serif text-base font-bold text-[#1A1C1C]">{{ appointment().patientName }}</p>
+      <p class="mt-2 font-serif text-base font-bold text-[#1A1C1C]">
+        {{ appointment().patientName }}
+      </p>
       <p class="mt-0.5 text-sm text-[#514440]">
-        {{ PROCEDURE_LABELS[appointment().procedure] }} • {{ LOCATION_LABELS[appointment().location!] }}
+        {{ PROCEDURE_LABELS[appointment().procedure] }} •
+        {{ LOCATION_LABELS[appointment().location!] }}
       </p>
 
       <div class="mt-3 flex flex-wrap gap-2">
         <a
-          [routerLink]="['/agenda', appointment().id, 'editar']"
+          [routerLink]="['/schedule', appointment().id, 'edit']"
           class="rounded-md border border-[#7C5145]/20 px-3 py-1.5 text-[9px] font-bold tracking-wide text-[#7C5145] uppercase"
         >
           Editar
         </a>
         <a
-          routerLink="/agenda/novo"
+          routerLink="/schedule/new"
           [queryParams]="{ reschedule: appointment().id }"
           class="rounded-md border border-[#83746F]/20 bg-[#F5DECB]/30 px-3 py-1.5 text-[9px] font-bold tracking-wide text-[#69594A] uppercase"
         >

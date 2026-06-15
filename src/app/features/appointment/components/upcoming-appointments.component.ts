@@ -1,18 +1,20 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Appointment } from '../../models/appointment.model';
-import { AppointmentListCardComponent } from '../appointment-list-card/appointment-list-card.component';
+import { AppointmentListCardComponent } from './appointment-list-card.component';
+import { Appointment } from '../models/appointment.model';
 
 @Component({
   selector: 'app-upcoming-appointments',
   imports: [RouterLink, AppointmentListCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="flex min-h-0 flex-1 flex-col rounded-2xl border border-[#D5C2BD]/10 bg-white p-4 shadow-sm">
+    <section
+      class="flex min-h-0 flex-1 flex-col rounded-2xl border border-[#D5C2BD]/10 bg-white p-4 shadow-sm"
+    >
       <div class="mb-4 flex min-w-0 items-center justify-between gap-3">
         <h3 class="shrink-0 font-serif text-sm font-bold text-[#7C5145]">Próximos</h3>
         <a
-          routerLink="/agenda/agendamentos"
+          routerLink="/schedule/appointments"
           class="shrink-0 text-[10px] font-bold tracking-wider whitespace-nowrap text-[#7C5145] uppercase transition hover:opacity-80"
         >
           Ver todos
