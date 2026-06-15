@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService, CurrentUser } from '../../../../core/services/auth.service';
 
@@ -125,7 +125,7 @@ interface SidebarItem {
         </div>
 
         <a
-          routerLink="/medical-records/1"
+          routerLink="/schedule/new"
           class="mt-6 flex h-11 items-center justify-center gap-2 rounded-lg bg-[#8B574B] px-4 text-sm font-bold text-white shadow-lg shadow-[#8B574B]/20 transition hover:bg-[#744A40]"
         >
           <span class="text-lg leading-none">+</span>
@@ -164,7 +164,7 @@ export class GlobalSidebarComponent {
       link: '/patients',
       match: ['/patients'],
     },
-    { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', match: ['/agenda'] },
+    { label: 'Agenda', icon: '/agenda.svg', link: '/schedule', match: ['/schedule'] },
     {
       label: 'Prontuários',
       icon: '/prontuarios.svg',
@@ -177,7 +177,7 @@ export class GlobalSidebarComponent {
       link: '/patients/a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56/treatments',
       match: ['/treatments', '/patients/'],
     },
-    { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', match: ['/stock'] },
+    { label: 'Estoque', icon: '/estoque.svg', link: '/inventories', match: ['/inventories'] },
     { label: 'Clínicas', icon: '/Clinicas.svg', link: '/clinics', match: ['/clinics'] },
     {
       label: 'Certificados',
@@ -216,7 +216,9 @@ export class GlobalSidebarComponent {
   }
 
   protected isItemActive(item: SidebarItem): boolean {
-    return item.match.some((prefix) => this.currentUrl().startsWith(prefix));
+    return item.match.some((prefix) =>
+      prefix === '/' ? this.currentUrl() === '/' : this.currentUrl().startsWith(prefix),
+    );
   }
 
   protected logout(): void {

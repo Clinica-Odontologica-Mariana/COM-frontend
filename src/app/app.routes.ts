@@ -123,14 +123,70 @@ export const routes: Routes = [
       import('./features/panel/pages/panel-page/panel-page.component').then(
         (m) => m.PanelPageComponent,
       ),
-  }, 
+  },
   {
     path: 'panel/history',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/panel/pages/panel-history-page/panel-history-page.component').then(
         (m) => m.HistoryPageComponent,
-    ),  
+      ),
+  },
+  {
+    path: 'schedule',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/appointment/pages/appointment-main-page.component').then(
+        (m) => m.AppointmentMainPageComponent,
+      ),
+  },
+  {
+    path: 'schedule/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/appointment/pages/appointment-create-page.component').then(
+        (m) => m.AppointmentCreatePageComponent,
+      ),
+  },
+  {
+    path: 'schedule/appointments',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/appointment/pages/appointments-list-page.component').then(
+        (m) => m.AppointmentsListPageComponent,
+      ),
+  },
+  {
+    path: 'schedule/:id/edit',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/appointment/pages/appointment-edit-page.component').then(
+        (m) => m.AppointmentEditPageComponent,
+      ),
+  },
+  {
+    path: 'inventories/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/inventories/pages/inventory-item-form-page/inventory-item-form-page.component').then(
+        (m) => m.InventoryItemFormPageComponent,
+      ),
+  },
+  {
+    path: 'inventories/:id/edit',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/inventories/pages/inventory-item-form-page/inventory-item-form-page.component').then(
+        (m) => m.InventoryItemFormPageComponent,
+      ),
+  },
+  {
+    path: 'inventories',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/inventories/pages/inventory-page/inventory-page.component').then(
+        (m) => m.InventoryPageComponent,
+      ),
   },
   {
     path: '**',

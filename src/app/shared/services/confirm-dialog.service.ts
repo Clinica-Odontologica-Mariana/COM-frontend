@@ -10,14 +10,14 @@ export interface ConfirmDialogState {
 export class ConfirmDialogService {
   readonly state = signal<ConfirmDialogState | null>(null);
 
+  private pendingResult: Subject<boolean> | null = null;
+
   confirm(message: string, title = 'Confirmar'): Observable<boolean> {
     const result$ = new Subject<boolean>();
     this.state.set({ title, message });
     this.pendingResult = result$;
     return result$.asObservable();
   }
-
-  private pendingResult: Subject<boolean> | null = null;
 
   accept(): void {
     this.pendingResult?.next(true);

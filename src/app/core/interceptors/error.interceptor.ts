@@ -33,8 +33,18 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
 };
 
 function resolveErrorMessage(error: HttpErrorResponse): string {
+  const backendMessage = readBackendErrorMessage(error.error);
+
+  if (backendMessage) {
+    return backendMessage;
+  }
+
   if (error.status === 403) {
-    return 'Você não tem permissão para essa ação';
+    return 'Você não tem permissão para essa ação.';
+  }
+
+  if (error.status >= 500) {
+    return 'Não foi possível processar a solicitação. Tente novamente mais tarde.';
   }
 
   if (isApiErrorResponse(error.error)) {
@@ -42,18 +52,29 @@ function resolveErrorMessage(error: HttpErrorResponse): string {
       return 'Usuário ou senha inválidos.';
     }
 
-    return error.error.error?.message ?? error.error.message ?? 'Ocorreu um erro inesperado.';
+    const backendMessage = error.error.error?.message ?? error.error.message;
+    if (backendMessage && backendMessage !== 'Unexpected error') {
+      return backendMessage;
+    }
   }
 
-  if (error.status === 401) {
-    return 'Sessão expirada. Faça login novamente.';
+  return 'Ocorreu um erro inesperado.';
+}
+
+function readBackendErrorMessage(payload: unknown): string | null {
+  if (!payload || typeof payload !== 'object' || !('error' in payload)) {
+    return null;
   }
 
-  if (error.status >= 500) {
-    return 'Não foi possível processar a solicitação agora.';
+  const apiError = (payload as { error?: unknown }).error;
+
+  if (!apiError || typeof apiError !== 'object' || !('message' in apiError)) {
+    return null;
   }
 
-  return error.message || 'Ocorreu um erro inesperado.';
+  const message = (apiError as { message?: unknown }).message;
+
+  return typeof message === 'string' && message.trim() ? message : null;
 }
 
 function isApiErrorResponse(value: unknown): value is {

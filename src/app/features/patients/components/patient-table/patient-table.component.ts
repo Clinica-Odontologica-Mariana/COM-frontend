@@ -42,7 +42,9 @@ import { formatConsultationDate, formatCpf, getInitials } from '../../utils/form
                   <p class="text-base font-semibold text-[#7C5145]">{{ patient.fullName }}</p>
                   <p class="text-[11px] text-[#A8A29E]">#{{ patient.registrationNumber }}</p>
                 </td>
-                <td class="px-6 py-6 text-sm font-medium text-[#78716C]">{{ formatCpf(patient.cpf) }}</td>
+                <td class="px-6 py-6 text-sm font-medium text-[#78716C]">
+                  {{ formatCpf(patient.cpf) }}
+                </td>
                 <td class="px-6 py-6 text-sm text-[#78716C]">
                   {{ formatConsultationDate(patient.lastConsultationDate) }}
                 </td>
@@ -112,7 +114,7 @@ import { formatConsultationDate, formatCpf, getInitials } from '../../utils/form
                 <td colspan="6" class="px-8 py-16 text-center">
                   <p class="text-sm text-[#78716C]">Nenhum paciente encontrado.</p>
                   <a
-                    routerLink="/patients/new"
+                    routerLink="/pacientes/new"
                     class="mt-4 inline-block rounded-xl bg-[#7C5145] px-6 py-2 text-sm font-bold text-white shadow-lg shadow-[#7C5145]/20 transition hover:bg-[#6a453b]"
                   >
                     Cadastrar paciente

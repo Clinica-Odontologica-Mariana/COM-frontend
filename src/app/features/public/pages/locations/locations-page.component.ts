@@ -15,12 +15,16 @@ interface LocationUnit {
   selector: 'app-locations-page',
   template: `
     <section class="border-b border-[#EDE7E2] bg-[#F9F9F9]">
-      <div class="mx-auto grid max-w-7xl gap-12 px-8 py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-end lg:px-12 lg:py-28">
+      <div
+        class="mx-auto grid max-w-7xl gap-12 px-8 py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-end lg:px-12 lg:py-28"
+      >
         <div>
           <p class="text-sm font-semibold uppercase tracking-[0.45em] text-[#89594C]">
             Presença & cuidado
           </p>
-          <h1 class="mt-8 max-w-3xl font-serif text-6xl font-bold leading-[0.95] text-[#171717] sm:text-7xl lg:text-8xl">
+          <h1
+            class="mt-8 max-w-3xl font-serif text-6xl font-bold leading-[0.95] text-[#171717] sm:text-7xl lg:text-8xl"
+          >
             Onde nos
             <span class="block font-normal italic text-[#89594C]">encontrar.</span>
           </h1>
@@ -35,7 +39,9 @@ interface LocationUnit {
 
     <main class="bg-[#F9F9F9] px-8 py-16 lg:px-12">
       <div class="mx-auto max-w-7xl">
-        <div class="mb-12 flex flex-col gap-4 border-b border-[#EDE7E2] pb-10 lg:flex-row lg:items-end lg:justify-between">
+        <div
+          class="mb-12 flex flex-col gap-4 border-b border-[#EDE7E2] pb-10 lg:flex-row lg:items-end lg:justify-between"
+        >
           <div>
             <p class="text-sm font-semibold uppercase tracking-[0.32em] text-[#A77769]">
               Atendimento presencial
@@ -53,8 +59,10 @@ interface LocationUnit {
         </div>
 
         <div class="grid gap-8 lg:grid-cols-2">
-          <article class="overflow-hidden rounded-lg border border-[#EFEAE7] bg-white shadow-[0_16px_40px_rgba(45,36,30,0.04)] lg:col-span-1">
-            <div class="grid min-h-[31rem] md:grid-cols-[1.05fr_0.95fr]">
+          <article
+            class="overflow-hidden rounded-lg border border-[#EFEAE7] bg-white shadow-[0_16px_40px_rgba(45,36,30,0.04)] lg:col-span-1"
+          >
+            <div class="grid min-h-124 md:grid-cols-[1.05fr_0.95fr]">
               <div
                 class="min-h-80 bg-cover bg-center"
                 [style.background-image]="'url(' + featuredUnit.imageUrl + ')'"
@@ -62,18 +70,36 @@ interface LocationUnit {
                 [attr.aria-label]="featuredUnit.name"
               ></div>
               <div class="flex flex-col p-8 lg:p-10">
-                <h3 class="font-serif text-3xl font-bold text-[#89594C]">{{ featuredUnit.name }}</h3>
-                <p class="mt-4 text-base leading-7 text-[#5E514B]">{{ featuredUnit.description }}</p>
+                <h3 class="font-serif text-3xl font-bold text-[#89594C]">
+                  {{ featuredUnit.name }}
+                </h3>
+                <p class="mt-4 text-base leading-7 text-[#5E514B]">
+                  {{ featuredUnit.description }}
+                </p>
 
                 <div class="mt-8 space-y-5 text-base leading-6 text-[#2D241E]">
                   <p class="flex gap-4">
-                    <img src="/localizacao.svg" width="18" height="22" alt="" aria-hidden="true" class="mt-1 h-5 w-5" />
+                    <img
+                      src="/localizacao.svg"
+                      width="18"
+                      height="22"
+                      alt=""
+                      aria-hidden="true"
+                      class="mt-1 h-5 w-5"
+                    />
                     <span>{{ featuredUnit.address }}</span>
                   </p>
                   <p class="flex gap-4">
-                    <span class="relative mt-0.5 h-5 w-5 rounded-full border-2 border-[#89594C]" aria-hidden="true">
-                      <span class="absolute left-1/2 top-1/2 h-1.5 w-0.5 -translate-x-1/2 -translate-y-full bg-[#89594C]"></span>
-                      <span class="absolute left-1/2 top-1/2 h-0.5 w-1.5 -translate-y-1/2 bg-[#89594C]"></span>
+                    <span
+                      class="relative mt-0.5 h-5 w-5 rounded-full border-2 border-[#89594C]"
+                      aria-hidden="true"
+                    >
+                      <span
+                        class="absolute left-1/2 top-1/2 h-1.5 w-0.5 -translate-x-1/2 -translate-y-full bg-[#89594C]"
+                      ></span>
+                      <span
+                        class="absolute left-1/2 top-1/2 h-0.5 w-1.5 -translate-y-1/2 bg-[#89594C]"
+                      ></span>
                     </span>
                     <span>{{ featuredUnit.hours }}</span>
                   </p>
@@ -89,24 +115,44 @@ interface LocationUnit {
             </div>
           </article>
 
-          <article class="overflow-hidden rounded-lg bg-[#75624F] text-white shadow-[0_16px_40px_rgba(45,36,30,0.08)]">
+          <article
+            class="overflow-hidden rounded-lg bg-[#75624F] text-white shadow-[0_16px_40px_rgba(45,36,30,0.08)]"
+          >
             <div
               class="relative h-48 bg-cover bg-center opacity-80"
               [style.background-image]="'url(' + mapPreviewUrl + ')'"
               aria-hidden="true"
             >
-              <span class="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#B78474] shadow-[0_0_0_10px_rgba(183,132,116,0.18)]"></span>
+              <span
+                class="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#B78474] shadow-[0_0_0_10px_rgba(183,132,116,0.18)]"
+              ></span>
             </div>
             <div class="p-8 lg:p-10">
               <h3 class="font-serif text-3xl font-bold">{{ highlightedUnit.name }}</h3>
-              <p class="mt-3 text-base leading-7 text-white/80">{{ highlightedUnit.description }}</p>
+              <p class="mt-3 text-base leading-7 text-white/80">
+                {{ highlightedUnit.description }}
+              </p>
               <div class="mt-7 space-y-4 text-base">
                 <p class="flex gap-4">
-                  <img src="/localizacao.svg" width="18" height="22" alt="" aria-hidden="true" class="mt-1 h-5 w-5 brightness-0 invert" />
+                  <img
+                    src="/localizacao.svg"
+                    width="18"
+                    height="22"
+                    alt=""
+                    aria-hidden="true"
+                    class="mt-1 h-5 w-5 brightness-0 invert"
+                  />
                   <span>{{ highlightedUnit.address }}</span>
                 </p>
                 <p class="flex gap-4">
-                  <img src="/telefone.svg" width="18" height="18" alt="" aria-hidden="true" class="mt-1 h-5 w-5 brightness-0 invert" />
+                  <img
+                    src="/telefone.svg"
+                    width="18"
+                    height="18"
+                    alt=""
+                    aria-hidden="true"
+                    class="mt-1 h-5 w-5 brightness-0 invert"
+                  />
                   <span>{{ highlightedUnit.phone }}</span>
                 </p>
               </div>
@@ -124,15 +170,26 @@ interface LocationUnit {
             <div class="mt-6 space-y-5 text-base leading-6 text-[#2D241E]">
               <p class="flex gap-4">
                 <span class="relative mt-1 h-5 w-5 text-[#89594C]" aria-hidden="true">
-                  <span class="absolute left-1/2 top-0 h-5 w-4 -translate-x-1/2 rounded-full border-2 border-[#89594C]"></span>
-                  <span class="absolute left-1/2 top-1.5 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#89594C]"></span>
+                  <span
+                    class="absolute left-1/2 top-0 h-5 w-4 -translate-x-1/2 rounded-full border-2 border-[#89594C]"
+                  ></span>
+                  <span
+                    class="absolute left-1/2 top-1.5 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#89594C]"
+                  ></span>
                 </span>
                 <span>{{ compactUnit.address }}</span>
               </p>
               <p class="flex gap-4">
-                <span class="relative h-6 w-6 rounded-full border-2 border-[#89594C]" aria-hidden="true">
-                  <span class="absolute left-1/2 top-1/2 h-2 w-0.5 -translate-x-1/2 -translate-y-full bg-[#89594C]"></span>
-                  <span class="absolute left-1/2 top-1/2 h-0.5 w-2 -translate-y-1/2 bg-[#89594C]"></span>
+                <span
+                  class="relative h-6 w-6 rounded-full border-2 border-[#89594C]"
+                  aria-hidden="true"
+                >
+                  <span
+                    class="absolute left-1/2 top-1/2 h-2 w-0.5 -translate-x-1/2 -translate-y-full bg-[#89594C]"
+                  ></span>
+                  <span
+                    class="absolute left-1/2 top-1/2 h-0.5 w-2 -translate-y-1/2 bg-[#89594C]"
+                  ></span>
                 </span>
                 <span>{{ compactUnit.hours }}</span>
               </p>
@@ -148,19 +205,31 @@ interface LocationUnit {
           <article class="rounded-lg bg-white p-8 shadow-[0_16px_40px_rgba(45,36,30,0.04)] lg:p-10">
             <div class="grid gap-10 md:grid-cols-[1fr_15rem] md:items-center">
               <div>
-                <span class="rounded-full bg-[#F0E8E5] px-5 py-2 text-xs font-bold uppercase tracking-[0.24em] text-[#89594C]">
+                <span
+                  class="rounded-full bg-[#F0E8E5] px-5 py-2 text-xs font-bold uppercase tracking-[0.24em] text-[#89594C]"
+                >
                   {{ wideUnit.region }}
                 </span>
-                <h3 class="mt-8 font-serif text-4xl font-bold text-[#89594C]">{{ wideUnit.name }}</h3>
-                <p class="mt-5 max-w-2xl text-lg leading-8 text-[#5E514B]">{{ wideUnit.description }}</p>
-                <div class="mt-8 grid gap-6 text-sm uppercase tracking-wide text-[#A77769] sm:grid-cols-2">
+                <h3 class="mt-8 font-serif text-4xl font-bold text-[#89594C]">
+                  {{ wideUnit.name }}
+                </h3>
+                <p class="mt-5 max-w-2xl text-lg leading-8 text-[#5E514B]">
+                  {{ wideUnit.description }}
+                </p>
+                <div
+                  class="mt-8 grid gap-6 text-sm uppercase tracking-wide text-[#A77769] sm:grid-cols-2"
+                >
                   <div>
                     <p class="font-bold">Endereço</p>
-                    <p class="mt-2 normal-case tracking-normal text-base text-[#2D241E]">{{ wideUnit.address }}</p>
+                    <p class="mt-2 normal-case tracking-normal text-base text-[#2D241E]">
+                      {{ wideUnit.address }}
+                    </p>
                   </div>
                   <div>
                     <p class="font-bold">Contato</p>
-                    <p class="mt-2 normal-case tracking-normal text-base text-[#2D241E]">{{ wideUnit.phone }}</p>
+                    <p class="mt-2 normal-case tracking-normal text-base text-[#2D241E]">
+                      {{ wideUnit.phone }}
+                    </p>
                   </div>
                 </div>
               </div>

@@ -11,18 +11,34 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+const apiTarget = process.env['API_TARGET_URL'] || 'http://localhost:8080';
 
-/**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
- */
+app.use('/api/v1', express.raw({ type: '*/*' }), async (req, res, next) => {
+  try {
+    const targetUrl = new URL(req.originalUrl, apiTarget);
+    const headers = new Headers();
+
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (key.toLowerCase() === 'host' || value === undefined) {
+        continue;
+      }
+
+      headers.set(key, Array.isArray(value) ? value.join(',') : value);
+    }
+
+    const response = await fetch(targetUrl, {
+      method: req.method,
+      headers,
+      body: req.method === 'GET' || req.method === 'HEAD' ? undefined : req.body,
+    });
+
+    res.status(response.status);
+    response.headers.forEach((value, key) => res.setHeader(key, value));
+    res.send(Buffer.from(await response.arrayBuffer()));
+  } catch (error) {
+    next(error);
+  }
+});
 
 /**
  * Serve static files from /browser
