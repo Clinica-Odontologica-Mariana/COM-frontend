@@ -33,15 +33,10 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
 };
 
 function resolveErrorMessage(error: HttpErrorResponse): string {
-<<<<<<< HEAD
-  if (error.status === 401) {
-    return 'Sessão expirada. Faça login novamente.';
-=======
   const backendMessage = readBackendErrorMessage(error.error);
 
   if (backendMessage) {
     return backendMessage;
->>>>>>> 6df08fd267776f9631072319f26d88dae077328c
   }
 
   if (error.status === 403) {
