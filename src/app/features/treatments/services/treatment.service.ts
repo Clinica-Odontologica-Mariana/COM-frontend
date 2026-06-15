@@ -4,7 +4,7 @@ import { Observable, catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { Procedure, ProcedureStatus, ToothState, TreatmentData } from '../models/treatment.model';
 import { getMockTreatment } from '../data/mock-treatment';
 
-const API_BASE = 'http://localhost:8080/api/v1';
+const API_BASE = '/api/v1';
 
 // ── API DTOs ──────────────────────────────────────────────────────────────────
 
