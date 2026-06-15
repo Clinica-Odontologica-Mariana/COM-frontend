@@ -34,7 +34,7 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
-    path: 'pacientes/**',
+    path: 'patients/**',
     renderMode: RenderMode.Client,
   },
   {
@@ -43,6 +43,10 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'patients/:id/edit',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'medical-records',
     renderMode: RenderMode.Client,
   },
   {

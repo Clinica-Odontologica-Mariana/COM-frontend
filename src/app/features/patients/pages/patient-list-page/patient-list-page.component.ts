@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
@@ -31,10 +25,7 @@ import { PatientService } from '../../services/patient.service';
   ],
   template: `
     <div class="min-h-full pb-12">
-      <app-patient-page-header
-        title="Pacientes"
-        [breadcrumbs]="breadcrumbs"
-      >
+      <app-patient-page-header title="Pacientes" [breadcrumbs]="breadcrumbs">
         <a
           routerLink="/pacientes/novo"
           class="rounded-xl bg-[#7C5145] px-8 py-2 text-base font-bold text-white shadow-lg shadow-[#7C5145]/20 transition hover:bg-[#6a453b]"
@@ -54,10 +45,7 @@ import { PatientService } from '../../services/patient.service';
         @if (loading()) {
           <p class="py-12 text-center text-sm text-[#78716C]">Carregando pacientes...</p>
         } @else {
-          <app-patient-table
-            [patients]="patients()"
-            (deletePatient)="onDelete($event)"
-          />
+          <app-patient-table [patients]="patients()" (deletePatient)="onDelete($event)" />
 
           @if (total() > 0) {
             <app-patient-pagination

@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -84,7 +78,7 @@ interface PatientFormControls {
         <form class="space-y-6 px-6 lg:px-8" [formGroup]="form" (ngSubmit)="onSubmit()">
           <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <section
-              class="order-2 space-y-8 rounded-[32px] border border-[#E7E5E4]/20 bg-[#F3F3F3] p-8 shadow-sm lg:order-1 lg:col-span-2"
+              class="order-2 space-y-8 rounded-4xl border border-[#E7E5E4]/20 bg-[#F3F3F3] p-8 shadow-sm lg:order-1 lg:col-span-2"
             >
               <div class="flex items-center gap-4">
                 <div
@@ -156,7 +150,10 @@ interface PatientFormControls {
                     [max]="todayIso"
                     class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
                   />
-                  @if (form.controls.birthDate.touched && form.controls.birthDate.hasError('futureDate')) {
+                  @if (
+                    form.controls.birthDate.touched &&
+                    form.controls.birthDate.hasError('futureDate')
+                  ) {
                     <p class="text-xs text-red-500">Data de nascimento não pode ser futura.</p>
                   }
                 </div>
@@ -218,7 +215,7 @@ interface PatientFormControls {
             </section>
 
             <section
-              class="order-1 flex flex-col items-center justify-center rounded-[32px] border border-[#7C5145]/10 bg-[#7C5145]/5 p-8 text-center lg:order-2"
+              class="order-1 flex flex-col items-center justify-center rounded-4xl border border-[#7C5145]/10 bg-[#7C5145]/5 p-8 text-center lg:order-2"
             >
               <div class="relative">
                 @if (photoPreview()) {
@@ -275,7 +272,7 @@ interface PatientFormControls {
           </div>
 
           <section
-            class="space-y-10 rounded-[32px] border border-[#E7E5E4]/20 bg-[#F3F3F3] p-8 shadow-sm"
+            class="space-y-10 rounded-4xl border border-[#E7E5E4]/20 bg-[#F3F3F3] p-8 shadow-sm"
           >
             <div class="flex items-center gap-4">
               <div
@@ -357,7 +354,7 @@ interface PatientFormControls {
 
           <div class="grid gap-6 lg:grid-cols-2">
             <section
-              class="space-y-6 rounded-[32px] border border-[#E7E5E4]/20 bg-[#F3F3F3] p-8 shadow-sm"
+              class="space-y-6 rounded-4xl border border-[#E7E5E4]/20 bg-[#F3F3F3] p-8 shadow-sm"
             >
               <div class="flex items-center gap-4">
                 <div
@@ -461,7 +458,7 @@ interface PatientFormControls {
             </section>
 
             <section
-              class="space-y-6 rounded-[32px] border border-[#E7E5E4]/20 bg-[#F3F3F3] p-8 shadow-sm"
+              class="space-y-6 rounded-4xl border border-[#E7E5E4]/20 bg-[#F3F3F3] p-8 shadow-sm"
             >
               <div class="flex items-center gap-4">
                 <div
