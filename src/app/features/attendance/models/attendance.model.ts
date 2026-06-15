@@ -1,3 +1,4 @@
+import { LucideIconData } from '@lucide/angular';
 export interface JourneyStep {
   number: string;
   title: string;
@@ -5,7 +6,6 @@ export interface JourneyStep {
 }
 
 export interface Benefit {
-  icon: string;
   title: string;
   description: string;
 }
