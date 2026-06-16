@@ -11,7 +11,10 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
-const apiTarget = process.env['API_TARGET_URL'] || 'http://localhost:8080';
+const apiTarget =
+  process.env['API_BASE_URL'] ||
+  process.env['API_TARGET_URL'] ||
+  'http://localhost:8080';
 
 app.use('/api/v1', express.raw({ type: '*/*' }), async (req, res, next) => {
   try {
