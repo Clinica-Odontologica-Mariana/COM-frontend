@@ -163,6 +163,6 @@ export class GlobalHeaderComponent {
     { label: 'Início', link: '/', exact: true, icon: '/Painel_icon.svg' },
     { label: 'Unidades', link: '/locations', exact: true, icon: '/Clinicas.svg' },
     { label: 'Atendimento', link: '/attendance', exact: true, icon: '/prontuarios.svg' },
-    { label: 'Acesso Administrativo', link: '/admin-access', exact: true, icon: '/pacientes.svg' },
+    { label: 'Acesso Administrativo', link: '/admin-access', exact: true, icon: '/patients.svg' },
   ];
 }

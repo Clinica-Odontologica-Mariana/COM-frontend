@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
+  OnChanges,
+  SimpleChanges,
   computed,
   inject,
   input,
@@ -155,7 +156,7 @@ interface ProcedureFormGroup {
               <label
                 class="text-[12px] font-bold uppercase text-[#78716C]"
                 style="font-family: Manrope, sans-serif; letter-spacing: 0.6px;"
-                >Nome</label
+                >Nome *</label
               >
               <input
                 formControlName="name"
@@ -169,6 +170,9 @@ interface ProcedureFormGroup {
                     : 'transparent'
                 "
               />
+              @if (form.controls.name.touched && form.controls.name.invalid) {
+                <span class="text-xs text-red-600">Nome é obrigatório.</span>
+              }
             </div>
 
             <div class="flex flex-col gap-2">
@@ -226,9 +230,17 @@ interface ProcedureFormGroup {
             <label
               class="text-[12px] font-bold uppercase text-[#78716C]"
               style="font-family: Manrope, sans-serif; letter-spacing: 0.6px;"
-              >Valor do procedimento</label
+              >Valor do procedimento *</label
             >
-            <div class="flex items-center overflow-hidden rounded-xl" style="background: #EEEEEE;">
+            <div
+              class="flex items-center overflow-hidden rounded-xl"
+              style="background: #EEEEEE; border: 2px solid transparent;"
+              [style.border-color]="
+                form.controls.value.touched && form.controls.value.invalid
+                  ? '#B20000'
+                  : 'transparent'
+              "
+            >
               <span
                 class="px-4 text-base font-semibold text-[#78716C]"
                 style="font-family: Manrope, sans-serif;"
@@ -243,6 +255,9 @@ interface ProcedureFormGroup {
                 (blur)="formatValue()"
               />
             </div>
+            @if (form.controls.value.touched && form.controls.value.invalid) {
+              <span class="text-xs text-red-600">Valor é obrigatório.</span>
+            }
           </div>
 
           <!-- Row 4: Materials select + quantity -->
@@ -345,7 +360,7 @@ interface ProcedureFormGroup {
             <label
               class="mb-3 block text-[12px] font-bold uppercase text-[#78716C]"
               style="font-family: Manrope, sans-serif; letter-spacing: 0.6px;"
-              >Status</label
+              >Status *</label
             >
             <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
               @for (opt of statusOptions; track opt.value) {
@@ -387,7 +402,7 @@ interface ProcedureFormGroup {
     />
   `,
 })
-export class ProcedureFormComponent implements OnInit {
+export class ProcedureFormComponent implements OnChanges {
   treatmentId = input.required<string>();
   patientName = input.required<string>();
   patientCode = input.required<string>();
@@ -417,7 +432,7 @@ export class ProcedureFormComponent implements OnInit {
     type: this.fb.nonNullable.control('', Validators.required),
     startDate: this.fb.nonNullable.control(''),
     endDate: this.fb.nonNullable.control(''),
-    value: this.fb.nonNullable.control(''),
+    value: this.fb.nonNullable.control('', Validators.required),
   }) as FormGroup<ProcedureFormGroup>;
 
   protected toothStatesSignal = computed<Record<number, ToothState>>(() =>
@@ -427,20 +442,34 @@ export class ProcedureFormComponent implements OnInit {
     }, {}),
   );
 
-  ngOnInit(): void {
-    const proc = this.existingProcedure();
-    if (proc) {
-      this.form.patchValue({
-        name: proc.name,
-        type: proc.type,
-        startDate: proc.startDate,
-        endDate: proc.endDate,
-        value: proc.value.toFixed(2).replace('.', ','),
-      });
-      this.selectedTeeth.set([...proc.teeth]);
-      this.materials.set([...proc.materials]);
-      this.selectedStatus.set(proc.status);
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['existingProcedure']) {
+      const proc = this.existingProcedure();
+      if (proc) {
+        this.form.patchValue({
+          name: proc.name,
+          type: proc.type,
+          startDate: this.ptBrToIso(proc.startDate),
+          endDate: this.ptBrToIso(proc.endDate),
+          value: proc.value.toFixed(2).replace('.', ','),
+        });
+        this.selectedTeeth.set([...proc.teeth]);
+        this.materials.set([...proc.materials]);
+        this.selectedStatus.set(proc.status);
+      } else {
+        this.form.reset();
+        this.selectedTeeth.set([]);
+        this.materials.set([]);
+        this.selectedStatus.set('in_progress');
+      }
     }
+  }
+
+  private ptBrToIso(date: string): string {
+    if (!date) return '';
+    const parts = date.split('/');
+    if (parts.length !== 3) return date;
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
   }
 
   protected formatValue(): void {
@@ -494,7 +523,7 @@ export class ProcedureFormComponent implements OnInit {
 
   protected onSave(): void {
     this.form.markAllAsTouched();
-    if (this.form.controls.name.invalid) return;
+    if (this.form.invalid) return;
 
     const rawValue = this.form.controls.value.value.trim();
     const estimatedPrice = parseFloat(rawValue.replace(/\./g, '').replace(',', '.')) || 0;

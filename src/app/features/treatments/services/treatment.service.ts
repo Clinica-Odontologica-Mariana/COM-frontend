@@ -1,76 +1,129 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, forkJoin, map, of, switchMap } from 'rxjs';
-import { Procedure, ProcedureStatus, ToothState, TreatmentData } from '../models/treatment.model';
-import { getMockTreatment } from '../data/mock-treatment';
+import { Observable, catchError, forkJoin, map, of, switchMap, throwError } from 'rxjs';
+import { ProcedureStatus, TreatmentData } from '../models/treatment.model';
+import { adaptTreatmentData, fromApiStatus } from '../data/adapters/treatment.adapter';
+import {
+  ClinicalProcedureDto,
+  OdontogramEntryDto,
+  PatientDto,
+  TreatmentPlanDto,
+  TreatmentPlanItemDto,
+} from '../data/dto/treatment-plan.dto';
+import { ApiResponse } from '../../../core/models/api-response.model';
 
 const API_BASE = '/api/v1';
 
-// ── API DTOs ──────────────────────────────────────────────────────────────────
+const API_STATUS: Record<ProcedureStatus, string> = {
+  pending: 'PENDING',
+  in_progress: 'APPROVED',
+  completed: 'DONE',
+  interrupted: 'CANCELLED',
+};
 
-interface TreatmentPlanDto {
+interface PatientPageDto {
+  content: PatientDto[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface TreatmentListItem {
   id: string;
   patientId: string;
-  medicalRecordId: string | null;
+  patientName: string;
   title: string;
   status: string;
-  notes: string | null;
   totalAmount: number | null;
-  createdAt: string;
-  updatedAt: string;
+  procedureCount: number;
+  completedCount: number;
 }
 
-interface TreatmentPlanItemDto {
-  id: string;
-  treatmentPlanId: string;
-  procedureId: string | null;
-  toothNumber: number | null;
-  description: string;
-  estimatedPrice: number;
-  status: string;
-  sortOrder: number | null;
-  completedAt: string | null;
-  createdAt: string;
+function unwrap<T>(source: Observable<ApiResponse<T>>): Observable<T> {
+  return source.pipe(map((res) => res.data));
 }
-
-interface PatientDto {
-  id: string;
-  fullName: string;
-  cpf: string | null;
-  phone: string | null;
-  email: string | null;
-}
-
-interface ClinicalProcedureDto {
-  id: string;
-  name: string;
-  category: string;
-}
-
-interface MedicalRecordDto {
-  id: string;
-  patientId: string;
-  generalObservations: string | null;
-}
-
-interface OdontogramEntryDto {
-  id: string;
-  patientId: string;
-  toothNumber: number;
-  conditionCode: string | null;
-}
-
-// ── Service ───────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
 export class TreatmentService {
   private http = inject(HttpClient);
 
+  getTreatmentList(): Observable<TreatmentListItem[]> {
+    return unwrap(
+      this.http.get<ApiResponse<PatientPageDto>>(`${API_BASE}/patients`, {
+        params: { size: '200', page: '0' },
+      }),
+    ).pipe(
+      switchMap((page) => {
+        const patients = page.content;
+        if (!patients.length) return of([]);
+
+        return forkJoin(
+          patients.map((patient) =>
+            unwrap(
+              this.http.get<ApiResponse<TreatmentPlanDto[]>>(
+                `${API_BASE}/treatment-plans/by-patient/${patient.id}`,
+              ),
+            ).pipe(
+              switchMap((plans) => {
+                if (!plans.length) return of([] as TreatmentListItem[]);
+                return forkJoin(
+                  plans.map((plan) =>
+                    unwrap(
+                      this.http.get<ApiResponse<TreatmentPlanItemDto[]>>(
+                        `${API_BASE}/treatment-plans/${plan.id}/items`,
+                      ),
+                    ).pipe(
+                      map(
+                        (items): TreatmentListItem => ({
+                          id: plan.id,
+                          patientId: patient.id,
+                          patientName: patient.fullName,
+                          title: plan.title,
+                          status: plan.status,
+                          totalAmount: plan.totalAmount,
+                          procedureCount: items.length,
+                          completedCount: items.filter(
+                            (i) => fromApiStatus(i.status) === 'completed',
+                          ).length,
+                        }),
+                      ),
+                      catchError(() =>
+                        of<TreatmentListItem>({
+                          id: plan.id,
+                          patientId: patient.id,
+                          patientName: patient.fullName,
+                          title: plan.title,
+                          status: plan.status,
+                          totalAmount: plan.totalAmount,
+                          procedureCount: 0,
+                          completedCount: 0,
+                        }),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              catchError(() => of([] as TreatmentListItem[])),
+            ),
+          ),
+        ).pipe(map((arrays) => arrays.flat()));
+      }),
+      catchError((err) => throwError(() => err)),
+    );
+  }
+
   getTreatment(treatmentPlanId: string): Observable<TreatmentData> {
     return forkJoin({
-      plan: this.http.get<TreatmentPlanDto>(`${API_BASE}/treatment-plans/${treatmentPlanId}`),
-      items: this.http.get<TreatmentPlanItemDto[]>(
-        `${API_BASE}/treatment-plans/${treatmentPlanId}/items`,
+      plan: unwrap(
+        this.http.get<ApiResponse<TreatmentPlanDto>>(
+          `${API_BASE}/treatment-plans/${treatmentPlanId}`,
+        ),
+      ),
+      items: unwrap(
+        this.http.get<ApiResponse<TreatmentPlanItemDto[]>>(
+          `${API_BASE}/treatment-plans/${treatmentPlanId}/items`,
+        ),
       ),
     }).pipe(
       switchMap(({ plan, items }) => {
@@ -82,9 +135,11 @@ export class TreatmentService {
           procedureIds.length > 0
             ? forkJoin(
                 procedureIds.map((id) =>
-                  this.http
-                    .get<ClinicalProcedureDto>(`${API_BASE}/clinical-procedures/${id}`)
-                    .pipe(catchError(() => of(null))),
+                  unwrap(
+                    this.http.get<ApiResponse<ClinicalProcedureDto>>(
+                      `${API_BASE}/clinical-procedures/${id}`,
+                    ),
+                  ).pipe(catchError(() => of(null))),
                 ),
               ).pipe(
                 map((results) => {
@@ -98,60 +153,61 @@ export class TreatmentService {
             : of({} as Record<string, ClinicalProcedureDto>);
 
         return forkJoin({
-          patient: this.http
-            .get<PatientDto>(`${API_BASE}/patients/${plan.patientId}`)
-            .pipe(catchError(() => of(null))),
-          medicalRecord: this.http
-            .get<MedicalRecordDto>(`${API_BASE}/medical-records/by-patient/${plan.patientId}`)
-            .pipe(catchError(() => of(null))),
-          odontogramEntries: this.http
-            .get<
-              OdontogramEntryDto[]
-            >(`${API_BASE}/odontogram-entries/by-patient/${plan.patientId}`)
-            .pipe(catchError(() => of([]))),
+          patient: unwrap(
+            this.http.get<ApiResponse<PatientDto>>(`${API_BASE}/patients/${plan.patientId}`),
+          ).pipe(catchError(() => of(null))),
+          medicalRecord: unwrap(
+            this.http.get<ApiResponse<never>>(
+              `${API_BASE}/medical-records/by-patient/${plan.patientId}`,
+            ),
+          ).pipe(catchError(() => of(null))),
+          odontogramEntries: unwrap(
+            this.http.get<ApiResponse<OdontogramEntryDto[]>>(
+              `${API_BASE}/odontogram-entries/by-patient/${plan.patientId}`,
+            ),
+          ).pipe(catchError(() => of([]))),
           clinicalProcs: clinicalProcs$,
         }).pipe(
           map(({ patient, medicalRecord, odontogramEntries, clinicalProcs }) =>
-            this.mapTreatmentData(
+            adaptTreatmentData(
               plan,
               items,
-              patient,
-              medicalRecord,
+              patient as PatientDto | null,
+              medicalRecord as never,
               odontogramEntries,
               clinicalProcs,
             ),
           ),
         );
       }),
-      catchError(() => of(getMockTreatment(treatmentPlanId))),
+      catchError((err) => throwError(() => err)),
     );
   }
 
   updateNotes(treatmentPlanId: string, notes: string): Observable<void> {
-    return this.http.get<TreatmentPlanDto>(`${API_BASE}/treatment-plans/${treatmentPlanId}`).pipe(
+    return unwrap(
+      this.http.get<ApiResponse<TreatmentPlanDto>>(
+        `${API_BASE}/treatment-plans/${treatmentPlanId}`,
+      ),
+    ).pipe(
       switchMap((plan) =>
         this.http.put<void>(`${API_BASE}/treatment-plans/${treatmentPlanId}`, {
           title: plan.title,
           notes,
         }),
       ),
-      catchError(() => of(undefined)),
     );
   }
 
   completeProcedure(itemId: string): Observable<void> {
-    return this.http
-      .patch<void>(`${API_BASE}/treatment-plans/items/${itemId}/complete`, {})
-      .pipe(catchError(() => of(undefined)));
+    return this.http.patch<void>(`${API_BASE}/treatment-plans/items/${itemId}/complete`, {});
   }
 
   startProcedure(itemId: string, description: string): Observable<void> {
-    return this.http
-      .put<void>(`${API_BASE}/treatment-plans/items/${itemId}`, {
-        status: 'APPROVED',
-        description: description || ' ',
-      })
-      .pipe(catchError(() => of(undefined)));
+    return this.http.put<void>(`${API_BASE}/treatment-plans/items/${itemId}`, {
+      status: 'APPROVED',
+      description: description || ' ',
+    });
   }
 
   createProcedureItem(
@@ -163,12 +219,17 @@ export class TreatmentService {
       toothNumber?: number;
     },
   ): Observable<TreatmentPlanItemDto> {
-    return this.http.post<TreatmentPlanItemDto>(`${API_BASE}/treatment-plans/${planId}/items`, {
-      description: data.description,
-      estimatedPrice: data.estimatedPrice ?? 0,
-      status: data.status ?? 'PENDING',
-      toothNumber: data.toothNumber ?? null,
-    });
+    return unwrap(
+      this.http.post<ApiResponse<TreatmentPlanItemDto>>(
+        `${API_BASE}/treatment-plans/${planId}/items`,
+        {
+          description: data.description,
+          estimatedPrice: data.estimatedPrice ?? 0,
+          status: data.status ?? API_STATUS.pending,
+          toothNumber: data.toothNumber ?? null,
+        },
+      ),
+    );
   }
 
   updateProcedureItem(
@@ -180,137 +241,20 @@ export class TreatmentService {
       toothNumber?: number;
     },
   ): Observable<TreatmentPlanItemDto> {
-    return this.http.put<TreatmentPlanItemDto>(`${API_BASE}/treatment-plans/items/${itemId}`, {
-      description: data.description,
-      estimatedPrice: data.estimatedPrice ?? 0,
-      status: data.status ?? 'PENDING',
-      toothNumber: data.toothNumber ?? null,
-    });
+    return unwrap(
+      this.http.put<ApiResponse<TreatmentPlanItemDto>>(
+        `${API_BASE}/treatment-plans/items/${itemId}`,
+        {
+          description: data.description,
+          estimatedPrice: data.estimatedPrice ?? 0,
+          status: data.status ?? API_STATUS.pending,
+          toothNumber: data.toothNumber ?? null,
+        },
+      ),
+    );
   }
 
   deleteProcedureItem(itemId: string): Observable<void> {
     return this.http.delete<void>(`${API_BASE}/treatment-plans/items/${itemId}`);
-  }
-
-  // ── Mapping helpers ─────────────────────────────────────────────────────────
-
-  private mapTreatmentData(
-    plan: TreatmentPlanDto,
-    items: TreatmentPlanItemDto[],
-    patient: PatientDto | null,
-    medicalRecord: MedicalRecordDto | null,
-    odontogramEntries: OdontogramEntryDto[],
-    clinicalProcs: Record<string, ClinicalProcedureDto>,
-  ): TreatmentData {
-    const procedures: Procedure[] = items.map((item) => {
-      const cp = item.procedureId ? clinicalProcs[item.procedureId] : null;
-      const status = this.fromApiStatus(item.status);
-      const teeth = item.toothNumber != null ? [item.toothNumber] : [];
-      return {
-        id: item.id,
-        name: cp?.name ?? item.description,
-        type: cp?.category ?? 'Outros',
-        startDate: this.fmtDate(item.createdAt),
-        endDate: this.fmtDate(item.completedAt),
-        value: item.estimatedPrice ?? 0,
-        teeth,
-        materials: [],
-        status,
-        subtitle: this.buildSubtitle(cp?.category ?? 'Outros', teeth),
-      };
-    });
-
-    const executed = procedures
-      .filter((p) => p.status === 'completed')
-      .reduce((sum, p) => sum + p.value, 0);
-
-    const totalBudget = plan.totalAmount ?? procedures.reduce((sum, p) => sum + p.value, 0);
-
-    return {
-      id: plan.id,
-      patient: {
-        id: patient?.id ?? plan.patientId,
-        name: patient?.fullName ?? 'Paciente',
-        code: this.buildPatientCode(patient),
-      },
-      procedures,
-      totalBudget,
-      executed,
-      toPay: totalBudget - executed,
-      toothStates: this.buildToothStates(procedures, odontogramEntries),
-      journeyStep: this.calcJourneyStep(procedures),
-      notes: plan.notes ?? medicalRecord?.generalObservations ?? '',
-    };
-  }
-
-  private fromApiStatus(apiStatus: string): ProcedureStatus {
-    switch (apiStatus?.toUpperCase()) {
-      case 'DONE':
-        return 'completed';
-      case 'APPROVED':
-        return 'in_progress';
-      case 'CANCELLED':
-        return 'interrupted';
-      default:
-        return 'pending';
-    }
-  }
-
-  private fmtDate(iso: string | null | undefined): string {
-    if (!iso) return '';
-    return new Date(iso).toLocaleDateString('pt-BR');
-  }
-
-  private buildSubtitle(category: string, teeth: number[]): string {
-    if (!teeth.length) return category;
-    return `${category} — ${teeth.length} ${teeth.length === 1 ? 'dente' : 'dentes'}`;
-  }
-
-  private buildPatientCode(patient: PatientDto | null): string {
-    if (!patient?.id) return 'PAC-000';
-    return `PAC-${patient.id.replace(/-/g, '').slice(-3).toUpperCase()}`;
-  }
-
-  private buildToothStates(
-    procedures: Procedure[],
-    odontogramEntries: OdontogramEntryDto[],
-  ): Record<number, ToothState> {
-    const states: Record<number, ToothState> = {};
-
-    for (const proc of procedures) {
-      for (const tooth of proc.teeth) {
-        switch (proc.status) {
-          case 'in_progress':
-            states[tooth] = 'pending';
-            break;
-          case 'completed':
-            states[tooth] = 'selected';
-            break;
-          case 'interrupted':
-            states[tooth] = 'inactive';
-            break;
-          case 'pending':
-          default:
-            states[tooth] = 'note';
-            break;
-        }
-      }
-    }
-
-    for (const entry of odontogramEntries) {
-      if (entry.toothNumber != null && !states[entry.toothNumber]) {
-        states[entry.toothNumber] = 'note';
-      }
-    }
-
-    return states;
-  }
-
-  private calcJourneyStep(procedures: Procedure[]): number {
-    if (!procedures.length) return 0;
-    const active = procedures.filter((p) => p.status !== 'interrupted');
-    if (active.every((p) => p.status === 'completed')) return 2;
-    if (active.some((p) => p.status === 'in_progress')) return 1;
-    return 0;
   }
 }

@@ -1,6 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  PLATFORM_ID,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { getMockTreatment } from '../../data/mock-treatment';
+import { TreatmentService } from '../../services/treatment.service';
+import { TreatmentData } from '../../models/treatment.model';
 import { ProcedureFormComponent } from '../../components/procedure-form/procedure-form.component';
 
 @Component({
@@ -8,18 +18,30 @@ import { ProcedureFormComponent } from '../../components/procedure-form/procedur
   imports: [ProcedureFormComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-procedure-form
-      [treatmentId]="id()"
-      [patientName]="treatment().patient.name"
-      [patientCode]="'ID: #PAC-' + treatment().patient.id.slice(0, 4).toUpperCase()"
-      [isEdit]="false"
-      [existingProcedure]="null"
-    />
+    @if (treatment()) {
+      <app-procedure-form
+        [treatmentId]="id()"
+        [patientName]="treatment()!.patient.name"
+        [patientCode]="'ID: #PAC-' + treatment()!.patient.id.slice(0, 4).toUpperCase()"
+        [isEdit]="false"
+        [existingProcedure]="null"
+      />
+    }
   `,
 })
-export class CreateProcedurePageComponent {
+export class CreateProcedurePageComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private treatmentService = inject(TreatmentService);
+  private platformId = inject(PLATFORM_ID);
 
-  protected id = computed(() => this.route.snapshot.paramMap.get('id') ?? '1');
-  protected treatment = computed(() => getMockTreatment(this.id()));
+  protected id = computed(() => this.route.snapshot.paramMap.get('id') ?? '');
+
+  private _data = signal<TreatmentData | null>(null);
+  protected treatment = computed<TreatmentData | null>(() => this._data());
+
+  ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.treatmentService.getTreatment(this.id()).subscribe((data) => this._data.set(data));
+    }
+  }
 }
