@@ -45,16 +45,19 @@ export const MOBILITY_HIGHLIGHTS: MobilityHighlight[] = [
 
 export const BENEFITS: Benefit[] = [
   {
+    icon: 'home',
     title: 'Conforto Domiciliar',
     description:
       'Ideal para pacientes com mobilidade reduzida, idosos ou quem prefere a privacidade do lar.',
   },
   {
+    icon: 'domain',
     title: 'Clínicas Parceiras',
     description:
       'Estruturas completas em localizações estratégicas para cirurgias e estética avançada.',
   },
   {
+    icon: 'schedule',
     title: 'Agenda Flexível',
     description: 'Horários que se adaptam à sua rotina, sem salas de espera e sem pressa.',
   },
