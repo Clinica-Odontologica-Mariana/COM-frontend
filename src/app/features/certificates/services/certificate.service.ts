@@ -7,8 +7,6 @@ import { adaptCertificate, adaptCertificates } from '../adapters/certificate.ada
 import { CertificateCreateDto, CertificateUpdateDto } from '../models/certificate.dto';
 import { CertificateState, CertificateViewModel } from '../models/certificate.model';
 
-export const DEFAULT_PATIENT_ID = 'a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56';
-
 const initialState: CertificateState = {
   certificates: [],
   loading: false,
@@ -27,16 +25,14 @@ export class CertificateService {
   readonly saving = computed(() => this.state().saving);
   readonly deletingId = computed(() => this.state().deletingId);
   readonly error = computed(() => this.state().error);
-  readonly patientId = DEFAULT_PATIENT_ID;
-
   load(): void {
     this.patchState({ loading: true, error: null });
-    this.api.getByPatient(DEFAULT_PATIENT_ID).subscribe({
+    this.api.getAll().subscribe({
       next: (dtos) => {
         this.patchState({ certificates: adaptCertificates(dtos), loading: false });
       },
-      error: (err: Error) => {
-        this.patchState({ error: err.message, loading: false });
+      error: () => {
+        this.patchState({ error: 'Não foi possível carregar os certificados.', loading: false });
       },
     });
   }

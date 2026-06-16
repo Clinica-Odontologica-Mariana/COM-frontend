@@ -1,11 +1,18 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  PLATFORM_ID,
+  inject,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { CertificateApi } from '../../certificates/api/certificate.api';
 import { adaptCertificates } from '../../certificates/adapters/certificate.adapter';
 import { CertificateViewModel } from '../../certificates/models/certificate.model';
 
-const DEFAULT_PATIENT_ID = 'a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56';
 const MAX_PUBLIC_CERTIFICATES = 3;
 
 @Component({
@@ -174,11 +181,11 @@ const MAX_PUBLIC_CERTIFICATES = 3;
 
             <div class="grid gap-4 sm:grid-cols-2">
               <article class="rounded-[28px] bg-[#ECECEC] p-7 shadow-sm">
-                <p class="text-3xl">✦</p>
+                <img src="estrela_icon.svg" class="size-7" />
                 <h3 class="mt-8 font-serif text-2xl text-[#8B574B]">Estética</h3>
               </article>
               <article class="rounded-[28px] bg-[#F2E2CC] p-7 shadow-sm">
-                <p class="text-3xl">◌</p>
+                <img src="escudo_icon.svg" class="size-7" />
                 <h3 class="mt-8 font-serif text-2xl text-[#8B574B]">Prevenção</h3>
               </article>
             </div>
@@ -202,7 +209,7 @@ const MAX_PUBLIC_CERTIFICATES = 3;
                 <div
                   class="grid h-12 w-12 place-items-center rounded-full bg-[#F5D7CF] text-[#8B574B]"
                 >
-                  {{ item.icon }}
+                  <img src="{{ item.icon }}" class="size-5" />
                 </div>
                 <h3 class="mt-6 font-serif text-2xl text-[#8B574B]">{{ item.title }}</h3>
                 <p class="mt-5 text-sm leading-7 text-[#6F645F]">{{ item.description }}</p>
@@ -229,20 +236,13 @@ const MAX_PUBLIC_CERTIFICATES = 3;
         </div>
       </section>
     </main>
-
-    <a
-      href="https://api.whatsapp.com/send?phone=61998439300"
-      class="fixed bottom-6 right-6 z-50 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-lg shadow-black/20 transition hover:scale-105"
-      aria-label="Falar no WhatsApp"
-    >
-      <span class="text-2xl leading-none">⌁</span>
-    </a>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent implements OnInit {
   private readonly certificateApi = inject(CertificateApi);
   private readonly authService = inject(AuthService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   protected readonly certificates = signal<CertificateViewModel[]>([]);
   protected readonly certificatesLoading = signal(false);
@@ -255,19 +255,19 @@ export class HomeComponent implements OnInit {
 
   protected readonly philosophy = [
     {
-      icon: '⌂',
+      icon: 'casa_icon.svg',
       title: 'Conveniência Ética',
       description:
         'Levamos o consultório completo até você, garantindo privacidade absoluta e eliminando o estresse do deslocamento.',
     },
     {
-      icon: '♡',
+      icon: 'coracao_icon.svg',
       title: 'Humanização Real',
       description:
         'Consultas com tempo estendido. Ouvimos o paciente além da queixa clínica, tratando a pessoa, não apenas o dente.',
     },
     {
-      icon: '⌁',
+      icon: 'tecnologia_icon.svg',
       title: 'Tecnologia Portátil',
       description:
         'Equipamentos de última geração em versões compactas para diagnósticos precisos em qualquer ambiente.',
@@ -279,8 +279,14 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    if (!this.authService.isTokenValid()) {
+      return;
+    }
     this.certificatesLoading.set(true);
-    this.certificateApi.getByPatient(DEFAULT_PATIENT_ID).subscribe({
+    this.certificateApi.getAll().subscribe({
       next: (dtos) => {
         const active = dtos.filter((d) => d.active && !d.revokedAt);
         this.certificates.set(adaptCertificates(active).slice(0, MAX_PUBLIC_CERTIFICATES));

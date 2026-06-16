@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { API_BASE_URL } from '../../../core/config/api.config';
+import { API_BASE_URL, SUPPRESS_ERROR_TOAST } from '../../../core/config/api.config';
 import { ApiResponse } from '../../../core/models/api-response.model';
 import { CertificateCreateDto, CertificateDto, CertificateUpdateDto } from '../models/certificate.dto';
 
@@ -16,9 +16,11 @@ export class CertificateApi {
   private readonly http = inject(HttpClient);
   private readonly base = inject(API_BASE_URL);
 
-  getByPatient(patientId: string): Observable<CertificateDto[]> {
+  getAll(): Observable<CertificateDto[]> {
     return unwrap(
-      this.http.get<ApiResponse<CertificateDto[]>>(`${this.base}/certificates/by-patient/${patientId}`),
+      this.http.get<ApiResponse<CertificateDto[]>>(`${this.base}/certificates`, {
+        context: new HttpContext().set(SUPPRESS_ERROR_TOAST, true),
+      }),
     );
   }
 

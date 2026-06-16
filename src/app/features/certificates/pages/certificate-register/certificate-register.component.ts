@@ -22,19 +22,30 @@ const CERTIFICATE_TYPES = [
   imports: [CommonModule, FormsModule],
   providers: [CertificateService],
   template: `
-    <main class="min-h-screen bg-gradient-to-br from-[#FAFAF9] to-[#F5F1ED] px-6 py-8 lg:px-12">
+    <main class="min-h-screen bg-linear-to-br from-[#FAFAF9] to-[#F5F1ED] px-6 py-8 lg:px-12">
       <!-- Error global -->
       @if (service.error()) {
-        <div class="mb-6 flex items-center justify-between rounded-xl bg-red-50 px-5 py-4 text-sm text-red-700 shadow-sm">
+        <div
+          class="mb-6 flex items-center justify-between rounded-xl bg-red-50 px-5 py-4 text-sm text-red-700 shadow-sm"
+        >
           <span>{{ service.error() }}</span>
-          <button (click)="service.clearError()" class="ml-4 text-red-500 hover:text-red-700">✕</button>
+          <button (click)="service.clearError()" class="ml-4 text-red-500 hover:text-red-700">
+            ✕
+          </button>
         </div>
       }
 
       @if (successMessage()) {
-        <div class="mb-6 flex items-center justify-between rounded-xl bg-green-50 px-5 py-4 text-sm text-green-700 shadow-sm">
+        <div
+          class="mb-6 flex items-center justify-between rounded-xl bg-green-50 px-5 py-4 text-sm text-green-700 shadow-sm"
+        >
           <span>{{ successMessage() }}</span>
-          <button (click)="successMessage.set(null)" class="ml-4 text-green-500 hover:text-green-700">✕</button>
+          <button
+            (click)="successMessage.set(null)"
+            class="ml-4 text-green-500 hover:text-green-700"
+          >
+            ✕
+          </button>
         </div>
       }
 
@@ -115,11 +126,26 @@ const CERTIFICATE_TYPES = [
                   Documento
                 </label>
                 <!-- Banner informativo — upload ainda não disponível -->
-                <div class="mt-2 flex items-start gap-3 rounded-lg border border-[#D4A574]/50 bg-[#FDF6EE] px-4 py-3 text-sm text-[#8B6535]">
-                  <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-[#D4A574]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <div
+                  class="mt-2 flex items-start gap-3 rounded-lg border border-[#D4A574]/50 bg-[#FDF6EE] px-4 py-3 text-sm text-[#8B6535]"
+                >
+                  <svg
+                    class="mt-0.5 h-4 w-4 shrink-0 text-[#D4A574]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
                   </svg>
-                  <span>O upload de arquivos para certificados ainda não está disponível. Salve os demais dados e anexe o documento quando a funcionalidade for liberada.</span>
+                  <span
+                    >O upload de arquivos para certificados ainda não está disponível. Salve os
+                    demais dados e anexe o documento quando a funcionalidade for liberada.</span
+                  >
                 </div>
               </div>
 
@@ -130,7 +156,13 @@ const CERTIFICATE_TYPES = [
                   [disabled]="!form.valid || service.saving()"
                   class="flex-1 rounded-xl bg-[#8B574B] px-6 py-4 text-center font-semibold text-white transition hover:bg-[#744A40] disabled:opacity-50"
                 >
-                  {{ service.saving() ? 'Salvando...' : editingId() ? 'Atualizar' : 'Salvar Certificado' }}
+                  {{
+                    service.saving()
+                      ? 'Salvando...'
+                      : editingId()
+                        ? 'Atualizar'
+                        : 'Salvar Certificado'
+                  }}
                 </button>
                 @if (editingId()) {
                   <button
@@ -169,11 +201,23 @@ const CERTIFICATE_TYPES = [
           <!-- Empty state -->
           @if (!service.loading() && service.certificates().length === 0 && !service.error()) {
             <div class="rounded-2xl bg-white p-12 text-center shadow-sm">
-              <svg class="mx-auto mb-4 h-12 w-12 text-[#D4CCBE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              <svg
+                class="mx-auto mb-4 h-12 w-12 text-[#D4CCBE]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                ></path>
               </svg>
               <p class="font-semibold text-[#5E514B]">Nenhum certificado cadastrado</p>
-              <p class="mt-1 text-sm text-[#A89D95]">Adicione sua primeira credencial pelo formulário ao lado.</p>
+              <p class="mt-1 text-sm text-[#A89D95]">
+                Adicione sua primeira credencial pelo formulário ao lado.
+              </p>
             </div>
           }
 
@@ -181,7 +225,12 @@ const CERTIFICATE_TYPES = [
           @if (!service.loading() && service.error() && service.certificates().length === 0) {
             <div class="rounded-2xl bg-white p-12 text-center shadow-sm">
               <p class="font-semibold text-red-600">Não foi possível carregar os certificados.</p>
-              <button (click)="service.load()" class="mt-4 text-sm text-[#8B574B] underline hover:text-[#744A40]">Tentar novamente</button>
+              <button
+                (click)="service.load()"
+                class="mt-4 text-sm text-[#8B574B] underline hover:text-[#744A40]"
+              >
+                Tentar novamente
+              </button>
             </div>
           }
 
@@ -194,10 +243,15 @@ const CERTIFICATE_TYPES = [
                   <div class="mb-3 flex items-start justify-between gap-3">
                     <div class="flex-1 min-w-0">
                       <h3 class="truncate text-lg font-bold text-[#5E514B]">{{ cert.title }}</h3>
-                      <p class="mt-0.5 text-sm font-medium text-[#8B8680]">{{ cert.certificateType }}</p>
+                      <p class="mt-0.5 text-sm font-medium text-[#8B8680]">
+                        {{ cert.certificateType }}
+                      </p>
                     </div>
                     <span
-                      [class]="'flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold text-white ' + (cert.status === 'active' ? 'bg-[#4CAF50]' : 'bg-[#D4A574]')"
+                      [class]="
+                        'shrink-0 rounded-full px-3 py-1 text-xs font-bold text-white ' +
+                        (cert.status === 'active' ? 'bg-[#4CAF50]' : 'bg-[#D4A574]')
+                      "
                     >
                       {{ cert.status === 'active' ? 'ATIVO' : 'REVOGADO' }}
                     </span>
@@ -212,16 +266,36 @@ const CERTIFICATE_TYPES = [
                   <div class="flex flex-wrap items-center gap-4 text-xs text-[#A89D95]">
                     @if (cert.issuedAtFormatted) {
                       <span class="flex items-center gap-1">
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        <svg
+                          class="h-3.5 w-3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          ></path>
                         </svg>
                         Emitido em {{ cert.issuedAtFormatted }}
                       </span>
                     }
                     @if (cert.hasFile) {
                       <span class="flex items-center gap-1 text-[#8B574B]">
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                        <svg
+                          class="h-3.5 w-3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                          ></path>
                         </svg>
                         Arquivo anexado
                       </span>
@@ -229,15 +303,27 @@ const CERTIFICATE_TYPES = [
                   </div>
 
                   <!-- Actions -->
-                  <div class="mt-4 flex items-center justify-end gap-4 border-t border-[#F5F1ED] pt-4">
+                  <div
+                    class="mt-4 flex items-center justify-end gap-4 border-t border-[#F5F1ED] pt-4"
+                  >
                     <button
                       (click)="viewCertificate(cert)"
                       class="flex items-center gap-1.5 text-xs text-[#8B8680] transition hover:text-[#5E514B]"
                       title="Visualizar"
                     >
                       <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        ></path>
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        ></path>
                       </svg>
                       Visualizar
                     </button>
@@ -247,7 +333,12 @@ const CERTIFICATE_TYPES = [
                       title="Editar"
                     >
                       <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        ></path>
                       </svg>
                       Editar
                     </button>
@@ -259,12 +350,28 @@ const CERTIFICATE_TYPES = [
                     >
                       @if (service.deletingId() === cert.id) {
                         <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                          <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                          ></circle>
+                          <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          ></path>
                         </svg>
                       } @else {
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          ></path>
                         </svg>
                       }
                       Excluir
@@ -279,12 +386,24 @@ const CERTIFICATE_TYPES = [
 
       <!-- DELETE MODAL -->
       @if (showDeleteModal()) {
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+        <div
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+        >
           <div class="mx-4 w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
             <div class="mb-4 flex justify-center">
               <div class="rounded-full bg-red-100 p-3">
-                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <svg
+                  class="h-6 w-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
                 </svg>
               </div>
             </div>
@@ -321,11 +440,21 @@ const CERTIFICATE_TYPES = [
             (click)="$event.stopPropagation()"
           >
             <!-- Header -->
-            <div class="sticky top-0 flex items-center justify-between border-b border-[#E8DED8] bg-white px-6 py-4">
+            <div
+              class="sticky top-0 flex items-center justify-between border-b border-[#E8DED8] bg-white px-6 py-4"
+            >
               <h2 class="text-xl font-bold text-[#5E514B]">{{ certificateToView()?.title }}</h2>
-              <button (click)="closeViewModal()" class="text-[#A89D95] transition hover:text-[#5E514B]">
+              <button
+                (click)="closeViewModal()"
+                class="text-[#A89D95] transition hover:text-[#5E514B]"
+              >
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
                 </svg>
               </button>
             </div>
@@ -339,14 +468,18 @@ const CERTIFICATE_TYPES = [
                 </div>
                 <div>
                   <label class="text-xs font-bold uppercase text-[#78716C]">Tipo</label>
-                  <p class="mt-1 font-semibold text-[#5E514B]">{{ certificateToView()?.certificateType }}</p>
+                  <p class="mt-1 font-semibold text-[#5E514B]">
+                    {{ certificateToView()?.certificateType }}
+                  </p>
                 </div>
               </div>
 
               @if (certificateToView()?.content) {
                 <div>
                   <label class="text-xs font-bold uppercase text-[#78716C]">Descrição</label>
-                  <p class="mt-1 whitespace-pre-wrap text-sm text-[#5E514B]">{{ certificateToView()?.content }}</p>
+                  <p class="mt-1 whitespace-pre-wrap text-sm text-[#5E514B]">
+                    {{ certificateToView()?.content }}
+                  </p>
                 </div>
               }
 
@@ -361,7 +494,10 @@ const CERTIFICATE_TYPES = [
                   <label class="text-xs font-bold uppercase text-[#78716C]">Status</label>
                   <div class="mt-1">
                     <span
-                      [class]="'inline-block rounded-full px-4 py-1 text-sm font-bold text-white ' + (certificateToView()?.status === 'active' ? 'bg-[#4CAF50]' : 'bg-[#D4A574]')"
+                      [class]="
+                        'inline-block rounded-full px-4 py-1 text-sm font-bold text-white ' +
+                        (certificateToView()?.status === 'active' ? 'bg-[#4CAF50]' : 'bg-[#D4A574]')
+                      "
                     >
                       {{ certificateToView()?.status === 'active' ? 'ATIVO' : 'REVOGADO' }}
                     </span>
@@ -373,11 +509,25 @@ const CERTIFICATE_TYPES = [
               <div>
                 <label class="text-xs font-bold uppercase text-[#78716C]">Arquivo</label>
                 @if (certificateToView()?.hasFile) {
-                  <div class="mt-2 flex items-start gap-3 rounded-lg border border-[#D4A574]/50 bg-[#FDF6EE] px-4 py-3 text-sm text-[#8B6535]">
-                    <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-[#D4A574]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  <div
+                    class="mt-2 flex items-start gap-3 rounded-lg border border-[#D4A574]/50 bg-[#FDF6EE] px-4 py-3 text-sm text-[#8B6535]"
+                  >
+                    <svg
+                      class="mt-0.5 h-4 w-4 shrink-0 text-[#D4A574]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
                     </svg>
-                    <span>Arquivo disponível no servidor. Download direto ainda não implementado.</span>
+                    <span
+                      >Arquivo disponível no servidor. Download direto ainda não implementado.</span
+                    >
                   </div>
                 } @else {
                   <p class="mt-1 text-sm text-[#A89D95]">Nenhum arquivo anexado.</p>
@@ -448,12 +598,13 @@ export class CertificateRegisterPageComponent implements OnInit {
             this.showSuccess('Certificado atualizado com sucesso.');
             this.resetForm();
           },
-          error: () => { /* service.error() já exibe a mensagem */ },
+          error: () => {
+            /* service.error() já exibe a mensagem */
+          },
         });
     } else {
       this.service
         .create({
-          patientId: this.service.patientId,
           title: this.formData.title,
           certificateType: this.formData.certificateType,
           content: this.formData.content || undefined,
@@ -464,7 +615,9 @@ export class CertificateRegisterPageComponent implements OnInit {
             this.showSuccess('Certificado salvo com sucesso.');
             this.resetForm();
           },
-          error: () => { /* service.error() já exibe a mensagem */ },
+          error: () => {
+            /* service.error() já exibe a mensagem */
+          },
         });
     }
   }

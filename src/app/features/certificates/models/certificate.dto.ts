@@ -14,7 +14,6 @@ export interface CertificateDto {
 }
 
 export interface CertificateCreateDto {
-  patientId: string;
   title: string;
   certificateType: string;
   professionalId?: string;
