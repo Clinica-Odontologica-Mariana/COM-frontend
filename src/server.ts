@@ -16,6 +16,11 @@ const apiTarget =
   process.env['API_TARGET_URL'] ||
   'http://localhost:8080';
 
+app.get('/env.js', (_req, res) => {
+  res.type('application/javascript');
+  res.send(`window.__env = ${JSON.stringify({ API_BASE_URL: apiTarget })};`);
+});
+
 app.use('/api/v1', express.raw({ type: '*/*' }), async (req, res, next) => {
   try {
     const targetUrl = new URL(req.originalUrl, apiTarget);
