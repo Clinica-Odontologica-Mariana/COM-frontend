@@ -1,14 +1,15 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ClinicsApi } from '../../../clinics/api/clinics.api';
+import {
+  ClinicCardViewModel,
+  WorkingDay,
+  toClinicCardViewModel,
+} from '../../../clinics/models/clinic.models';
 
-interface LocationUnit {
-  name: string;
-  region?: string;
-  description: string;
-  address: string;
-  hours?: string;
-  phone?: string;
-  imageUrl?: string;
-  mapUrl?: string;
+interface LocationUnit extends ClinicCardViewModel {
+  fullAddress: string;
+  mapUrl: string;
+  whatsappUrl: string;
 }
 
 @Component({
@@ -51,245 +52,236 @@ interface LocationUnit {
             </h2>
           </div>
           <a
-            href="https://api.whatsapp.com/send?phone=61993359225"
+            [href]="primaryWhatsappUrl()"
             class="inline-flex w-fit items-center justify-center rounded-xl bg-[#89594C] px-6 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-[#744A40]"
           >
             Reservar horário
           </a>
         </div>
 
-        <div class="grid gap-8 lg:grid-cols-2">
-          <article
-            class="overflow-hidden rounded-lg border border-[#EFEAE7] bg-white shadow-[0_16px_40px_rgba(45,36,30,0.04)] lg:col-span-1"
-          >
-            <div class="grid min-h-124 md:grid-cols-[1.05fr_0.95fr]">
-              <div
-                class="min-h-80 bg-cover bg-center"
-                [style.background-image]="'url(' + featuredUnit.imageUrl + ')'"
-                role="img"
-                [attr.aria-label]="featuredUnit.name"
-              ></div>
-              <div class="flex flex-col p-8 lg:p-10">
-                <h3 class="font-serif text-3xl font-bold text-[#89594C]">
-                  {{ featuredUnit.name }}
-                </h3>
-                <p class="mt-4 text-base leading-7 text-[#5E514B]">
-                  {{ featuredUnit.description }}
-                </p>
-
-                <div class="mt-8 space-y-5 text-base leading-6 text-[#2D241E]">
-                  <p class="flex gap-4">
-                    <img
-                      src="/localizacao.svg"
-                      width="18"
-                      height="22"
-                      alt=""
-                      aria-hidden="true"
-                      class="mt-1 h-5 w-5"
-                    />
-                    <span>{{ featuredUnit.address }}</span>
-                  </p>
-                  <p class="flex gap-4">
-                    <span
-                      class="relative mt-0.5 h-5 w-5 rounded-full border-2 border-[#89594C]"
-                      aria-hidden="true"
-                    >
-                      <span
-                        class="absolute left-1/2 top-1/2 h-1.5 w-0.5 -translate-x-1/2 -translate-y-full bg-[#89594C]"
-                      ></span>
-                      <span
-                        class="absolute left-1/2 top-1/2 h-0.5 w-1.5 -translate-y-1/2 bg-[#89594C]"
-                      ></span>
-                    </span>
-                    <span>{{ featuredUnit.hours }}</span>
-                  </p>
+        @if (loading()) {
+          <div class="grid gap-8 lg:grid-cols-2">
+            @for (_ of skeletonCards; track $index) {
+              <article class="overflow-hidden rounded-lg border border-[#EFEAE7] bg-white">
+                <div class="h-64 animate-pulse bg-[#EAE4E0]"></div>
+                <div class="space-y-4 p-8">
+                  <div class="h-7 w-56 animate-pulse rounded-full bg-[#EEE8E4]"></div>
+                  <div class="h-4 w-full animate-pulse rounded-full bg-[#F3EEEB]"></div>
+                  <div class="h-4 w-2/3 animate-pulse rounded-full bg-[#F3EEEB]"></div>
                 </div>
-
-                <a
-                  [href]="featuredUnit.mapUrl"
-                  class="mt-auto inline-flex w-fit items-center gap-2 pt-10 text-sm font-bold uppercase tracking-wide text-[#89594C] transition hover:text-[#744A40]"
-                >
-                  Ver no mapa <span aria-hidden="true">-></span>
-                </a>
-              </div>
-            </div>
-          </article>
-
-          <article
-            class="overflow-hidden rounded-lg bg-[#75624F] text-white shadow-[0_16px_40px_rgba(45,36,30,0.08)]"
-          >
-            <div
-              class="relative h-48 bg-cover bg-center opacity-80"
-              [style.background-image]="'url(' + mapPreviewUrl + ')'"
-              aria-hidden="true"
-            >
-              <span
-                class="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#B78474] shadow-[0_0_0_10px_rgba(183,132,116,0.18)]"
-              ></span>
-            </div>
-            <div class="p-8 lg:p-10">
-              <h3 class="font-serif text-3xl font-bold">{{ highlightedUnit.name }}</h3>
-              <p class="mt-3 text-base leading-7 text-white/80">
-                {{ highlightedUnit.description }}
-              </p>
-              <div class="mt-7 space-y-4 text-base">
-                <p class="flex gap-4">
-                  <img
-                    src="/localizacao.svg"
-                    width="18"
-                    height="22"
-                    alt=""
-                    aria-hidden="true"
-                    class="mt-1 h-5 w-5 brightness-0 invert"
-                  />
-                  <span>{{ highlightedUnit.address }}</span>
-                </p>
-                <p class="flex gap-4">
-                  <img
-                    src="/telefone.svg"
-                    width="18"
-                    height="18"
-                    alt=""
-                    aria-hidden="true"
-                    class="mt-1 h-5 w-5 brightness-0 invert"
-                  />
-                  <span>{{ highlightedUnit.phone }}</span>
-                </p>
-              </div>
-              <a
-                href="https://api.whatsapp.com/send?phone=61993359225"
-                class="mt-9 flex items-center justify-center rounded-lg bg-white/14 px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-white/22"
+              </article>
+            }
+          </div>
+        } @else if (feedback()) {
+          <div class="rounded-lg border border-[#E9C9C0] bg-[#FFF6F4] px-6 py-5 text-[#A34D43]">
+            {{ feedback() }}
+          </div>
+        } @else if (!visibleUnits().length) {
+          <div class="rounded-lg border border-[#EFEAE7] bg-white px-6 py-12 text-center">
+            <h3 class="font-serif text-3xl font-bold text-[#89594C]">Nenhuma unidade cadastrada</h3>
+            <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-[#5E514B]">
+              Assim que uma clínica for cadastrada no gerenciamento, ela aparecerá aqui para
+              consulta.
+            </p>
+          </div>
+        } @else {
+          <div class="grid gap-8 lg:grid-cols-2">
+            @for (unit of visibleUnits(); track unit.id) {
+              <article
+                class="overflow-hidden rounded-lg border border-[#EFEAE7] bg-white shadow-[0_16px_40px_rgba(45,36,30,0.04)]"
               >
-                Reservar horário
-              </a>
-            </div>
-          </article>
+                <div class="h-64 overflow-hidden bg-[#F3F1EF]">
+                  @if (unit.imageUrl) {
+                    <img
+                      [src]="unit.imageUrl"
+                      [alt]="unit.name"
+                      class="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  } @else {
+                    <div class="flex h-full items-center justify-center px-6 text-center text-[#8B7E77]">
+                      <p class="text-base font-semibold">Imagem da unidade indisponível</p>
+                    </div>
+                  }
+                </div>
 
-          <article class="rounded-lg border-l-4 border-[#89594C] bg-[#F3F1EF] p-8">
-            <h3 class="font-serif text-2xl font-bold text-[#89594C]">{{ compactUnit.name }}</h3>
-            <div class="mt-6 space-y-5 text-base leading-6 text-[#2D241E]">
-              <p class="flex gap-4">
-                <span class="relative mt-1 h-5 w-5 text-[#89594C]" aria-hidden="true">
-                  <span
-                    class="absolute left-1/2 top-0 h-5 w-4 -translate-x-1/2 rounded-full border-2 border-[#89594C]"
-                  ></span>
-                  <span
-                    class="absolute left-1/2 top-1.5 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#89594C]"
-                  ></span>
-                </span>
-                <span>{{ compactUnit.address }}</span>
-              </p>
-              <p class="flex gap-4">
-                <span
-                  class="relative h-6 w-6 rounded-full border-2 border-[#89594C]"
-                  aria-hidden="true"
-                >
-                  <span
-                    class="absolute left-1/2 top-1/2 h-2 w-0.5 -translate-x-1/2 -translate-y-full bg-[#89594C]"
-                  ></span>
-                  <span
-                    class="absolute left-1/2 top-1/2 h-0.5 w-2 -translate-y-1/2 bg-[#89594C]"
-                  ></span>
-                </span>
-                <span>{{ compactUnit.hours }}</span>
-              </p>
-            </div>
-            <div
-              class="mt-8 h-44 rounded-md bg-cover bg-center grayscale"
-              [style.background-image]="'url(' + compactUnit.imageUrl + ')'"
-              role="img"
-              [attr.aria-label]="compactUnit.name"
-            ></div>
-          </article>
+                <div class="flex min-h-88 flex-col p-8 lg:p-10">
+                  <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <p class="text-xs font-bold uppercase tracking-[0.24em] text-[#A77769]">
+                        {{ unit.city || 'Unidade' }}
+                      </p>
+                      <h3 class="mt-3 font-serif text-3xl font-bold text-[#89594C]">
+                        {{ unit.name }}
+                      </h3>
+                    </div>
 
-          <article class="rounded-lg bg-white p-8 shadow-[0_16px_40px_rgba(45,36,30,0.04)] lg:p-10">
-            <div class="grid gap-10 md:grid-cols-[1fr_15rem] md:items-center">
-              <div>
-                <span
-                  class="rounded-full bg-[#F0E8E5] px-5 py-2 text-xs font-bold uppercase tracking-[0.24em] text-[#89594C]"
-                >
-                  {{ wideUnit.region }}
-                </span>
-                <h3 class="mt-8 font-serif text-4xl font-bold text-[#89594C]">
-                  {{ wideUnit.name }}
-                </h3>
-                <p class="mt-5 max-w-2xl text-lg leading-8 text-[#5E514B]">
-                  {{ wideUnit.description }}
-                </p>
-                <div
-                  class="mt-8 grid gap-6 text-sm uppercase tracking-wide text-[#A77769] sm:grid-cols-2"
-                >
-                  <div>
-                    <p class="font-bold">Endereço</p>
-                    <p class="mt-2 normal-case tracking-normal text-base text-[#2D241E]">
-                      {{ wideUnit.address }}
-                    </p>
+                    <span
+                      class="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.18em]"
+                      [class.bg-emerald-100]="unit.active"
+                      [class.text-emerald-800]="unit.active"
+                      [class.bg-red-100]="!unit.active"
+                      [class.text-red-700]="!unit.active"
+                    >
+                      {{ unit.active ? 'Ativa' : 'Inativa' }}
+                    </span>
                   </div>
-                  <div>
-                    <p class="font-bold">Contato</p>
-                    <p class="mt-2 normal-case tracking-normal text-base text-[#2D241E]">
-                      {{ wideUnit.phone }}
+
+                  <div class="mt-8 space-y-5 text-base leading-6 text-[#2D241E]">
+                    <p class="flex gap-4">
+                      <img
+                        src="/localizacao.svg"
+                        width="18"
+                        height="22"
+                        alt=""
+                        aria-hidden="true"
+                        class="mt-1 h-5 w-5"
+                      />
+                      <span>{{ unit.fullAddress || 'Endereço não informado' }}</span>
                     </p>
+                    <p class="flex gap-4">
+                      <span
+                        class="relative mt-0.5 h-5 w-5 shrink-0 rounded-full border-2 border-[#89594C]"
+                        aria-hidden="true"
+                      >
+                        <span
+                          class="absolute left-1/2 top-1/2 h-1.5 w-0.5 -translate-x-1/2 -translate-y-full bg-[#89594C]"
+                        ></span>
+                        <span
+                          class="absolute left-1/2 top-1/2 h-0.5 w-1.5 -translate-y-1/2 bg-[#89594C]"
+                        ></span>
+                      </span>
+                      <span>{{ formatSchedule(unit.workingDays) }}</span>
+                    </p>
+                    @if (unit.phone) {
+                      <p class="flex gap-4">
+                        <img
+                          src="/telefone.svg"
+                          width="18"
+                          height="18"
+                          alt=""
+                          aria-hidden="true"
+                          class="mt-1 h-5 w-5"
+                        />
+                        <span>{{ unit.phone }}</span>
+                      </p>
+                    }
+                    @if (unit.email) {
+                      <p class="flex gap-4">
+                        <span class="mt-1 h-5 w-5 shrink-0 text-center text-sm font-bold text-[#89594C]">
+                          &#64;
+                        </span>
+                        <span>{{ unit.email }}</span>
+                      </p>
+                    }
+                  </div>
+
+                  <div class="mt-auto flex flex-col items-start gap-3 pt-10">
+                    <a
+                      [href]="unit.mapUrl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex w-fit items-center gap-2 text-sm font-bold uppercase tracking-wide text-[#89594C] transition hover:text-[#744A40]"
+                    >
+                      Ver no mapa <span aria-hidden="true">-></span>
+                    </a>
+                    <a
+                      [href]="unit.whatsappUrl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex w-fit items-center gap-2 text-sm font-bold uppercase tracking-wide text-[#89594C] transition hover:text-[#744A40]"
+                    >
+                      Agendar <span aria-hidden="true">-></span>
+                    </a>
                   </div>
                 </div>
-              </div>
-              <div
-                class="mx-auto aspect-square w-full max-w-60 rounded-full bg-cover bg-center shadow-[0_0_0_12px_rgba(221,199,180,0.35)]"
-                [style.background-image]="'url(' + wideUnit.imageUrl + ')'"
-                role="img"
-                [attr.aria-label]="wideUnit.name"
-              ></div>
-            </div>
-          </article>
-        </div>
+              </article>
+            }
+          </div>
+        }
       </div>
     </main>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LocationsPageComponent {
-  protected readonly units: LocationUnit[] = [
-    {
-      name: 'Unidade Brasília',
-      description:
-        'Localizada na Asa Sul, oferecendo tecnologia de ponta em um ambiente sereno e sofisticado.',
-      address: 'Asa Sul, 904 - EQS Brasília, DF',
-      hours: 'Segunda a Sexta: 08h - 19h Sabado: 08h - 13h',
-      imageUrl:
-        'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=900&q=80',
-      mapUrl: 'https://maps.google.com/?q=Asa+Sul+Brasilia',
-    },
-    {
-      name: 'Unidade Águas Claras',
-      description: 'Conveniência e agilidade para pacientes da região oeste e condomínios.',
-      address: 'Av. Castanheiras, 325',
-      phone: '(61) 4195-0000',
-    },
-    {
-      name: 'Unidade Taguatinga',
-      address: 'Setor Especial, Q1 Lote16',
-      hours: 'Terças e Quintas: 09h - 18h',
-      description: 'Atendimento em clínica parceira para procedimentos de rotina e avaliação.',
-      imageUrl:
-        'https://images.unsplash.com/photo-1629909615184-74f495363b67?auto=format&fit=crop&w=900&q=80',
-    },
-    {
-      name: 'Unidade Samambaia',
-      region: 'Zona Oeste',
-      description:
-        'Fácil acesso pelo metrô, com foco em ortodontia estética e clareamento a laser.',
-      address: 'QE 40 Conjunto O, Loja 3',
-      phone: '(61) 2091-0000',
-      imageUrl:
-        'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&w=900&q=80',
-    },
-  ];
+export class LocationsPageComponent implements OnInit {
+  private readonly clinicsApi = inject(ClinicsApi);
 
-  protected readonly mapPreviewUrl =
-    'https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?auto=format&fit=crop&w=1000&q=80';
+  protected readonly skeletonCards = Array.from({ length: 4 });
+  protected readonly loading = signal(true);
+  protected readonly feedback = signal<string | null>(null);
+  protected readonly units = signal<LocationUnit[]>([]);
+  protected readonly visibleUnits = computed(() =>
+    [...this.units()].sort((left, right) => left.name.localeCompare(right.name, 'pt-BR')),
+  );
+  protected readonly primaryWhatsappUrl = computed(
+    () => this.visibleUnits().find((unit) => unit.whatsapp)?.whatsappUrl ?? 'https://api.whatsapp.com/send?phone=61993359225',
+  );
 
-  protected readonly featuredUnit = this.units[0];
-  protected readonly highlightedUnit = this.units[1];
-  protected readonly compactUnit = this.units[2];
-  protected readonly wideUnit = this.units[3];
+  ngOnInit(): void {
+    this.clinicsApi.list().subscribe({
+      next: (clinics) => {
+        this.units.set(clinics.map((clinic) => toLocationUnit(toClinicCardViewModel(clinic))));
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.feedback.set('Não foi possível carregar as unidades no momento.');
+      },
+    });
+  }
+
+  protected formatSchedule(days: WorkingDay[]): string {
+    const enabledDays = days.filter((day) => day.enabled);
+
+    if (!enabledDays.length) {
+      return 'Horário não informado';
+    }
+
+    const dayLabels = enabledDays.map((day) => day.label.replace('-feira', ''));
+    const schedules = enabledDays
+      .map((day) => day.intervals.map((interval) => `${interval.startTime} - ${interval.endTime}`).join(', '))
+      .filter(Boolean);
+    const uniqueSchedules = Array.from(new Set(schedules));
+
+    if (!uniqueSchedules.length) {
+      return dayLabels.join(', ');
+    }
+
+    if (uniqueSchedules.length === 1) {
+      return `${formatList(dayLabels)}: ${uniqueSchedules[0]}`;
+    }
+
+    return 'Horários variados';
+  }
+}
+
+function toLocationUnit(clinic: ClinicCardViewModel): LocationUnit {
+  const fullAddress = [
+    [clinic.street, clinic.number].filter(Boolean).join(', '),
+    clinic.neighborhood,
+    [clinic.city, clinic.state].filter(Boolean).join(' - '),
+    clinic.zipCode,
+  ]
+    .filter(Boolean)
+    .join(' | ');
+
+  return {
+    ...clinic,
+    fullAddress,
+    mapUrl: `https://maps.google.com/?q=${encodeURIComponent(fullAddress || clinic.name)}`,
+    whatsappUrl: `https://api.whatsapp.com/send?phone=${clinic.whatsapp || clinic.phone || '61993359225'}`,
+  };
+}
+
+function formatList(values: string[]): string {
+  if (values.length <= 1) {
+    return values[0] ?? '';
+  }
+
+  if (values.length === 2) {
+    return `${values[0]} e ${values[1]}`;
+  }
+
+  return `${values.slice(0, -1).join(', ')} e ${values.at(-1)}`;
 }
