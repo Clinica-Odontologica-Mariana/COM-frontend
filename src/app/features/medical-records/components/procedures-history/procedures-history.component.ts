@@ -19,7 +19,7 @@ import { LucidePlus } from '@lucide/angular';
         </h3>
 
         <a
-          [routerLink]="['/patients', patientId(), 'treatments']"
+          [routerLink]="['/treatments', patientId()]"
           class="flex shrink-0 items-center gap-1 rounded-lg bg-[#7C5145] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#6B4439]"
         >
           <svg

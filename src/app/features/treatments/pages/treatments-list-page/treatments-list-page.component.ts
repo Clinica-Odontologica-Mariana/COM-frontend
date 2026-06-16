@@ -199,7 +199,7 @@ const STATUS_COLORS: Record<ProcedureStatus, { bg: string; text: string; dot: st
               type="button"
               class="group flex w-full items-center gap-4 rounded-2xl cursor-pointer p-4 text-left transition hover:shadow-md md:gap-6 md:p-5"
               style="background: #FFFFFF; border: 1px solid #EDE8E4;"
-              (click)="openTreatment(p.treatmentId)"
+              (click)="openTreatment(p.patientId)"
             >
               <!-- Avatar -->
               <div

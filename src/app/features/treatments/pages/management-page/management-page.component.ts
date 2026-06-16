@@ -42,7 +42,9 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
     <!-- Loading state -->
     @if (loading()) {
       <div class="flex items-center justify-center py-32">
-        <div class="h-10 w-10 animate-spin rounded-full border-4 border-[#7C5145] border-t-transparent"></div>
+        <div
+          class="h-10 w-10 animate-spin rounded-full border-4 border-[#7C5145] border-t-transparent"
+        ></div>
       </div>
     }
 
@@ -50,7 +52,9 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
     @if (!loading() && loadError()) {
       <div class="px-6 py-8 md:px-12">
         <div class="rounded-2xl border border-red-200 bg-red-50 px-6 py-8 text-center">
-          <p class="text-base font-semibold text-red-700">Não foi possível carregar o tratamento.</p>
+          <p class="text-base font-semibold text-red-700">
+            Não foi possível carregar o tratamento.
+          </p>
           <p class="mt-1 text-sm text-red-500">{{ loadError() }}</p>
           <button
             type="button"
@@ -76,7 +80,9 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
             </h1>
             <div class="mt-2 flex flex-wrap items-center gap-2">
               <span class="text-sm text-[#78716C]">Paciente:</span>
-              <span class="rounded-full bg-[#F3F3F3] px-3 py-1 text-sm font-semibold text-[#1A1C1C]">
+              <span
+                class="rounded-full bg-[#F3F3F3] px-3 py-1 text-sm font-semibold text-[#1A1C1C]"
+              >
                 {{ treatment()!.patient.name }}
               </span>
               <span class="text-sm text-[#78716C]"
@@ -97,7 +103,7 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
               class="cursor-pointer rounded-xl bg-[#7C5145] px-6 py-3 text-sm font-bold text-white shadow-(--shadow-btn) transition hover:opacity-90"
               (click)="goBack()"
             >
-              Voltar aos Pacientes
+              Voltar
             </button>
           </div>
         </div>
@@ -118,7 +124,9 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
             <!-- Mobile-only: Clinical notes (between odontogram and plan) -->
             <div class="mt-6 rounded-4xl bg-white p-6 shadow-(--shadow-card) lg:hidden">
               <div class="mb-3 flex items-center justify-between">
-                <p class="font-family-sans text-sm font-bold uppercase tracking-[1px] text-[#78716C]">
+                <p
+                  class="font-family-sans text-sm font-bold uppercase tracking-[1px] text-[#78716C]"
+                >
                   Anotações Clínicas
                 </p>
                 <button
@@ -181,7 +189,9 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
             <!-- Clinical notes (desktop only) -->
             <div class="hidden rounded-4xl bg-white p-6 shadow-(--shadow-card) lg:block">
               <div class="mb-3 flex items-center justify-between">
-                <p class="font-family-sans text-sm font-bold uppercase tracking-[1px] text-[#78716C]">
+                <p
+                  class="font-family-sans text-sm font-bold uppercase tracking-[1px] text-[#78716C]"
+                >
                   Anotações Clínicas
                 </p>
                 <button
@@ -223,7 +233,9 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
           >
             <div class="mb-2 flex items-center justify-between">
               <h2 class="font-family-serif m-0 text-xl font-normal text-[#1A1C1C]">
-                {{ confirmType() === 'complete' ? 'Concluir Procedimento' : 'Iniciar Procedimento' }}
+                {{
+                  confirmType() === 'complete' ? 'Concluir Procedimento' : 'Iniciar Procedimento'
+                }}
               </h2>
               <button
                 type="button"
@@ -460,7 +472,7 @@ export class TreatmentManagementPageComponent implements OnInit {
   private load(): void {
     this.loading.set(true);
     this.loadError.set(null);
-    this.treatmentService.getTreatment(this.id()).subscribe({
+    this.treatmentService.getTreatmentByPatient(this.id()).subscribe({
       next: (data) => {
         this._data.set(data);
         this.loading.set(false);
@@ -493,7 +505,7 @@ export class TreatmentManagementPageComponent implements OnInit {
     const notes = this.editingNotes().trim();
     this._data.update((t) => (t ? { ...t, notes } : null));
     this.showNotesDialog.set(false);
-    this.treatmentService.updateNotes(this.id(), notes).subscribe({
+    this.treatmentService.updateNotes(this._data()!.id, notes).subscribe({
       error: () => {
         // Notes saved locally; a background sync failure is non-critical
       },
@@ -544,9 +556,7 @@ export class TreatmentManagementPageComponent implements OnInit {
     this._data.update((t) => {
       if (!t) return null;
       const updatedProcs = t.procedures.map((p) =>
-        p.id === proc.id
-          ? { ...p, status: 'in_progress' as ProcedureStatus, startDate: today }
-          : p,
+        p.id === proc.id ? { ...p, status: 'in_progress' as ProcedureStatus, startDate: today } : p,
       );
       return { ...t, procedures: updatedProcs };
     });

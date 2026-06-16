@@ -20,7 +20,8 @@ import { ProcedureFormComponent } from '../../components/procedure-form/procedur
   template: `
     @if (treatment()) {
       <app-procedure-form
-        [treatmentId]="id()"
+        [treatmentId]="treatment()!.id"
+        [patientId]="id()"
         [patientName]="treatment()!.patient.name"
         [patientCode]="'ID: #PAC-' + treatment()!.patient.id.slice(0, 4).toUpperCase()"
         [isEdit]="false"
@@ -41,7 +42,7 @@ export class CreateProcedurePageComponent implements OnInit {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      this.treatmentService.getTreatment(this.id()).subscribe((data) => this._data.set(data));
+      this.treatmentService.getTreatmentByPatient(this.id()).subscribe((data) => this._data.set(data));
     }
   }
 }

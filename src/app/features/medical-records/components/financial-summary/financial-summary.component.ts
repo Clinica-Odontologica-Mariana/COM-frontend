@@ -30,10 +30,10 @@ import { BalanceView, LastVisitView } from '../../models/patient-record.models';
         }
       </section>
 
-      <!-- Valor dos treatments -->
+      <!-- Valor dos tratamentos -->
       <section class="flex-1 rounded-xl bg-[#7C5145] p-6 flex flex-col justify-between">
         <p class="text-xs font-bold uppercase tracking-[1.2px] text-white/60">
-          Valor dos treatments
+          Valor dos tratamentos
         </p>
 
         @if (balance(); as b) {

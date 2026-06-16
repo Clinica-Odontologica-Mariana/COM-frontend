@@ -404,6 +404,7 @@ interface ProcedureFormGroup {
 })
 export class ProcedureFormComponent implements OnChanges {
   treatmentId = input.required<string>();
+  patientId = input.required<string>();
   patientName = input.required<string>();
   patientCode = input.required<string>();
   isEdit = input<boolean>(false);
@@ -552,7 +553,7 @@ export class ProcedureFormComponent implements OnChanges {
     request$.subscribe({
       next: () => {
         this.saving.set(false);
-        void this.router.navigate(['/treatments', this.treatmentId()]);
+        void this.router.navigate(['/treatments', this.patientId()]);
       },
       error: () => {
         this.saving.set(false);
@@ -570,12 +571,12 @@ export class ProcedureFormComponent implements OnChanges {
     if (!proc) return;
     this.deleteConfirmOpen.set(false);
     this.treatmentService.deleteProcedureItem(proc.id).subscribe({
-      next: () => void this.router.navigate(['/treatments', this.treatmentId()]),
+      next: () => void this.router.navigate(['/treatments', this.patientId()]),
       error: () => this.saveError.set('Não foi possível excluir o procedimento. Tente novamente.'),
     });
   }
 
   protected onCancel(): void {
-    void this.router.navigate(['/treatments', this.treatmentId()]);
+    void this.router.navigate(['/treatments', this.patientId()]);
   }
 }

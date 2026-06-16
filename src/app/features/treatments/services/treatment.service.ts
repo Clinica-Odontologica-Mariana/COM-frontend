@@ -257,4 +257,17 @@ export class TreatmentService {
   deleteProcedureItem(itemId: string): Observable<void> {
     return this.http.delete<void>(`${API_BASE}/treatment-plans/items/${itemId}`);
   }
+
+  getTreatmentByPatient(patientId: string): Observable<TreatmentData> {
+    return unwrap(
+      this.http.get<ApiResponse<TreatmentPlanDto[]>>(
+        `${API_BASE}/treatment-plans/by-patient/${patientId}`,
+      ),
+    ).pipe(
+      switchMap((plans) => {
+        if (!plans.length) return throwError(() => new Error('Nenhum plano de tratamento encontrado.'));
+        return this.getTreatment(plans[0].id);
+      }),
+    );
+  }
 }
