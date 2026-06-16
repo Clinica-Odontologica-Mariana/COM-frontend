@@ -5,13 +5,23 @@ import {
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express from 'express';
-import { join } from 'node:path';
+import { extname, join } from 'node:path';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
-const apiTarget = process.env['API_TARGET_URL'] || 'http://localhost:8080';
+const apiTarget =
+  process.env['API_BASE_URL'] || process.env['API_TARGET_URL'] || 'http://localhost:8080/api/v1';
+
+function isAssetRequest(pathname: string): boolean {
+  return pathname.startsWith('/@') || extname(pathname) !== '';
+}
+
+app.get('/env.js', (_req, res) => {
+  res.type('application/javascript');
+  res.send(`window.__env = ${JSON.stringify({ API_BASE_URL: apiTarget })};`);
+});
 
 app.use('/api/v1', express.raw({ type: '*/*' }), async (req, res, next) => {
   try {
@@ -55,11 +65,14 @@ app.use(
  * Handle all other requests by rendering the Angular application.
  */
 app.use((req, res, next) => {
+  if (isAssetRequest(req.path)) {
+    next();
+    return;
+  }
+
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
+    .then((response) => (response ? writeResponseToNodeResponse(response, res) : next()))
     .catch(next);
 });
 
