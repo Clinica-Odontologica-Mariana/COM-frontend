@@ -1,17 +1,16 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 interface SidebarItem {
   label: string;
   icon: string;
   link: string;
-  active: boolean;
 }
 
 @Component({
   selector: 'app-global-sidebar',
-  imports: [RouterLink, NgOptimizedImage],
+  imports: [RouterLink, RouterLinkActive, NgOptimizedImage],
   template: `
     <aside class="hidden h-full min-h-fit bg-[#FAFAF9] px-4 py-6 lg:flex lg:flex-col">
       <div class="pb-8">
@@ -34,19 +33,21 @@ interface SidebarItem {
           @for (item of items; track item.label) {
             <a
               [routerLink]="item.link"
-              [attr.aria-current]="item.active ? 'page' : null"
+              routerLinkActive
+              #rla="routerLinkActive"
+              [attr.aria-current]="rla.isActive ? 'page' : null"
               class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide transition"
-              [class.bg-[#EDE8E6]]="item.active"
-              [class.font-semibold]="item.active"
-              [class.text-[#8B574B]]="item.active"
-              [class.text-[#78716C]]="!item.active"
+              [class.bg-[#EDE8E6]]="rla.isActive"
+              [class.font-semibold]="rla.isActive"
+              [class.text-[#8B574B]]="rla.isActive"
+              [class.text-[#78716C]]="!rla.isActive"
             >
               <img
                 [src]="item.icon"
                 alt=""
                 class="h-5 w-5"
                 [style.filter]="
-                  item.active
+                  rla.isActive
                     ? 'invert(33%) sepia(22%) saturate(560%) hue-rotate(340deg) brightness(95%) contrast(90%)'
                     : 'none'
                 "
@@ -84,14 +85,14 @@ interface SidebarItem {
 })
 export class GlobalSidebarComponent {
   protected readonly items: SidebarItem[] = [
-    { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1', active: false },
-    { label: 'Pacientes', icon: '/pacientes.svg', link: '/medical-records/1', active: false },
-    { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1', active: false },
-    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/medical-records/1', active: false },
-    { label: 'Tratamentos', icon: '/tratamentos.svg', link: '/medical-records/1', active: false },
-    { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1', active: false },
-    { label: 'Clínicas', icon: '/Clinicas.svg', link: '/medical-records/1', active: false },
-    { label: 'Certificados', icon: '/certificados.svg', link: '/certificados', active: true },
+    { label: 'Painel', icon: '/Painel_icon.svg', link: '/medical-records/1' },
+    { label: 'Pacientes', icon: '/pacientes.svg', link: '/medical-records/1' },
+    { label: 'Agenda', icon: '/agenda.svg', link: '/medical-records/1' },
+    { label: 'Prontuários', icon: '/prontuarios.svg', link: '/medical-records/1' },
+    { label: 'Tratamentos', icon: '/tratamentos.svg', link: '/medical-records/1' },
+    { label: 'Estoque', icon: '/estoque.svg', link: '/medical-records/1' },
+    { label: 'Clínicas', icon: '/Clinicas.svg', link: '/medical-records/1' },
+    { label: 'Certificados', icon: '/certificados.svg', link: '/certificados' },
   ];
 
   protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
