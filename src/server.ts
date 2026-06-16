@@ -5,24 +5,50 @@ import {
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express from 'express';
-import { join } from 'node:path';
+import { extname, join } from 'node:path';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+const apiTarget =
+  process.env['API_BASE_URL'] || process.env['API_TARGET_URL'] || 'http://localhost:8080/api/v1';
 
-/**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
- */
+function isAssetRequest(pathname: string): boolean {
+  return pathname.startsWith('/@') || extname(pathname) !== '';
+}
+
+app.get('/env.js', (_req, res) => {
+  res.type('application/javascript');
+  res.send(`window.__env = ${JSON.stringify({ API_BASE_URL: apiTarget })};`);
+});
+
+app.use('/api/v1', express.raw({ type: '*/*' }), async (req, res, next) => {
+  try {
+    const targetUrl = new URL(req.originalUrl, apiTarget);
+    const headers = new Headers();
+
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (key.toLowerCase() === 'host' || value === undefined) {
+        continue;
+      }
+
+      headers.set(key, Array.isArray(value) ? value.join(',') : value);
+    }
+
+    const response = await fetch(targetUrl, {
+      method: req.method,
+      headers,
+      body: req.method === 'GET' || req.method === 'HEAD' ? undefined : req.body,
+    });
+
+    res.status(response.status);
+    response.headers.forEach((value, key) => res.setHeader(key, value));
+    res.send(Buffer.from(await response.arrayBuffer()));
+  } catch (error) {
+    next(error);
+  }
+});
 
 /**
  * Serve static files from /browser
@@ -39,11 +65,14 @@ app.use(
  * Handle all other requests by rendering the Angular application.
  */
 app.use((req, res, next) => {
+  if (isAssetRequest(req.path)) {
+    next();
+    return;
+  }
+
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
+    .then((response) => (response ? writeResponseToNodeResponse(response, res) : next()))
     .catch(next);
 });
 

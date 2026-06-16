@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, expect, it, beforeEach } from 'vitest';
 
 import { GlobalSidebarComponent } from './global-sidebar.component';
@@ -8,7 +10,7 @@ describe('GlobalSidebarComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [GlobalSidebarComponent],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });
   });
 
@@ -33,6 +35,17 @@ describe('GlobalSidebarComponent', () => {
       a.textContent?.includes('Certificados'),
     );
     expect(certLink).toBeTruthy();
+  });
+
+  it('Certificados item has correct link and match', () => {
+    const fixture = TestBed.createComponent(GlobalSidebarComponent);
+    const component = fixture.componentInstance as GlobalSidebarComponent;
+    const items = (
+      component as unknown as { items: { label: string; link: string; match: string[] }[] }
+    ).items;
+    const certItem = items.find((i) => i.label === 'Certificados');
+    expect(certItem?.link).toBe('/certificados');
+    expect(certItem?.match).toContain('/certificados');
   });
 
   it('does not have any item with static active:true property', () => {
