@@ -60,6 +60,16 @@ export interface FinancialTransactionCreatePayload {
   notes?: string | null;
 }
 
+export interface FinancialTransactionUpdatePayload {
+  description: string;
+  type: TransactionType;
+  category?: string | null;
+  amount: number;
+  status?: TransactionStatus;
+  transactionDate: string;
+  notes?: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class FinancialTransactionsApi {
   private readonly http = inject(HttpClient);
@@ -114,6 +124,17 @@ export class FinancialTransactionsApi {
       .post<
         ApiResponse<FinancialTransactionApiDto>
       >(`${this.baseUrl}/financial-transactions`, payload)
+      .pipe(map((response) => response.data));
+  }
+
+  update(
+    id: string,
+    payload: FinancialTransactionUpdatePayload,
+  ): Observable<FinancialTransactionApiDto> {
+    return this.http
+      .put<
+        ApiResponse<FinancialTransactionApiDto>
+      >(`${this.baseUrl}/financial-transactions/${id}`, payload)
       .pipe(map((response) => response.data));
   }
 }

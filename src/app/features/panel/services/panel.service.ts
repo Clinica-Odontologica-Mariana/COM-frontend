@@ -7,6 +7,7 @@ import {
   ClinicSummaryDto,
   FinancialTransactionApiDto,
   FinancialTransactionCreatePayload,
+  FinancialTransactionUpdatePayload,
   FinancialTransactionsApi,
   MonthlyTrendApiDto,
   RevenueByServiceApiDto,
@@ -46,6 +47,13 @@ export class PanelService {
     payload: FinancialTransactionCreatePayload,
   ): Observable<FinancialTransactionApiDto> {
     return this.api.create(payload);
+  }
+
+  updateTransaction(
+    id: string,
+    payload: FinancialTransactionUpdatePayload,
+  ): Observable<FinancialTransactionApiDto> {
+    return this.api.update(id, payload);
   }
 
   private fetchPerClinic(clinics: ClinicSummaryDto[]): Observable<ClinicDashboardSlice[]> {

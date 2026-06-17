@@ -1,10 +1,19 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CurrencyMaskDirective } from '../../../../shared/directives/currency-mask.directive';
 import {
   ClinicSummaryDto,
   FinancialTransactionCreatePayload,
+  FinancialTransactionUpdatePayload,
   TransactionStatus,
   TransactionType,
 } from '../../api/financial-transactions.api';
@@ -36,9 +45,15 @@ interface TransactionFormModel {
         (click)="$event.stopPropagation()"
       >
         <div>
-          <h3 class="font-serif text-lg font-bold text-stone-800 m-0">Nova Transação</h3>
+          <h3 class="font-serif text-lg font-bold text-stone-800 m-0">
+            {{ isEditing ? 'Editar Transação' : 'Nova Transação' }}
+          </h3>
           <p class="text-sm text-stone-500 m-0 mt-1">
-            Preencha os campos abaixo para atualizar o caixa.
+            {{
+              isEditing
+                ? 'Altere os dados da transação abaixo.'
+                : 'Preencha os campos abaixo para atualizar o caixa.'
+            }}
           </p>
         </div>
 
@@ -47,6 +62,14 @@ interface TransactionFormModel {
           class="px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-semibold"
         >
           {{ errorMessage }}
+        </div>
+
+        <div
+          *ngIf="isTreatmentLinked"
+          class="px-3 py-2.5 rounded-lg bg-sky-50 border border-sky-100 text-sky-700 text-[11px] sm:text-xs font-medium leading-relaxed"
+        >
+          <strong class="font-bold">Origem de Tratamento:</strong> Algumas informações financeiras
+          estão bloqueadas para edição direta.
         </div>
 
         <form (ngSubmit)="submit()" class="flex flex-col gap-3">
@@ -58,7 +81,8 @@ interface TransactionFormModel {
               [(ngModel)]="model.clinicId"
               name="clinicId"
               required
-              class="border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#A77769]"
+              [disabled]="isEditing"
+              class="border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#A77769] disabled:bg-stone-100 disabled:text-stone-500"
             >
               <option value="" disabled>Selecione...</option>
               <option *ngFor="let c of clinics" [value]="c.id">{{ c.name }}</option>
@@ -72,25 +96,27 @@ interface TransactionFormModel {
             <div class="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                (click)="model.type = 'RECEITA'"
+                (click)="!isTreatmentLinked && (model.type = 'RECEITA')"
+                [disabled]="isTreatmentLinked"
                 [class]="
                   model.type === 'RECEITA'
                     ? 'bg-emerald-100 text-emerald-800 border-emerald-500'
                     : 'bg-stone-50 text-stone-600 border-stone-200'
                 "
-                class="py-2 text-xs font-bold rounded-lg border transition-all"
+                class="py-2 text-xs font-bold rounded-lg border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Receita
               </button>
               <button
                 type="button"
-                (click)="model.type = 'DESPESA'"
+                (click)="!isTreatmentLinked && (model.type = 'DESPESA')"
+                [disabled]="isTreatmentLinked"
                 [class]="
                   model.type === 'DESPESA'
                     ? 'bg-red-100 text-red-800 border-red-500'
                     : 'bg-stone-50 text-stone-600 border-stone-200'
                 "
-                class="py-2 text-xs font-bold rounded-lg border transition-all"
+                class="py-2 text-xs font-bold rounded-lg border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Despesa
               </button>
@@ -122,8 +148,9 @@ interface TransactionFormModel {
                 [(ngModel)]="model.category"
                 name="category"
                 maxlength="80"
+                [disabled]="isTreatmentLinked"
                 placeholder="Ex: Consultas, Materiais"
-                class="border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#A77769]"
+                class="border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#A77769] disabled:bg-stone-100 disabled:text-stone-500 disabled:cursor-not-allowed"
               />
             </label>
 
@@ -137,8 +164,9 @@ interface TransactionFormModel {
                 [(ngModel)]="model.amountDisplay"
                 name="amount"
                 required
+                [disabled]="isTreatmentLinked"
                 placeholder="R$ 0,00"
-                class="border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#A77769]"
+                class="border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#A77769] disabled:bg-stone-100 disabled:text-stone-500 disabled:cursor-not-allowed"
               />
             </label>
           </div>
@@ -153,7 +181,8 @@ interface TransactionFormModel {
                 [(ngModel)]="model.transactionDate"
                 name="transactionDate"
                 required
-                class="border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#A77769]"
+                [disabled]="isTreatmentLinked"
+                class="border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#A77769] disabled:bg-stone-100 disabled:text-stone-500 disabled:cursor-not-allowed"
               />
             </label>
 
@@ -169,6 +198,7 @@ interface TransactionFormModel {
                 <option value="PENDING">Pendente</option>
                 <option value="PAID">Pago</option>
                 <option value="COMPLETED">Concluído</option>
+                <option *ngIf="isEditing" value="CANCELLED">Cancelado</option>
               </select>
             </label>
           </div>
@@ -199,7 +229,9 @@ interface TransactionFormModel {
               [disabled]="saving || !isValid"
               class="px-4 py-2 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 transition-colors"
             >
-              {{ saving ? 'Salvando...' : 'Confirmar Lançamento' }}
+              {{
+                saving ? 'Salvando...' : isEditing ? 'Atualizar Transação' : 'Confirmar Lançamento'
+              }}
             </button>
           </div>
         </form>
@@ -207,12 +239,12 @@ interface TransactionFormModel {
     </div>
   `,
 })
-export class TransactionFormModalComponent {
+export class TransactionFormModalComponent implements OnChanges {
   private _open = false;
 
   @Input() set open(value: boolean) {
     this._open = value;
-    if (value) {
+    if (value && !this.transaction) {
       this.model = this.emptyModel();
     }
   }
@@ -223,15 +255,34 @@ export class TransactionFormModalComponent {
   @Input() clinics: ClinicSummaryDto[] = [];
   @Input() saving = false;
   @Input() errorMessage: string | null = null;
+  @Input() transaction: any = null;
 
   @Output() closed = new EventEmitter<void>();
-  @Output() submitted = new EventEmitter<FinancialTransactionCreatePayload>();
+  @Output() submitted = new EventEmitter<
+    FinancialTransactionCreatePayload | FinancialTransactionUpdatePayload
+  >();
 
   protected model: TransactionFormModel = this.emptyModel();
 
+  get isEditing(): boolean {
+    return !!this.transaction;
+  }
+
+  get isTreatmentLinked(): boolean {
+    return !!this.transaction?.treatmentPlanId;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['transaction'] && this.transaction) {
+      this.populateModel(this.transaction);
+    } else if (changes['transaction'] && !this.transaction && this.open) {
+      this.model = this.emptyModel();
+    }
+  }
+
   protected get isValid(): boolean {
     return (
-      !!this.model.clinicId &&
+      (this.isEditing || !!this.model.clinicId) &&
       !!this.model.description.trim() &&
       !!this.model.transactionDate &&
       this.parsedAmount > 0
@@ -246,16 +297,37 @@ export class TransactionFormModalComponent {
   protected submit(): void {
     if (this.saving || !this.isValid) return;
 
-    this.submitted.emit({
-      clinicId: this.model.clinicId,
+    const payload: any = {
       description: this.model.description.trim(),
-      type: this.model.type,
-      category: this.model.category.trim() || null,
-      amount: this.parsedAmount,
       status: this.model.status,
-      transactionDate: this.model.transactionDate,
       notes: this.model.notes.trim() || null,
-    });
+
+      type: this.isTreatmentLinked ? this.transaction.type : this.model.type,
+      category: this.isTreatmentLinked
+        ? this.transaction.category
+        : this.model.category.trim() || null,
+      amount: this.isTreatmentLinked
+        ? Math.abs(this.transaction.amount || this.transaction.value || 0)
+        : this.parsedAmount,
+      transactionDate: this.isTreatmentLinked
+        ? this.formatDateToIso(this.transaction.transactionDate || this.transaction.date)
+        : this.model.transactionDate,
+    };
+
+    if (!this.isEditing) {
+      payload.clinicId = this.model.clinicId;
+    }
+
+    this.submitted.emit(payload);
+  }
+
+  private formatDateToIso(dateStr: string): string {
+    if (!dateStr) return new Date().toISOString().slice(0, 10);
+    if (dateStr.includes('/')) {
+      const [d, m, y] = dateStr.split('/');
+      return `${y}-${m}-${d}`;
+    }
+    return dateStr;
   }
 
   protected close(): void {
@@ -273,6 +345,47 @@ export class TransactionFormModalComponent {
       status: 'PENDING',
       transactionDate: new Date().toISOString().slice(0, 10),
       notes: '',
+    };
+  }
+
+  private populateModel(data: any): void {
+    let tDate = data.transactionDate || data.date;
+    if (tDate && tDate.includes('/')) {
+      const parts = tDate.split('/');
+      if (parts.length === 3) tDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+
+    let tStatus = data.status;
+    const statusMap: Record<string, string> = {
+      Concluído: 'COMPLETED',
+      Pago: 'PAID',
+      Pendente: 'PENDING',
+      Cancelado: 'CANCELLED',
+    };
+    tStatus = statusMap[tStatus] || tStatus;
+
+    const val = Math.abs(data.amount || data.value || 0);
+    const amountStr = val.toLocaleString('pr-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    const tType = data.type || (data.category?.toUpperCase() === 'DESPESA' ? 'DESPESA' : 'RECEITA');
+
+    this.model = {
+      clinicId: data.clinicId ?? '',
+      type: tType,
+      description: data.description || '',
+      category:
+        data.category &&
+        data.category.toLowerCase() !== 'receita' &&
+        data.category.toLowerCase() !== 'despesa'
+          ? data.category
+          : '',
+      amountDisplay: amountStr,
+      status: tStatus,
+      transactionDate: tDate || new Date().toISOString().slice(0, 10),
+      notes: data.notes || '',
     };
   }
 }

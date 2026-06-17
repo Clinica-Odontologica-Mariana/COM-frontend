@@ -17,8 +17,12 @@ import { PanelService } from '../../services/panel.service';
 import { ClinicContextService } from '../../services/clinic-context.service';
 import { ReportService } from '../../services/report.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import { DashboardData, MonthlyTrend } from '../../models/panel.model';
-import { ClinicSummaryDto, FinancialTransactionCreatePayload } from '../../api/financial-transactions.api';
+import { DashboardData, MonthlyTrend, RecentActivity } from '../../models/panel.model';
+import {
+  ClinicSummaryDto,
+  FinancialTransactionCreatePayload,
+  FinancialTransactionUpdatePayload,
+} from '../../api/financial-transactions.api';
 import { PanelActivityComponent } from '../../components/panel-activity/panel-activity.component';
 import { PanelCardComponent } from '../../components/panel-card/panel-card.component';
 import { TransactionFormModalComponent } from '../../components/panel-transaction-form/panel-transaction-form.component';
@@ -30,7 +34,14 @@ const MOBILE_BREAKPOINT = 768;
 @Component({
   selector: 'app-panel-page',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, FormsModule, PanelActivityComponent, PanelCardComponent, TransactionFormModalComponent],
+  imports: [
+    CommonModule,
+    CurrencyPipe,
+    FormsModule,
+    PanelActivityComponent,
+    PanelCardComponent,
+    TransactionFormModalComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -175,6 +186,7 @@ const MOBILE_BREAKPOINT = 768;
         [isMobile]="isMobile"
         [showClinic]="clinics.length > 1"
         (viewAll)="goToHistory()"
+        (edit)="openTransactionModal($event)"
       />
 
       <div
@@ -244,6 +256,7 @@ const MOBILE_BREAKPOINT = 768;
         [clinics]="clinics"
         [saving]="savingTransaction"
         [errorMessage]="transactionError"
+        [transaction]="editingTransaction"
         (closed)="closeTransactionModal()"
         (submitted)="saveTransaction($event)"
       />
@@ -310,6 +323,8 @@ export class PanelPageComponent implements OnInit, OnDestroy {
   protected savingTransaction = false;
   protected transactionError: string | null = null;
 
+  protected editingTransaction: RecentActivity | any | null = null;
+
   ngOnInit(): void {
     this.isMobile = window.innerWidth < MOBILE_BREAKPOINT;
     this.loadClinics();
@@ -326,8 +341,7 @@ export class PanelPageComponent implements OnInit, OnDestroy {
         this.clinics = clinics;
         this.cdr.markForCheck();
       },
-      error: () => {
-      },
+      error: () => {},
     });
   }
 
@@ -352,25 +366,36 @@ export class PanelPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected openTransactionModal(): void {
+  // Modificado para aceitar uma transação (nova ou edição)
+  protected openTransactionModal(transaction?: RecentActivity | any): void {
     this.transactionError = null;
+    this.editingTransaction = transaction || null;
     this.transactionModalOpen = true;
   }
 
   protected closeTransactionModal(): void {
     if (this.savingTransaction) return;
     this.transactionModalOpen = false;
+    this.editingTransaction = null;
   }
 
-  protected saveTransaction(payload: FinancialTransactionCreatePayload): void {
+  protected saveTransaction(payload: any): void {
     this.savingTransaction = true;
     this.transactionError = null;
 
-    this.panelService.createTransaction(payload).subscribe({
+    // Se temos um ID na variável editingTransaction, chamamos o update (PUT), caso contrário, o create (POST)
+    const request$ = this.editingTransaction?.id
+      ? this.panelService.updateTransaction(String(this.editingTransaction.id), payload)
+      : this.panelService.createTransaction(payload);
+
+    request$.subscribe({
       next: () => {
         this.savingTransaction = false;
         this.transactionModalOpen = false;
-        this.toastService.success('Transação registrada com sucesso.');
+        this.toastService.success(
+          `Transação ${this.editingTransaction ? 'atualizada' : 'registrada'} com sucesso.`,
+        );
+        this.editingTransaction = null;
         this.loadDashboardData();
       },
       error: (err) => {

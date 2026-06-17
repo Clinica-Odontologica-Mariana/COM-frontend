@@ -38,9 +38,11 @@ export function toRecentActivity(
     clinicName,
     date: formatDateBr(dto.transactionDate),
     description: dto.description,
-    category: dto.type,
+    type: dto.type,
+    category: dto.category || (dto.type === 'RECEITA' ? 'Receita' : 'Despesa'),
     status: mapStatus(dto.status),
     value: dto.type === 'RECEITA' ? amount : -amount,
+    treatmentPlanId: dto.treatmentPlanId || null,
   };
 }
 

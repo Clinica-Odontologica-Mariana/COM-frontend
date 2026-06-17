@@ -9,13 +9,15 @@ export interface RecentActivity {
   clinicName: string;
   date: string;
   description: string;
-  category: 'RECEITA' | 'DESPESA';
+  type: 'RECEITA' | 'DESPESA';
+  category: string;
   status: 'Concluído' | 'Pago' | 'Pendente' | 'Cancelado';
   value: number;
+  treatmentPlanId: string | null;
 }
 
 export interface MonthlyTrend {
-  label: string;   // 'JAN', 'FEV', etc.
+  label: string; // 'JAN', 'FEV', etc.
   receita: number;
   despesa: number;
 }
