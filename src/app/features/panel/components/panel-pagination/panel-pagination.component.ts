@@ -82,7 +82,6 @@ export class HistoryPaginationComponent {
     return Math.min(this.page * this.pageSize, this.total);
   }
 
-  /** Lista compacta de páginas: 1 … 4 5 [6] 7 8 … 20 */
   get visiblePages(): (number | '…')[] {
     const total = this.totalPages;
     const current = this.page;

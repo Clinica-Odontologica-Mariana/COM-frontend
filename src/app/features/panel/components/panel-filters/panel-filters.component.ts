@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HistoryFilters } from '../../models/history.model';
+import { ClinicSummaryDto } from '../../api/financial-transactions.api';
 
 @Component({
   selector: 'app-history-filters',
@@ -60,11 +61,25 @@ import { HistoryFilters } from '../../models/history.model';
             <option value="Concluído">Concluído</option>
             <option value="Pago">Pago</option>
             <option value="Pendente">Pendente</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+        </label>
+
+        <!-- Clínica -->
+        <label class="flex flex-col gap-1" *ngIf="clinics.length > 1">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500">Clínica</span>
+          <select
+            [(ngModel)]="model.clinicId"
+            (ngModelChange)="emit()"
+            class="px-3 py-2 border border-stone-200 rounded-lg text-sm text-stone-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+          >
+            <option [ngValue]="undefined">Todas</option>
+            <option *ngFor="let c of clinics" [value]="c.id">{{ c.name }}</option>
           </select>
         </label>
 
         <!-- Período -->
-        <div class="flex gap-2 sm:col-span-2 md:col-span-3 lg:col-span-1">
+        <div class="flex gap-2 col-span-full lg:col-span-2">
           <label class="flex flex-col gap-1 flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500">De</span>
             <input type="date" [(ngModel)]="model.startDate" (ngModelChange)="emit()"
@@ -78,7 +93,7 @@ import { HistoryFilters } from '../../models/history.model';
         </div>
 
         <!-- Valor min/max -->
-        <div class="flex gap-2 sm:col-span-2 md:col-span-1 lg:col-span-1">
+        <div class="flex gap-2 col-span-full lg:col-span-2">
           <label class="flex flex-col gap-1 flex-1">
             <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500">Valor mín.</span>
             <input type="number" [(ngModel)]="model.minValue" (ngModelChange)="emit()" placeholder="0"
@@ -98,6 +113,7 @@ export class HistoryFiltersComponent {
   @Input() set filters(value: HistoryFilters) {
     this.model = { category: 'TODAS', ...value };
   }
+  @Input() clinics: ClinicSummaryDto[] = [];
   @Output() filtersChange = new EventEmitter<HistoryFilters>();
 
   protected model: HistoryFilters = { category: 'TODAS' };

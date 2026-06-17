@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, Location } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { HistoryService } from '../../data/history.service';
+import { HistoryService } from '../../services/history.service';
+import { ClinicContextService } from '../../services/clinic-context.service';
+import { ClinicSummaryDto } from '../../api/financial-transactions.api';
 import { HistoryFilters, HistoryResult } from '../../models/history.model';
 import { HistoryFiltersComponent } from '../../components/panel-filters/panel-filters.component';
 import { HistoryPaginationComponent } from '../../components/panel-pagination/panel-pagination.component';
@@ -13,7 +14,6 @@ import { getStatusColor } from '../../utils/status.utils';
   imports: [
     CommonModule,
     CurrencyPipe,
-    RouterLink,
     HistoryFiltersComponent,
     HistoryPaginationComponent,
   ],
@@ -22,7 +22,6 @@ import { getStatusColor } from '../../utils/status.utils';
     <main class="min-h-screen bg-stone-50 p-4 md:p-8">
       <div class="max-w-6xl mx-auto flex flex-col gap-5">
 
-        <!-- HEADER -->
         <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <button type="button" (click)="goBack()"
@@ -34,7 +33,6 @@ import { getStatusColor } from '../../utils/status.utils';
           </div>
         </header>
 
-        <!-- RESUMO -->
         <section *ngIf="result" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="bg-white border border-stone-200 rounded-xl p-4">
             <p class="text-[10px] font-bold uppercase tracking-wider text-stone-500 m-0">Receitas</p>
@@ -57,10 +55,8 @@ import { getStatusColor } from '../../utils/status.utils';
           </div>
         </section>
 
-        <!-- FILTROS -->
-        <app-history-filters [filters]="filters" (filtersChange)="onFiltersChange($event)" />
+        <app-history-filters [filters]="filters" [clinics]="clinics" (filtersChange)="onFiltersChange($event)" />
 
-        <!-- TABELA -->
         <section class="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
@@ -77,6 +73,7 @@ import { getStatusColor } from '../../utils/status.utils';
                 <tr *ngFor="let a of result?.items; trackBy: trackById"
                     class="hover:bg-stone-50 transition-colors">
                   <td class="px-5 py-4 text-[13px] border-t border-stone-100 text-stone-500 whitespace-nowrap">{{ a.date }}</td>
+                  <td *ngIf="clinics.length > 1" class="px-5 py-4 text-[13px] border-t border-stone-100 text-stone-600 whitespace-nowrap">{{ a.clinicName }}</td>
                   <td class="px-5 py-4 text-[13px] border-t border-stone-100 font-medium text-stone-800">{{ a.description }}</td>
                   <td class="px-5 py-4 border-t border-stone-100">
                     <span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold"
@@ -98,7 +95,7 @@ import { getStatusColor } from '../../utils/status.utils';
                   </td>
                 </tr>
                 <tr *ngIf="result && result.items.length === 0">
-                  <td colspan="5" class="px-5 py-12 text-center text-sm text-stone-400 border-t border-stone-100">
+                  <td [attr.colspan]="headers.length" class="px-5 py-12 text-center text-sm text-stone-400 border-t border-stone-100">
                     Nenhuma transação encontrada com os filtros atuais.
                   </td>
                 </tr>
@@ -106,7 +103,6 @@ import { getStatusColor } from '../../utils/status.utils';
             </table>
           </div>
 
-          <!-- PAGINAÇÃO -->
           <app-history-pagination
             *ngIf="result"
             [page]="result.page"
@@ -122,23 +118,38 @@ import { getStatusColor } from '../../utils/status.utils';
   `,
 })
 export class HistoryPageComponent implements OnInit {
-  protected readonly headers = ['Data', 'Descrição', 'Categoria', 'Status', 'Valor'];
+  protected get headers(): string[] {
+    return this.clinics.length > 1
+      ? ['Data', 'Clínica', 'Descrição', 'Categoria', 'Status', 'Valor']
+      : ['Data', 'Descrição', 'Categoria', 'Status', 'Valor'];
+  }
+
   protected result: HistoryResult | null = null;
   protected filters: HistoryFilters = { category: 'TODAS' };
+  protected clinics: ClinicSummaryDto[] = [];
   protected page = 1;
   protected pageSize = 10;
 
   private readonly service = inject(HistoryService);
+  private readonly clinicContext = inject(ClinicContextService);
   private readonly location = inject(Location);
   private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
+    this.clinicContext.getClinics().subscribe({
+      next: (clinics) => {
+        this.clinics = clinics;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+      },
+    });
     this.load();
   }
 
   protected onFiltersChange(filters: HistoryFilters): void {
     this.filters = filters;
-    this.page = 1; // reseta paginação ao filtrar
+    this.page = 1;
     this.load();
   }
 
@@ -160,9 +171,9 @@ export class HistoryPageComponent implements OnInit {
   protected get statusColor(): (status: string) => string {
     return getStatusColor;
   }
-  
-  protected trackById(_: number, item: any): string | number {
-    return item.id ?? _;
+
+  protected trackById(index: number, item: HistoryResult['items'][number]): string | number {
+    return item.id ?? index;
   }
 
   private load(): void {

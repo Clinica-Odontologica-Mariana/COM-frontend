@@ -61,6 +61,7 @@ import { getStatusColor } from '../../utils/status.utils';
               class="group hover:bg-stone-50 transition-colors"
             >
               <td class="px-5 py-4 text-[13px] border-t border-stone-100 text-stone-500 whitespace-nowrap">{{ a.date }}</td>
+              <td *ngIf="showClinic" class="px-5 py-4 text-[13px] border-t border-stone-100 text-stone-600 whitespace-nowrap">{{ a.clinicName }}</td>
               <td class="px-5 py-4 text-[13px] border-t border-stone-100 font-medium text-stone-800">{{ a.description }}</td>
               <td class="px-5 py-4 border-t border-stone-100">
                 <span
@@ -86,7 +87,7 @@ import { getStatusColor } from '../../utils/status.utils';
               </td>
             </tr>
             <tr *ngIf="filteredActivities.length === 0">
-              <td colspan="5" class="px-5 py-8 text-center text-sm text-stone-400 border-t border-stone-100">
+              <td [attr.colspan]="headers.length" class="px-5 py-8 text-center text-sm text-stone-400 border-t border-stone-100">
                 Nenhuma transação encontrada.
               </td>
             </tr>
@@ -109,7 +110,9 @@ import { getStatusColor } from '../../utils/status.utils';
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-xs sm:text-[13px] font-bold m-0 text-stone-800 truncate">{{ a.description }}</p>
-            <p class="text-[9px] sm:text-[10px] text-stone-500 m-0 mt-0.5">{{ a.date }} · {{ a.category }}</p>
+            <p class="text-[9px] sm:text-[10px] text-stone-500 m-0 mt-0.5">
+              {{ a.date }} · {{ a.category }}<span *ngIf="showClinic"> · {{ a.clinicName }}</span>
+            </p>
           </div>
           <div class="text-right shrink-0">
             <p class="text-xs sm:text-[13px] font-bold m-0" [ngClass]="a.value > 0 ? 'text-emerald-600' : 'text-red-600'">
@@ -141,21 +144,27 @@ export class PanelActivityComponent {
   @Input() isMobile = false;
   @Input() title = 'Transações Recentes';
 
-  /** Emitido quando o usuário clica em "Ver Histórico Completo" */
+  @Input() showClinic = false;
+
   @Output() viewAll = new EventEmitter<void>();
 
-  protected readonly headers = ['Data', 'Descrição', 'Categoria', 'Status', 'Valor'];
+  protected get headers(): string[] {
+    return this.showClinic
+      ? ['Data', 'Clínica', 'Descrição', 'Categoria', 'Status', 'Valor']
+      : ['Data', 'Descrição', 'Categoria', 'Status', 'Valor'];
+  }
 
   protected searchTerm = '';
   protected getStatusColor (status: string): string {
     return getStatusColor(status);
   }
-  /** Lista filtrada a partir do searchTerm (busca em todos os campos). */
+
   protected get filteredActivities(): RecentActivity[] {
     const term = this.searchTerm.trim().toLowerCase();
     if (!term) return this.activities;
     return this.activities.filter(a =>
       this.matches(a.date, term) ||
+      this.matches(a.clinicName, term) ||
       this.matches(a.description, term) ||
       this.matches(a.category, term) ||
       this.matches(a.status, term) ||
@@ -168,7 +177,7 @@ export class PanelActivityComponent {
   }
 
   protected trackById(index: number, item: RecentActivity): string | number {
-    return (item as any).id ?? index;
+    return item.id ?? index;
   }
 
   private matches(value: unknown, term: string): boolean {
@@ -176,7 +185,6 @@ export class PanelActivityComponent {
   }
 
   private formatValue(value: number): string {
-    // permite buscar por "1.234,56", "1234.56", "-100" etc.
     return `${value} ${value.toFixed(2)} ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   }
 }

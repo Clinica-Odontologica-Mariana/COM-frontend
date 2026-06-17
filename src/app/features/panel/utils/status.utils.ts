@@ -3,6 +3,7 @@ export function getStatusColor(status: string): string {
     'Concluído': '#10B981',
     'Pago':      '#10B981',
     'Pendente':  '#F59E0B',
+    'Cancelado': '#9CA3AF',
   };
   return map[status] ?? '#9CA3AF';
 }

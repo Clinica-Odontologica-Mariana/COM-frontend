@@ -1,18 +1,16 @@
 export interface DashboardStats {
-  totalPatients: number;
-  appointmentsToday: number;
-  pendingTasks: number;
   monthlyRevenue: number;
-  monthlyExpenses?: number;
-  monthlyBalance?: number;
+  monthlyExpenses: number;
+  monthlyBalance: number;
 }
 
 export interface RecentActivity {
-  id: number;
+  id: number | string;
+  clinicName: string;
   date: string;
   description: string;
   category: 'RECEITA' | 'DESPESA';
-  status: 'Concluído' | 'Pago' | 'Pendente';
+  status: 'Concluído' | 'Pago' | 'Pendente' | 'Cancelado';
   value: number;
 }
 

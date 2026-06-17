@@ -1,8 +1,9 @@
 export interface HistoryFilters {
   search?: string;
-  column?: 'all' | 'date' | 'description' | 'category' | 'status' | 'value';
   category?: 'TODAS' | 'RECEITA' | 'DESPESA';
-  status?: string;
+  status?: 'Concluído' | 'Pago' | 'Pendente' | 'Cancelado';
+  /** Quando ausente, considera todas as clínicas cadastradas. */
+  clinicId?: string;
   startDate?: string;
   endDate?: string;
   minValue?: number;
