@@ -27,19 +27,31 @@ describe('CreateEvolutionComponent', () => {
   });
 
   it('form is invalid when note is shorter than 3 characters', () => {
-    const form = (component as unknown as { form: { controls: { note: { setValue: (v: string) => void; invalid: boolean } } } }).form;
+    const form = (
+      component as unknown as {
+        form: { controls: { note: { setValue: (v: string) => void; invalid: boolean } } };
+      }
+    ).form;
     form.controls.note.setValue('ab');
     expect(form.controls.note.invalid).toBe(true);
   });
 
   it('form is valid when note has at least 3 characters', () => {
-    const form = (component as unknown as { form: { controls: { note: { setValue: (v: string) => void; valid: boolean } } } }).form;
+    const form = (
+      component as unknown as {
+        form: { controls: { note: { setValue: (v: string) => void; valid: boolean } } };
+      }
+    ).form;
     form.controls.note.setValue('Paciente evoluindo bem.');
     expect(form.controls.note.valid).toBe(true);
   });
 
   it('emits saved event with note payload on valid submit', () => {
-    const form = (component as unknown as { form: { controls: { note: { setValue: (v: string) => void } }; invalid: boolean } }).form;
+    const form = (
+      component as unknown as {
+        form: { controls: { note: { setValue: (v: string) => void } }; invalid: boolean };
+      }
+    ).form;
     form.controls.note.setValue('Evolução clínica registrada.');
 
     const savedSpy = vi.fn();
@@ -74,7 +86,11 @@ describe('CreateEvolutionComponent', () => {
   });
 
   it('marks all fields as touched on invalid submit to show error messages', () => {
-    const form = (component as unknown as { form: { controls: { note: { touched: boolean } }; markAllAsTouched: () => void } }).form;
+    const form = (
+      component as unknown as {
+        form: { controls: { note: { touched: boolean } }; markAllAsTouched: () => void };
+      }
+    ).form;
 
     (component as unknown as { submit: () => void }).submit();
 
