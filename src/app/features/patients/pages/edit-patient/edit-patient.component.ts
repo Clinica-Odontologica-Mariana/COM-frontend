@@ -39,7 +39,7 @@ const HEALTH_CONDITIONS = [
       >
         <div class="flex flex-col gap-1">
           <nav class="flex items-center gap-2 text-xs uppercase tracking-[1.2px]">
-            <a routerLink="/medical-records" class="text-[#78716C] hover:text-[#7C5145]"
+            <a routerLink="/pacientes" class="text-[#78716C] hover:text-[#7C5145]"
               >Pacientes</a
             >
             <span class="text-[#78716C]">›</span>
@@ -54,7 +54,7 @@ const HEALTH_CONDITIONS = [
         </div>
         <div class="flex items-center gap-3">
           <a
-            routerLink="/medical-records"
+            routerLink="/pacientes"
             class="rounded-xl px-6 py-2 text-base font-bold text-[#78716C] transition hover:bg-[#EFE7E3]"
             >Cancelar</a
           >
@@ -204,6 +204,35 @@ const HEALTH_CONDITIONS = [
                         class="text-sm font-medium"
                         [class.text-[#1A1C1C]]="form.get('gender')?.value !== opt.value"
                         [class.text-white]="form.get('gender')?.value === opt.value"
+                        >{{ opt.label }}</span
+                      >
+                    </label>
+                  }
+                </div>
+              </div>
+
+              <!-- Status -->
+              <div class="flex flex-col gap-1">
+                <label class="px-1 text-xs font-bold uppercase tracking-[0.6px] text-[#78716C]"
+                  >Status</label
+                >
+                <div class="mt-2 grid grid-cols-2 gap-4">
+                  @for (opt of statusOptions; track opt.value) {
+                    <label
+                      class="flex cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-3 transition"
+                      [class.bg-[#E2E2E2]]="form.get('active')?.value !== opt.value"
+                      [class.bg-[#7C5145]]="form.get('active')?.value === opt.value"
+                    >
+                      <input
+                        type="radio"
+                        formControlName="active"
+                        [value]="opt.value"
+                        class="hidden"
+                      />
+                      <span
+                        class="text-sm font-medium"
+                        [class.text-[#1A1C1C]]="form.get('active')?.value !== opt.value"
+                        [class.text-white]="form.get('active')?.value === opt.value"
                         >{{ opt.label }}</span
                       >
                     </label>
@@ -465,30 +494,6 @@ const HEALTH_CONDITIONS = [
                   class="rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none focus:ring-2 focus:ring-[#7C5145]/30"
                 />
               </div>
-
-              <div class="border-t border-[#E7E5E4] pt-4">
-                <label class="flex cursor-pointer select-none items-center justify-between gap-3">
-                  <div>
-                    <p class="text-sm font-bold text-[#57534E]">Notificações</p>
-                    <p class="mt-0.5 text-xs text-[#A8A29E]">
-                      Enviar lembretes de consulta via WhatsApp automaticamente.
-                    </p>
-                  </div>
-                  <div class="relative h-6 w-11 shrink-0">
-                    <input
-                      type="checkbox"
-                      formControlName="whatsappReminders"
-                      class="peer sr-only"
-                    />
-                    <span
-                      class="absolute inset-0 rounded-full bg-[#D6D3D1] transition-colors duration-200 peer-checked:bg-[#7E544C]"
-                    ></span>
-                    <span
-                      class="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 peer-checked:translate-x-5"
-                    ></span>
-                  </div>
-                </label>
-              </div>
             </div>
           </section>
 
@@ -651,6 +656,8 @@ export class EditPatientComponent implements OnInit {
 
   private patientId = '';
   private medicalRecordId = '';
+  private currentPatient: PatientDTO | null = null;
+  private currentRecord: MedicalRecordDTO | null = null;
 
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
@@ -666,12 +673,18 @@ export class EditPatientComponent implements OnInit {
     { value: 'O', label: 'Outro' },
   ];
 
+  protected readonly statusOptions = [
+    { value: true, label: 'Ativo' },
+    { value: false, label: 'Inativo' },
+  ];
+
   protected readonly form = this.fb.group({
     fullName: ['', Validators.required],
     cpf: ['', [Validators.required, cpfValidator]],
     birthDate: ['', Validators.required],
     notes: [''],
     gender: [''],
+    active: [true],
     phone: [''],
     email: ['', Validators.email],
     whatsappReminders: [true],
@@ -753,6 +766,8 @@ export class EditPatientComponent implements OnInit {
       .subscribe({
         next: ({ patient, record }) => {
           this.medicalRecordId = record.id;
+          this.currentPatient = patient;
+          this.currentRecord = record;
           this.patchForm(patient, record);
           this.loading.set(false);
         },
@@ -774,6 +789,7 @@ export class EditPatientComponent implements OnInit {
       cpf: formatCpf(patient.cpf ?? ''),
       birthDate: patient.birthDate ? patient.birthDate.slice(0, 10) : '',
       notes: patient.notes ?? '',
+      active: patient.active,
       phone: formatPhone(patient.phone ?? ''),
       email: patient.email,
       street: streetBase,
@@ -822,8 +838,12 @@ export class EditPatientComponent implements OnInit {
         phone: v.phone ?? '',
         email: v.email ?? '',
         notes: v.notes ?? null,
+        active: v.active ?? true,
+        emergencyContactName: this.currentPatient?.emergencyContactName ?? null,
+        emergencyContactPhone: this.currentPatient?.emergencyContactPhone ?? null,
       }),
       record: this.api.updateMedicalRecord(this.medicalRecordId, {
+        allergies: this.currentRecord?.allergies ?? null,
         chronicConditions: chronicConditions || null,
         generalObservations: v.generalObservations ?? null,
         continuousMedications: v.continuousMedications ?? null,
@@ -833,7 +853,7 @@ export class EditPatientComponent implements OnInit {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.router.navigate(['/medical-records', this.patientId]);
+          this.router.navigate(['/pacientes']);
         },
         error: () => {
           this.saveError.set('Erro ao salvar os dados. Tente novamente.');

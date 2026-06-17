@@ -290,20 +290,22 @@ describe('TreatmentService', () => {
   // ── startProcedure ──────────────────────────────────────────────────────────
 
   describe('startProcedure', () => {
-    it('sends PUT with status APPROVED', async () => {
-      const result$ = firstValueFrom(service.startProcedure('item-1', 'Extração de Siso'));
+    it('sends PUT with status APPROVED, description, estimatedPrice and toothNumber', async () => {
+      const result$ = firstValueFrom(service.startProcedure('item-1', 'Extração de Siso', 300, 18));
 
       const req = httpMock.expectOne('/api/v1/treatment-plans/items/item-1');
       expect(req.request.method).toBe('PUT');
       expect(req.request.body.status).toBe('APPROVED');
       expect(req.request.body.description).toBe('Extração de Siso');
+      expect(req.request.body.estimatedPrice).toBe(300);
+      expect(req.request.body.toothNumber).toBe(18);
       req.flush(null);
 
       await result$;
     });
 
     it('sends null description when value is empty or whitespace', async () => {
-      const result$ = firstValueFrom(service.startProcedure('item-1', '   '));
+      const result$ = firstValueFrom(service.startProcedure('item-1', '   ', 0, null));
 
       const req = httpMock.expectOne('/api/v1/treatment-plans/items/item-1');
       expect(req.request.body.description).toBeNull();

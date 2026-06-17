@@ -205,10 +205,17 @@ export class TreatmentService {
     return this.http.patch<void>(`${this.apiBase}/treatment-plans/items/${itemId}/complete`, {});
   }
 
-  startProcedure(itemId: string, description: string): Observable<void> {
+  startProcedure(
+    itemId: string,
+    description: string,
+    estimatedPrice: number,
+    toothNumber: number | null,
+  ): Observable<void> {
     return this.http.put<void>(`${this.apiBase}/treatment-plans/items/${itemId}`, {
       status: 'APPROVED',
       description: description?.trim() || null,
+      estimatedPrice,
+      toothNumber,
     });
   }
 

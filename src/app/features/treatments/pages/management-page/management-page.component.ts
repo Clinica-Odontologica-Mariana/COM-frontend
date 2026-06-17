@@ -566,7 +566,7 @@ export class TreatmentManagementPageComponent implements OnInit {
       );
       return { ...t, procedures: updatedProcs };
     });
-    this.treatmentService.startProcedure(proc.id, proc.name).subscribe({
+    this.treatmentService.startProcedure(proc.id, proc.name, proc.value, proc.teeth[0] ?? null).subscribe({
       error: () => {
         this.toast.error('Não foi possível iniciar o procedimento. Recarregando os dados.');
         this.load();

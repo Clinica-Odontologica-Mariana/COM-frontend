@@ -43,7 +43,6 @@ interface PatientFormControls {
   continuousMedications: FormControl<string>;
   phone: FormControl<string>;
   email: FormControl<string>;
-  whatsappReminders: FormControl<boolean>;
   zipCode: FormControl<string>;
   street: FormControl<string>;
   streetNumber: FormControl<string>;
@@ -438,29 +437,6 @@ interface PatientFormControls {
                 }
               </div>
 
-              <div class="border-t border-[#E7E5E4] pt-4">
-                <label class="flex cursor-pointer select-none items-center justify-between gap-3">
-                  <div>
-                    <p class="text-sm font-bold text-[#57534E]">Notificações</p>
-                    <p class="mt-0.5 text-xs text-[#A8A29E]">
-                      Enviar lembretes de consulta via WhatsApp automaticamente.
-                    </p>
-                  </div>
-                  <div class="relative h-6 w-11 shrink-0">
-                    <input
-                      type="checkbox"
-                      formControlName="whatsappReminders"
-                      class="peer sr-only"
-                    />
-                    <span
-                      class="absolute inset-0 rounded-full bg-[#D6D3D1] transition-colors duration-200 peer-checked:bg-[#7E544C]"
-                    ></span>
-                    <span
-                      class="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 peer-checked:translate-x-5"
-                    ></span>
-                  </div>
-                </label>
-              </div>
             </section>
 
             <section
@@ -646,7 +622,6 @@ export class PatientFormPageComponent {
     continuousMedications: this.fb.nonNullable.control(''),
     phone: this.fb.nonNullable.control(''),
     email: this.fb.nonNullable.control('', Validators.email),
-    whatsappReminders: this.fb.nonNullable.control(true),
     zipCode: this.fb.nonNullable.control(''),
     street: this.fb.nonNullable.control(''),
     streetNumber: this.fb.nonNullable.control(''),
@@ -811,7 +786,6 @@ export class PatientFormPageComponent {
             continuousMedications: patient.continuousMedications,
             phone: formatPhone(patient.phone ?? ''),
             email: patient.email,
-            whatsappReminders: patient.whatsappReminders,
             zipCode: formatZipCode(patient.address.zipCode ?? ''),
             street: streetBase,
             streetNumber,
@@ -845,7 +819,6 @@ export class PatientFormPageComponent {
       continuousMedications: value.continuousMedications,
       phone: value.phone,
       email: value.email,
-      whatsappReminders: value.whatsappReminders,
       address: {
         zipCode: value.zipCode,
         street: value.streetNumber ? `${value.street}, ${value.streetNumber}` : value.street,

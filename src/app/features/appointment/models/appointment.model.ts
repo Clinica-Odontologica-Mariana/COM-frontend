@@ -19,6 +19,7 @@ export interface Appointment {
   patientName: string;
   patientEmail?: string;
   patientInitials?: string;
+  professionalName?: string;
   procedure: ProcedureType;
   procedureId?: string | null;
   location: AppointmentLocation | null;

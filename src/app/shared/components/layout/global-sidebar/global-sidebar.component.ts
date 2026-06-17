@@ -48,12 +48,12 @@ interface SidebarItem {
       [class.-translate-x-full]="!mobileOpen()"
       aria-label="Menu de navegação"
     >
-      <nav class="mt-2 space-y-1" aria-label="Area administrativa">
+      <nav class="mt-2 flex-1 space-y-1 overflow-y-auto" aria-label="Area administrativa">
         @for (item of items; track item.label) {
           <a
             [routerLink]="item.link"
             [attr.aria-current]="isItemActive(item) ? 'page' : null"
-            class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide transition"
+            class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide transition hover:bg-[#EDE8E6] hover:text-[#8B574B]"
             [class.bg-[#EDE8E6]]="isItemActive(item)"
             [class.font-semibold]="isItemActive(item)"
             [class.text-[#8B574B]]="isItemActive(item)"
@@ -65,6 +65,37 @@ interface SidebarItem {
           </a>
         }
       </nav>
+
+      <!-- Mobile user section -->
+      <div class="mt-4 border-t border-[#EEE8E5] pt-4">
+        <div class="flex items-center gap-3 px-2 pb-4">
+          <div
+            class="grid h-11 w-11 place-items-center rounded-full bg-[#DFA17C] text-sm font-bold text-[#1F2425]"
+          >
+            {{ initials() }}
+          </div>
+          <div>
+            <p class="text-sm font-bold text-[#1F2425]">{{ displayName() }}</p>
+          </div>
+        </div>
+
+        <a
+          routerLink="/schedule/new"
+          class="flex h-11 items-center justify-center gap-2 rounded-lg bg-[#8B574B] px-4 text-sm font-bold text-white shadow-lg shadow-[#8B574B]/20 transition hover:bg-[#744A40]"
+          (click)="closeMobile()"
+        >
+          <span class="text-lg leading-none">+</span>
+          Novo Atendimento
+        </a>
+
+        <button
+          type="button"
+          class="mt-3 flex h-11 w-full items-center justify-center rounded-lg border border-[#E3D7D1] bg-white px-4 text-sm font-bold text-[#8B574B] transition hover:bg-[#F5EFEC]"
+          (click)="logout()"
+        >
+          Sair
+        </button>
+      </div>
     </aside>
 
     <!-- Desktop sidebar -->
@@ -90,7 +121,7 @@ interface SidebarItem {
             <a
               [routerLink]="item.link"
               [attr.aria-current]="isItemActive(item) ? 'page' : null"
-              class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide transition"
+              class="flex h-11 items-center gap-3 rounded-xl px-4 text-sm tracking-wide transition hover:bg-[#EDE8E6] hover:text-[#8B574B]"
               [class.bg-[#EDE8E6]]="isItemActive(item)"
               [class.font-semibold]="isItemActive(item)"
               [class.text-[#8B574B]]="isItemActive(item)"
@@ -158,14 +189,14 @@ export class GlobalSidebarComponent {
     {
       label: 'Painel',
       icon: '/Painel_icon.svg',
-      link: '/medical-records/1',
-      match: ['/dashboard'],
+      link: '/panel',
+      match: ['/panel'],
     },
     {
       label: 'Pacientes',
       icon: '/pacientes.svg',
-      link: '/patients',
-      match: ['/patients'],
+      link: '/pacientes',
+      match: ['/pacientes'],
     },
     { label: 'Agenda', icon: '/agenda.svg', link: '/schedule', match: ['/schedule'] },
     {
