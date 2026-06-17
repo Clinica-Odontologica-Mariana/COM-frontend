@@ -42,7 +42,6 @@ interface PatientFormControls {
   continuousMedications: FormControl<string>;
   phone: FormControl<string>;
   email: FormControl<string>;
-  whatsappReminders: FormControl<boolean>;
   zipCode: FormControl<string>;
   street: FormControl<string>;
   neighborhood: FormControl<string>;
@@ -434,27 +433,6 @@ interface PatientFormControls {
                 }
               </div>
 
-              <div class="space-y-2 border-t border-[#E7E5E4] pt-4">
-                <div class="flex items-center justify-between">
-                  <span class="text-sm font-bold text-[#57534E]">Notificações</span>
-                  <label class="relative inline-flex cursor-pointer items-center">
-                    <input
-                      type="checkbox"
-                      formControlName="whatsappReminders"
-                      class="peer sr-only"
-                    />
-                    <span
-                      class="h-6 w-11 rounded-full bg-[#D6D3D1] transition-colors peer-checked:bg-[#7E544C]"
-                    ></span>
-                    <span
-                      class="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5"
-                    ></span>
-                  </label>
-                </div>
-                <p class="text-xs text-[#A8A29E]">
-                  Enviar lembretes de consulta via WhatsApp automaticamente.
-                </p>
-              </div>
             </section>
 
             <section
@@ -605,7 +583,6 @@ export class PatientFormPageComponent {
     continuousMedications: this.fb.nonNullable.control(''),
     phone: this.fb.nonNullable.control(''),
     email: this.fb.nonNullable.control('', Validators.email),
-    whatsappReminders: this.fb.nonNullable.control(true),
     zipCode: this.fb.nonNullable.control(''),
     street: this.fb.nonNullable.control(''),
     neighborhood: this.fb.nonNullable.control(''),
@@ -730,7 +707,6 @@ export class PatientFormPageComponent {
             continuousMedications: patient.continuousMedications,
             phone: patient.phone,
             email: patient.email,
-            whatsappReminders: patient.whatsappReminders,
             zipCode: patient.address.zipCode,
             street: patient.address.street,
             neighborhood: patient.address.neighborhood,
@@ -763,7 +739,6 @@ export class PatientFormPageComponent {
       continuousMedications: value.continuousMedications,
       phone: value.phone,
       email: value.email,
-      whatsappReminders: value.whatsappReminders,
       address: {
         zipCode: value.zipCode,
         street: value.street,

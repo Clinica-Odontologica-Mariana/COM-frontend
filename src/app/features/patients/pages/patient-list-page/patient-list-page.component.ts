@@ -5,10 +5,7 @@ import { filter } from 'rxjs';
 import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { PatientFiltersComponent } from '../../components/patient-filters/patient-filters.component';
-import {
-  BreadcrumbItem,
-  PatientPageHeaderComponent,
-} from '../../components/patient-page-header/patient-page-header.component';
+import { PatientPageHeaderComponent } from '../../components/patient-page-header/patient-page-header.component';
 import { PatientPaginationComponent } from '../../components/patient-pagination/patient-pagination.component';
 import { PatientTableComponent } from '../../components/patient-table/patient-table.component';
 import { Patient, PatientFilters } from '../../models/patient.model';
@@ -25,7 +22,7 @@ import { PatientService } from '../../services/patient.service';
   ],
   template: `
     <div class="min-h-full pb-12">
-      <app-patient-page-header title="Pacientes" [breadcrumbs]="breadcrumbs">
+      <app-patient-page-header title="Pacientes">
         <a
           routerLink="/pacientes/new"
           class="rounded-xl bg-[#7C5145] px-8 py-2 text-base font-bold text-white shadow-lg shadow-[#7C5145]/20 transition hover:bg-[#6a453b]"
@@ -67,11 +64,6 @@ export class PatientListPageComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toast = inject(ToastService);
-
-  protected readonly breadcrumbs: BreadcrumbItem[] = [
-    { label: 'Cadastro de Pacientes', link: '/pacientes' },
-    { label: 'Listagem' },
-  ];
 
   protected readonly filters = signal<PatientFilters>({
     name: '',

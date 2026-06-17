@@ -192,8 +192,8 @@ export class GlobalSidebarComponent {
     {
       label: 'Pacientes',
       icon: '/pacientes.svg',
-      link: '/patients',
-      match: ['/patients'],
+      link: '/pacientes',
+      match: ['/pacientes'],
     },
     { label: 'Agenda', icon: '/agenda.svg', link: '/schedule', match: ['/schedule'] },
     {
@@ -205,8 +205,8 @@ export class GlobalSidebarComponent {
     {
       label: 'Tratamentos',
       icon: '/tratamentos.svg',
-      link: '/patients/a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56/treatments',
-      match: ['/treatments', '/patients/'],
+      link: '/pacientes/a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56/tratamentos',
+      match: ['/tratamentos', '/pacientes/'],
     },
     { label: 'Estoque', icon: '/estoque.svg', link: '/inventories', match: ['/inventories'] },
     { label: 'Clínicas', icon: '/Clinicas.svg', link: '/clinics', match: ['/clinics'] },
