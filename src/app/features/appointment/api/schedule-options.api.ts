@@ -5,15 +5,10 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { API_BASE_URL } from '../../../core/config/api.config';
 import { ApiResponse } from '../../../core/models/api-response.model';
+import { ClinicsApi } from '../../clinics/api/clinics.api';
 
 interface PageDto<T> {
   content: T[];
-}
-
-interface ClinicApiDto {
-  id: string;
-  name: string;
-  active: boolean;
 }
 
 interface WorkplaceApiDto {
@@ -62,32 +57,28 @@ function unwrap<T>(res: ApiResponse<PageDto<T>>): T[] {
 export class ScheduleOptionsApi {
   private readonly http = inject(HttpClient);
   private readonly base = inject(API_BASE_URL);
+  private readonly clinicsApi = inject(ClinicsApi);
 
   listWorkplaces(): Observable<WorkplaceOption[]> {
-    const clinicParams = new HttpParams().set('page', '0').set('size', '50');
+    return this.clinicsApi.list().pipe(
+      map((clinics) => clinics.filter((c) => c.active)),
+      switchMap((clinics) => {
+        if (clinics.length === 0) return of<WorkplaceOption[]>([]);
 
-    return this.http
-      .get<ApiResponse<PageDto<ClinicApiDto>>>(`${this.base}/clinics`, { params: clinicParams })
-      .pipe(
-        map((res) => unwrap<ClinicApiDto>(res).filter((c) => c.active)),
-        switchMap((clinics) => {
-          if (clinics.length === 0) return of<WorkplaceOption[]>([]);
+        const clinicId = clinics[0].id;
 
-          const clinicId = clinics[0].id;
-          const params = new HttpParams().set('clinicId', clinicId).set('page', '0').set('size', '100');
-
-          return this.http
-            .get<ApiResponse<PageDto<WorkplaceApiDto>>>(`${this.base}/workplaces`, { params })
-            .pipe(
-              map((res) =>
-                unwrap<WorkplaceApiDto>(res)
-                  .filter((w) => w.active)
-                  .map((w) => ({ id: w.id, clinicId: w.clinicId, name: w.name })),
-              ),
-            );
-        }),
-        catchError(() => of<WorkplaceOption[]>([])),
-      );
+        return this.http
+          .get<ApiResponse<WorkplaceApiDto[]>>(`${this.base}/workplaces/clinic/${clinicId}`)
+          .pipe(
+            map((res) =>
+              (res.data ?? [])
+                .filter((w) => w.active)
+                .map((w) => ({ id: w.id, clinicId: w.clinicId, name: w.name })),
+            ),
+          );
+      }),
+      catchError(() => of<WorkplaceOption[]>([])),
+    );
   }
 
   listProfessionals(): Observable<ProfessionalOption[]> {
