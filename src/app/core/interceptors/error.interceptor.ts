@@ -35,12 +35,6 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
 };
 
 function resolveErrorMessage(error: HttpErrorResponse): string {
-  const backendMessage = readBackendErrorMessage(error.error);
-
-  if (backendMessage) {
-    return backendMessage;
-  }
-
   if (error.status === 403) {
     return 'Você não tem permissão para essa ação.';
   }
@@ -54,7 +48,7 @@ function resolveErrorMessage(error: HttpErrorResponse): string {
       return 'Usuário ou senha inválidos.';
     }
 
-    const backendMessage = error.error.error?.message ?? error.error.message;
+    const backendMessage = readBackendErrorMessage(error.error);
     if (backendMessage && backendMessage !== 'Unexpected error') {
       return backendMessage;
     }

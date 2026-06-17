@@ -174,7 +174,10 @@ describe('adaptBalance', () => {
   });
 
   it('sums totalAmount across all plans', () => {
-    const result = adaptBalance([makePlan({ totalAmount: 300 }), makePlan({ id: 'p2', totalAmount: 200 })]);
+    const result = adaptBalance([
+      makePlan({ totalAmount: 300 }),
+      makePlan({ id: 'p2', totalAmount: 200 }),
+    ]);
     expect(result?.amount).toBe(500);
   });
 
@@ -218,7 +221,11 @@ describe('adaptProcedures', () => {
   });
 
   it('maps status and estimatedPrice correctly', () => {
-    const item = makeItem({ status: 'DONE', estimatedPrice: 250, completedAt: '2024-05-01T00:00:00Z' });
+    const item = makeItem({
+      status: 'DONE',
+      estimatedPrice: 250,
+      completedAt: '2024-05-01T00:00:00Z',
+    });
     const [result] = adaptProcedures([item]);
     expect(result.status).toBe('DONE');
     expect(result.estimatedPrice).toBe(250);

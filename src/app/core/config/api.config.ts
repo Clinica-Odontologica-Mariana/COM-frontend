@@ -11,7 +11,8 @@ declare global {
 
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL', {
   providedIn: 'root',
-  factory: () => (typeof window !== 'undefined' ? window.__env?.API_BASE_URL?.trim() : undefined) ?? '/api/v1',
+  factory: () =>
+    typeof window !== 'undefined' ? window.__env?.API_BASE_URL?.trim() || '/api/v1' : '/api/v1',
 });
 
 export const SUPPRESS_ERROR_TOAST = new HttpContextToken<boolean>(() => false);

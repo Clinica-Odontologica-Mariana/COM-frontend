@@ -128,6 +128,7 @@ interface SidebarItem {
               [class.font-semibold]="isItemActive(item)"
               [class.text-[#8B574B]]="isItemActive(item)"
               [class.text-[#78716C]]="!isItemActive(item)"
+              (click)="closeMobile()"
             >
               <img
                 [src]="item.icon"
@@ -160,6 +161,7 @@ interface SidebarItem {
         <a
           routerLink="/schedule/new"
           class="mt-6 flex h-11 items-center justify-center gap-2 rounded-lg bg-[#8B574B] px-4 text-sm font-bold text-white shadow-lg shadow-[#8B574B]/20 transition hover:bg-[#744A40]"
+          (click)="closeMobile()"
         >
           <span class="text-lg leading-none">+</span>
           Novo Atendimento
@@ -184,6 +186,7 @@ export class GlobalSidebarComponent {
   protected readonly mobileOpen = signal(false);
   protected readonly currentUrl = signal(this.router.url);
   protected readonly currentUser = signal<CurrentUser | null>(null);
+
   protected readonly items: SidebarItem[] = [
     {
       label: 'Painel',
@@ -194,8 +197,8 @@ export class GlobalSidebarComponent {
     {
       label: 'Pacientes',
       icon: '/pacientes.svg',
-      link: '/patients',
-      match: ['/patients'],
+      link: '/pacientes',
+      match: ['/pacientes'],
     },
     { label: 'Agenda', icon: '/agenda.svg', link: '/schedule', match: ['/schedule'] },
     {
@@ -207,8 +210,8 @@ export class GlobalSidebarComponent {
     {
       label: 'Tratamentos',
       icon: '/tratamentos.svg',
-      link: '/patients/a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56/treatments',
-      match: ['/treatments', '/patients/'],
+      link: '/treatments',
+      match: ['/treatments'],
     },
     { label: 'Estoque', icon: '/estoque.svg', link: '/inventories', match: ['/inventories'] },
     { label: 'Clínicas', icon: '/Clinicas.svg', link: '/clinics', match: ['/clinics'] },
@@ -219,7 +222,6 @@ export class GlobalSidebarComponent {
       match: ['/certificados'],
     },
   ];
-  protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
 
   constructor() {
     this.router.events

@@ -35,7 +35,6 @@ export interface Patient {
   continuousMedications: string;
   phone: string;
   email: string;
-  whatsappReminders: boolean;
   address: PatientAddress;
   lastConsultationDate?: string;
   nextConsultationDate?: string;

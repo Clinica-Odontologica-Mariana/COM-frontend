@@ -1,4 +1,5 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { httpParams } from '../../../core/utils/http-params.utils';
 import { inject, Injectable } from '@angular/core';
 import { forkJoin, Observable, switchMap } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -83,7 +84,6 @@ function toPatient(dto: PatientApiDto, record?: MedicalContext): Patient {
     continuousMedications: record?.continuousMedications ?? '',
     phone: dto.phone ?? '',
     email: dto.email ?? '',
-    whatsappReminders: false,
     address: { zipCode: '', street: '', neighborhood: '', city: '', state: '' },
   };
 }
@@ -121,7 +121,7 @@ export class PatientApi {
   private readonly medicalRecordApi = inject(MedicalRecordApi);
 
   list(filters: PatientFilters = {}, page = 1): Observable<PaginatedPatients> {
-    let params = new HttpParams().set('page', String(page - 1)).set('size', '10');
+    let params = httpParams().set('page', String(page - 1)).set('size', '10');
 
     if (filters.name?.trim()) {
       params = params.set('name', filters.name.trim());
@@ -180,7 +180,7 @@ export class PatientApi {
     }).pipe(
       switchMap(({ patient, record }) =>
         this.medicalRecordApi
-          .updateMedicalRecord(record.id, toMedicalBody(dto))
+          .updateMedicalRecord(record.id, { ...toMedicalBody(dto), allergies: record.allergies ?? null })
           .pipe(map((updated) => toPatient(patient, updated))),
       ),
     );

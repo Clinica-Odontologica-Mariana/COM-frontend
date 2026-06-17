@@ -116,8 +116,8 @@ import { RouterLink } from '@angular/router';
               <div
                 class="flex gap-5 uppercase tracking-widest text-[10px] text-[rgba(167,119,105,0.6)]"
               >
-                <a href="#">Privacidade</a>
-                <a href="#">Termos</a>
+                <p>Privacidade</p>
+                <p>Termos</p>
               </div>
             </div>
 

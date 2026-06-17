@@ -18,8 +18,8 @@ import { AppointmentService } from '../services/appointment.service';
   imports: [ReactiveFormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="min-h-full bg-[#F9F9F9]">
-      <div class="mx-auto max-w-5xl px-6 py-10 lg:px-12">
+    <div class="h-full bg-[#F9F9F9]">
+      <div class="mx-auto max-w-full px-6 py-10 lg:px-12">
         <nav class="mb-4 flex items-center gap-2 text-sm text-[#78716C]" aria-label="Breadcrumb">
           <a routerLink="/schedule" class="transition hover:text-[#7C5145]">Agenda</a>
           <span aria-hidden="true">›</span>
@@ -44,7 +44,7 @@ import { AppointmentService } from '../services/appointment.service';
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="relative">
           <div class="grid gap-6 lg:grid-cols-12">
             <!-- Patient card -->
-            <div class="rounded-xl bg-white p-8 shadow-sm lg:col-span-8">
+            <div class="rounded-xl bg-white p-8 shadow-sm lg:col-span-6">
               <div class="mb-6 flex items-center gap-3">
                 <svg
                   class="h-5 w-5 text-[#7C5145]"
@@ -118,7 +118,7 @@ import { AppointmentService } from '../services/appointment.service';
             </div>
 
             <!-- Professional card -->
-            <div class="rounded-xl bg-white p-8 shadow-sm lg:col-span-12">
+            <div class="rounded-xl bg-white p-8 shadow-sm lg:col-span-6">
               <div class="mb-6 flex items-center gap-3">
                 <svg
                   class="h-5 w-5 text-[#7C5145]"
@@ -156,7 +156,7 @@ import { AppointmentService } from '../services/appointment.service';
             </div>
 
             <!-- Procedure card -->
-            <div class="rounded-xl bg-[#98695C] p-8 shadow-sm lg:col-span-4">
+            <div class="rounded-xl bg-[#98695C] p-8 shadow-sm lg:col-span-6">
               <svg
                 class="mb-4 h-6 w-6 text-[#FFFBFF]"
                 fill="none"
@@ -179,7 +179,7 @@ import { AppointmentService } from '../services/appointment.service';
               } @else {
                 <select
                   formControlName="procedureId"
-                  class="w-full rounded-lg bg-white/10 px-3 py-3 text-base text-white outline-none"
+                  class="w-full rounded-lg bg-white/10 px-5 py-3 text-base text-white outline-none"
                 >
                   <option value="" class="text-[#1A1C1C]">Selecionar procedimento...</option>
                   @for (proc of procedureOptions(); track proc.id) {
@@ -190,7 +190,7 @@ import { AppointmentService } from '../services/appointment.service';
             </div>
 
             <!-- Schedule card -->
-            <div class="rounded-xl bg-white p-8 shadow-sm lg:col-span-5">
+            <div class="rounded-xl bg-white p-8 shadow-sm lg:col-span-6">
               <div class="mb-6 flex items-center gap-3">
                 <svg
                   class="h-5 w-5 text-[#7C5145]"
@@ -242,7 +242,7 @@ import { AppointmentService } from '../services/appointment.service';
             </div>
 
             <!-- Location card -->
-            <div class="rounded-xl bg-white p-8 shadow-sm lg:col-span-7">
+            <div class="rounded-xl bg-white p-8 shadow-sm lg:col-span-12">
               <div class="mb-6 flex items-center gap-3">
                 <svg
                   class="h-5 w-5 shrink-0 text-[#7C5145]"
