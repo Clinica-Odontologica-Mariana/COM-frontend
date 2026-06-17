@@ -10,6 +10,7 @@ export function adaptCertificate(dto: CertificateDto): CertificateViewModel {
     issuedAt: dto.issuedAt ?? null,
     storedFileId: dto.storedFileId ?? null,
     hasFile: !!dto.storedFileId,
+    featured: dto.featured,
     status: dto.active && !dto.revokedAt ? 'active' : 'revoked',
     issuedAtFormatted: dto.issuedAt ? formatIsoDate(dto.issuedAt) : null,
     createdAt: dto.createdAt,

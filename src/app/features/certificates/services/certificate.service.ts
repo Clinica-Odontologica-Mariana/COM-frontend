@@ -15,6 +15,8 @@ const initialState: CertificateState = {
   error: null,
 };
 
+const MAX_FEATURED = 3;
+
 @Injectable()
 export class CertificateService {
   private readonly api = inject(CertificateApi);
@@ -25,6 +27,10 @@ export class CertificateService {
   readonly saving = computed(() => this.state().saving);
   readonly deletingId = computed(() => this.state().deletingId);
   readonly error = computed(() => this.state().error);
+  readonly featuredCount = computed(
+    () => this.state().certificates.filter((c) => c.featured).length,
+  );
+  readonly canFeatureMore = computed(() => this.featuredCount() < MAX_FEATURED);
   load(): void {
     this.patchState({ loading: true, error: null });
     this.api.getAll().subscribe({
@@ -85,6 +91,26 @@ export class CertificateService {
       }),
       finalize(() => this.patchState({ deletingId: null })),
     );
+  }
+
+  toggleFeatured(cert: CertificateViewModel): void {
+    const next = !cert.featured;
+    if (next && !this.canFeatureMore()) {
+      this.patchState({ error: `Máximo de ${MAX_FEATURED} certificados em destaque.` });
+      return;
+    }
+    this.api.setFeatured(cert.id, next).subscribe({
+      next: (dto) => {
+        const vm = adaptCertificate(dto);
+        this.patchState({
+          certificates: this.state().certificates.map((c) => (c.id === cert.id ? vm : c)),
+          error: null,
+        });
+      },
+      error: (err: Error) => {
+        this.patchState({ error: err.message });
+      },
+    });
   }
 
   clearError(): void {

@@ -19,6 +19,7 @@ const makeCertDto = (overrides: Partial<CertificateDto> = {}): CertificateDto =>
   issuedAt: null,
   storedFileId: null,
   active: true,
+  featured: false,
   revokedAt: null,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',

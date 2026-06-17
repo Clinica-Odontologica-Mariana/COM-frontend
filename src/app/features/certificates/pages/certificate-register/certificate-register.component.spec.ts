@@ -15,6 +15,7 @@ const makeCertVm = (overrides: Partial<CertificateViewModel> = {}): CertificateV
   issuedAt: '2023-06-15T00:00:00Z',
   storedFileId: null,
   hasFile: false,
+  featured: false,
   status: 'active',
   issuedAtFormatted: '15/06/2023',
   createdAt: '2024-01-01T00:00:00Z',
@@ -27,6 +28,8 @@ function createServiceMock() {
   const saving = vi.fn(() => false);
   const deletingId = vi.fn(() => null);
   const error = vi.fn(() => null);
+  const featuredCount = vi.fn(() => 0);
+  const canFeatureMore = vi.fn(() => true);
 
   return {
     certificates: certs,
@@ -34,11 +37,13 @@ function createServiceMock() {
     saving,
     deletingId,
     error,
-    patientId: 'patient-1',
+    featuredCount,
+    canFeatureMore,
     load: vi.fn(),
     create: vi.fn().mockReturnValue(of(makeCertVm({ id: 'new-cert' }))),
     update: vi.fn().mockReturnValue(of(makeCertVm({ title: 'Atualizado' }))),
     delete: vi.fn().mockReturnValue(of(undefined)),
+    toggleFeatured: vi.fn(),
     clearError: vi.fn(),
   };
 }

@@ -247,14 +247,38 @@ const CERTIFICATE_TYPES = [
                         {{ cert.certificateType }}
                       </p>
                     </div>
-                    <span
-                      [class]="
-                        'shrink-0 rounded-full px-3 py-1 text-xs font-bold text-white ' +
-                        (cert.status === 'active' ? 'bg-[#4CAF50]' : 'bg-[#D4A574]')
-                      "
-                    >
-                      {{ cert.status === 'active' ? 'ATIVO' : 'REVOGADO' }}
-                    </span>
+                    <div class="flex shrink-0 items-center gap-2">
+                      @if (cert.status === 'active') {
+                        <button
+                          (click)="service.toggleFeatured(cert)"
+                          [disabled]="!cert.featured && !service.canFeatureMore()"
+                          [title]="
+                            cert.featured
+                              ? 'Remover dos destaques da home'
+                              : service.canFeatureMore()
+                                ? 'Destacar na home'
+                                : 'Máximo de 3 destaques'
+                          "
+                          [class]="
+                            'flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition ' +
+                            (cert.featured
+                              ? 'border-[#E0B84A] bg-[#FBF3DC] text-[#9A7B1E]'
+                              : 'border-[#EDE7E2] text-[#A89D95] hover:text-[#8B574B] disabled:cursor-not-allowed disabled:opacity-40')
+                          "
+                        >
+                          <span>{{ cert.featured ? '★' : '☆' }}</span>
+                          Destaque
+                        </button>
+                      }
+                      <span
+                        [class]="
+                          'rounded-full px-3 py-1 text-xs font-bold text-white ' +
+                          (cert.status === 'active' ? 'bg-[#4CAF50]' : 'bg-[#D4A574]')
+                        "
+                      >
+                        {{ cert.status === 'active' ? 'ATIVO' : 'REVOGADO' }}
+                      </span>
+                    </div>
                   </div>
 
                   <!-- Content preview -->

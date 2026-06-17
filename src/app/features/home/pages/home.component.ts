@@ -238,13 +238,10 @@ export class HomeComponent implements OnInit {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-    if (!this.authService.isTokenValid()) {
-      return;
-    }
-    this.certificateApi.getAll().subscribe({
+    // Destaques são públicos: carregam para qualquer visitante (logado ou não).
+    this.certificateApi.getFeatured().subscribe({
       next: (dtos) => {
-        const active = dtos.filter((d) => d.active && !d.revokedAt);
-        this.certificates.set(adaptCertificates(active).slice(0, MAX_PUBLIC_CERTIFICATES));
+        this.certificates.set(adaptCertificates(dtos).slice(0, MAX_PUBLIC_CERTIFICATES));
       },
       error: () => {
         /* mantém a seção oculta se a listagem falhar */

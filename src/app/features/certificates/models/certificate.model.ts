@@ -6,6 +6,7 @@ export interface CertificateViewModel {
   issuedAt: string | null;
   storedFileId: string | null;
   hasFile: boolean;
+  featured: boolean;
   status: 'active' | 'revoked';
   issuedAtFormatted: string | null;
   createdAt: string;

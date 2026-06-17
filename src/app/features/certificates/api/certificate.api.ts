@@ -39,6 +39,22 @@ export class CertificateApi {
     );
   }
 
+  getFeatured(): Observable<CertificateDto[]> {
+    return unwrap(
+      this.http.get<ApiResponse<CertificateDto[]>>(`${this.base}/certificates/featured`, {
+        context: new HttpContext().set(SUPPRESS_ERROR_TOAST, true),
+      }),
+    );
+  }
+
+  setFeatured(id: string, featured: boolean): Observable<CertificateDto> {
+    return unwrap(
+      this.http.patch<ApiResponse<CertificateDto>>(`${this.base}/certificates/${id}/featured`, {
+        featured,
+      }),
+    );
+  }
+
   create(dto: CertificateCreateDto): Observable<CertificateDto> {
     return unwrap(
       this.http.post<ApiResponse<CertificateDto>>(`${this.base}/certificates`, dto),

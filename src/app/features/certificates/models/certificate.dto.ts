@@ -8,6 +8,7 @@ export interface CertificateDto {
   issuedAt: string | null;
   storedFileId: string | null;
   active: boolean;
+  featured: boolean;
   revokedAt: string | null;
   createdAt: string;
   updatedAt: string;
