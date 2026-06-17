@@ -190,11 +190,9 @@ export class TreatmentService {
         `${this.apiBase}/treatment-plans/${treatmentPlanId}`,
       ),
     ).pipe(
-      switchMap((plan) =>
+      switchMap(({ id, patientId, createdAt, updatedAt, ...updatable }) =>
         this.http.put<void>(`${this.apiBase}/treatment-plans/${treatmentPlanId}`, {
-          title: plan.title,
-          status: plan.status,
-          totalAmount: plan.totalAmount,
+          ...updatable,
           notes,
         }),
       ),
@@ -226,6 +224,7 @@ export class TreatmentService {
       estimatedPrice?: number;
       status?: string;
       toothNumber?: number;
+      materials?: Array<{ name: string; category: string; quantity: number }>;
     },
   ): Observable<TreatmentPlanItemDto> {
     return unwrap(
@@ -236,6 +235,7 @@ export class TreatmentService {
           estimatedPrice: data.estimatedPrice ?? 0,
           status: data.status ?? API_STATUS.pending,
           toothNumber: data.toothNumber ?? null,
+          ...(data.materials?.length ? { materials: data.materials } : {}),
         },
       ),
     );
@@ -248,6 +248,7 @@ export class TreatmentService {
       estimatedPrice?: number;
       status?: string;
       toothNumber?: number;
+      materials?: Array<{ name: string; category: string; quantity: number }>;
     },
   ): Observable<TreatmentPlanItemDto> {
     return unwrap(
@@ -258,6 +259,7 @@ export class TreatmentService {
           estimatedPrice: data.estimatedPrice ?? 0,
           status: data.status ?? API_STATUS.pending,
           toothNumber: data.toothNumber ?? null,
+          ...(data.materials?.length ? { materials: data.materials } : {}),
         },
       ),
     );
@@ -274,7 +276,8 @@ export class TreatmentService {
       ),
     ).pipe(
       switchMap((plans) => {
-        if (!plans.length) return throwError(() => new Error('Nenhum plano de tratamento encontrado.'));
+        if (!plans.length)
+          return throwError(() => new Error('Nenhum plano de tratamento encontrado.'));
         return this.getTreatment(plans[0].id);
       }),
     );

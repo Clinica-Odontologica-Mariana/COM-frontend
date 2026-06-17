@@ -16,6 +16,7 @@ import { JourneyTrackerComponent } from '../../components/journey-tracker/journe
 import { OdontogramGridComponent } from '../../components/odontogram-grid/odontogram-grid.component';
 import { ProcedureCardComponent } from '../../components/procedure-card/procedure-card.component';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
+import { forkJoin } from 'rxjs';
 import { ToastService } from '../../../../core/services/toast.service';
 
 type ConfirmType = 'complete' | 'start';
@@ -549,7 +550,7 @@ export class TreatmentManagementPageComponent implements OnInit {
         .reduce((sum, p) => sum + p.value, 0);
       return { ...t, procedures: updatedProcs, executed, toPay: t.totalBudget - executed };
     });
-    this.treatmentService.completeProcedure(proc.id).subscribe({
+    forkJoin(proc.ids.map((id) => this.treatmentService.completeProcedure(id))).subscribe({
       error: () => {
         this.toast.error('Não foi possível concluir o procedimento. Recarregando os dados.');
         this.load();
@@ -566,7 +567,11 @@ export class TreatmentManagementPageComponent implements OnInit {
       );
       return { ...t, procedures: updatedProcs };
     });
-    this.treatmentService.startProcedure(proc.id, proc.name, proc.value, proc.teeth[0] ?? null).subscribe({
+    forkJoin(
+      proc.ids.map((id, i) =>
+        this.treatmentService.startProcedure(id, proc.name, proc.value, proc.teeth[i] ?? null),
+      ),
+    ).subscribe({
       error: () => {
         this.toast.error('Não foi possível iniciar o procedimento. Recarregando os dados.');
         this.load();

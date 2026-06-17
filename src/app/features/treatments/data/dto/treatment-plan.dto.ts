@@ -10,6 +10,12 @@ export interface TreatmentPlanDto {
   updatedAt: string;
 }
 
+export interface MaterialItemDto {
+  name: string;
+  category: string;
+  quantity: number;
+}
+
 export interface TreatmentPlanItemDto {
   id: string;
   treatmentPlanId: string;
@@ -21,6 +27,7 @@ export interface TreatmentPlanItemDto {
   sortOrder: number | null;
   completedAt: string | null;
   createdAt: string;
+  materials?: MaterialItemDto[];
 }
 
 export interface PatientDto {

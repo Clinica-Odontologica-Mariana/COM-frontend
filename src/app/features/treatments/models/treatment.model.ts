@@ -9,6 +9,7 @@ export interface Material {
 
 export interface Procedure {
   id: string;
+  ids: string[];
   name: string;
   type: string;
   startDate: string;

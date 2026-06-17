@@ -22,6 +22,7 @@ import { MaterialsTableComponent } from '../materials-table/materials-table.comp
 import { OdontogramGridComponent } from '../odontogram-grid/odontogram-grid.component';
 import { TreatmentService } from '../../services/treatment.service';
 import { ConfirmDeleteModalComponent } from '../../../../shared/components/feedback/confirm-delete-modal/confirm-delete-modal.component';
+import { Observable, forkJoin } from 'rxjs';
 
 const PROCEDURE_TYPES = [
   'Cirurgia',
@@ -183,14 +184,17 @@ interface ProcedureFormGroup {
               >
               <select
                 formControlName="type"
-                class="rounded-xl px-4 py-4.25 text-base outline-none transition"
-                style="background: #EEEEEE; font-family: Manrope, sans-serif; border: 2px solid transparent; appearance: none; cursor: pointer;"
+                class="rounded-xl px-4 py-4.25 text-base outline-none transition opacity-50 cursor-not-allowed"
+                style="background: #EEEEEE; font-family: Manrope, sans-serif; border: 2px solid transparent; appearance: none;"
               >
                 <option value="" disabled>Selecione o tipo</option>
                 @for (t of procedureTypes; track t) {
                   <option [value]="t">{{ t }}</option>
                 }
               </select>
+              <span class="text-[11px] text-[#78716C]" style="font-family: Manrope, sans-serif;">
+                Aguardando suporte do backend para salvar este campo.
+              </span>
             </div>
           </div>
 
@@ -295,7 +299,7 @@ interface ProcedureFormGroup {
                 <input
                   type="number"
                   min="1"
-                  class="w-10 bg-transparent py-4.25 text-center text-base font-semibold outline-none"
+                  class="w-10 bg-transparent py-4.25 text-center text-base font-semibold outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   style="font-family: Manrope, sans-serif;"
                   [value]="materialQty()"
                   (change)="onQtyInputChange($event)"
@@ -430,7 +434,7 @@ export class ProcedureFormComponent implements OnChanges {
 
   protected form: FormGroup<ProcedureFormGroup> = this.fb.group({
     name: this.fb.nonNullable.control('', Validators.required),
-    type: this.fb.nonNullable.control('', Validators.required),
+    type: this.fb.nonNullable.control({ value: '', disabled: true }),
     startDate: this.fb.nonNullable.control(''),
     endDate: this.fb.nonNullable.control(''),
     value: this.fb.nonNullable.control('', Validators.required),
@@ -530,25 +534,58 @@ export class ProcedureFormComponent implements OnChanges {
     const estimatedPrice = parseFloat(rawValue.replace(/\./g, '').replace(',', '.')) || 0;
     const description = this.form.controls.name.value;
     const status = API_STATUS[this.selectedStatus()];
-    const toothNumber = this.selectedTeeth()[0] ?? undefined;
+    const teeth = this.selectedTeeth();
+    const materials = this.materials();
 
     this.saving.set(true);
     this.saveError.set(null);
 
     const proc = this.existingProcedure();
-    const request$ = proc
-      ? this.treatmentService.updateProcedureItem(proc.id, {
+    let request$: Observable<unknown>;
+
+    if (proc) {
+      // Slots to save: at least 1 item (null tooth if none selected)
+      const newSlots: (number | undefined)[] = teeth.length > 0 ? teeth : [undefined];
+      const oldIds = proc.ids;
+
+      const updateCount = Math.min(oldIds.length, newSlots.length);
+      const updates = oldIds.slice(0, updateCount).map((id, i) =>
+        this.treatmentService.updateProcedureItem(id, {
+          description,
+          estimatedPrice,
+          status,
+          toothNumber: newSlots[i],
+          materials,
+        }),
+      );
+      const deletes = oldIds
+        .slice(updateCount)
+        .map((id) => this.treatmentService.deleteProcedureItem(id));
+      const creates = newSlots.slice(updateCount).map((toothNumber) =>
+        this.treatmentService.createProcedureItem(this.treatmentId(), {
           description,
           estimatedPrice,
           status,
           toothNumber,
-        })
-      : this.treatmentService.createProcedureItem(this.treatmentId(), {
-          description,
-          estimatedPrice,
-          status,
-          toothNumber,
-        });
+          materials,
+        }),
+      );
+
+      request$ = forkJoin([...updates, ...deletes, ...creates]);
+    } else {
+      const toothList = teeth.length > 0 ? teeth : [undefined];
+      request$ = forkJoin(
+        toothList.map((toothNumber) =>
+          this.treatmentService.createProcedureItem(this.treatmentId(), {
+            description,
+            estimatedPrice,
+            status,
+            toothNumber,
+            materials,
+          }),
+        ),
+      );
+    }
 
     request$.subscribe({
       next: () => {
@@ -570,7 +607,7 @@ export class ProcedureFormComponent implements OnChanges {
     const proc = this.existingProcedure();
     if (!proc) return;
     this.deleteConfirmOpen.set(false);
-    this.treatmentService.deleteProcedureItem(proc.id).subscribe({
+    forkJoin(proc.ids.map((id) => this.treatmentService.deleteProcedureItem(id))).subscribe({
       next: () => void this.router.navigate(['/treatments', this.patientId()]),
       error: () => this.saveError.set('Não foi possível excluir o procedimento. Tente novamente.'),
     });

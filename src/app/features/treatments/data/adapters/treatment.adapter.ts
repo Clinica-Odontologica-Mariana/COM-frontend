@@ -21,29 +21,44 @@ export function adaptTreatmentData(
   odontogramEntries: OdontogramEntryDto[],
   clinicalProcs: Record<string, ClinicalProcedureDto>,
 ): TreatmentData {
-  const procedures: Procedure[] = items.map((item) => {
-    const cp = item.procedureId ? clinicalProcs[item.procedureId] : null;
-    const status = fromApiStatus(item.status);
-    const teeth = item.toothNumber != null ? [item.toothNumber] : [];
+  // Group items that represent the same procedure (same description + status + price)
+  const groupMap = new Map<string, TreatmentPlanItemDto[]>();
+  for (const item of items) {
+    const key = `${item.description}|${item.status}|${item.estimatedPrice ?? 0}`;
+    if (!groupMap.has(key)) groupMap.set(key, []);
+    groupMap.get(key)!.push(item);
+  }
+
+  const procedures: Procedure[] = [...groupMap.values()].map((group) => {
+    const first = group[0];
+    const cp = first.procedureId ? clinicalProcs[first.procedureId] : null;
+    const status = fromApiStatus(first.status);
+    const teeth = group.map((i) => i.toothNumber).filter((t): t is number => t != null);
     return {
-      id: item.id,
-      name: cp?.name ?? item.description,
+      id: first.id,
+      ids: group.map((i) => i.id),
+      name: cp?.name ?? first.description,
       type: cp?.category ?? 'Outros',
-      startDate: fmtDate(item.createdAt),
-      endDate: fmtDate(item.completedAt),
-      value: item.estimatedPrice ?? 0,
+      startDate: fmtDate(first.createdAt),
+      endDate: fmtDate(first.completedAt),
+      value: first.estimatedPrice ?? 0,
       teeth,
-      materials: [],
+      materials: (first.materials ?? []).map((m) => ({
+        name: m.name,
+        category: m.category,
+        quantity: m.quantity,
+      })),
       status,
       subtitle: buildSubtitle(cp?.category ?? 'Outros', teeth),
     };
   });
 
-  const executed = procedures
-    .filter((p) => p.status === 'completed')
-    .reduce((sum, p) => sum + p.value, 0);
+  // Budget: sum all raw items (correct total, avoids grouping distortion)
+  const executed = items
+    .filter((i) => fromApiStatus(i.status) === 'completed')
+    .reduce((sum, i) => sum + (i.estimatedPrice ?? 0), 0);
 
-  const totalBudget = plan.totalAmount ?? procedures.reduce((sum, p) => sum + p.value, 0);
+  const totalBudget = plan.totalAmount ?? items.reduce((sum, i) => sum + (i.estimatedPrice ?? 0), 0);
 
   return {
     id: plan.id,

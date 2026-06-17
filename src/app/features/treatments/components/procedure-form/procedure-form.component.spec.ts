@@ -58,6 +58,7 @@ const mockItem: TreatmentPlanItemDto = {
 
 const existingProcedure: Procedure = {
   id: 'item-1',
+  ids: ['item-1'],
   name: 'Extração de Siso',
   type: 'Cirurgia',
   startDate: '01/01/2024',
