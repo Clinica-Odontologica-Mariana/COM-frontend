@@ -296,6 +296,17 @@ describe('TreatmentService', () => {
       const req = httpMock.expectOne('/api/v1/treatment-plans/items/item-1');
       expect(req.request.method).toBe('PUT');
       expect(req.request.body.status).toBe('APPROVED');
+      expect(req.request.body.description).toBe('Extração de Siso');
+      req.flush(null);
+
+      await result$;
+    });
+
+    it('sends null description when value is empty or whitespace', async () => {
+      const result$ = firstValueFrom(service.startProcedure('item-1', '   '));
+
+      const req = httpMock.expectOne('/api/v1/treatment-plans/items/item-1');
+      expect(req.request.body.description).toBeNull();
       req.flush(null);
 
       await result$;
@@ -305,7 +316,7 @@ describe('TreatmentService', () => {
   // ── updateNotes ─────────────────────────────────────────────────────────────
 
   describe('updateNotes', () => {
-    it('GETs the plan then PUTs with updated notes', async () => {
+    it('GETs the plan then PUTs with updated notes preserving all existing fields', async () => {
       const result$ = firstValueFrom(service.updateNotes('plan-1', 'Nova observação'));
 
       const getReq = httpMock.expectOne('/api/v1/treatment-plans/plan-1');
@@ -316,6 +327,8 @@ describe('TreatmentService', () => {
       expect(putReq.request.method).toBe('PUT');
       expect(putReq.request.body.notes).toBe('Nova observação');
       expect(putReq.request.body.title).toBe('Plano A');
+      expect(putReq.request.body.status).toBe('ACTIVE');
+      expect(putReq.request.body.totalAmount).toBe(500);
       putReq.flush(null);
 
       await result$;

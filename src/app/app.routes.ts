@@ -92,6 +92,7 @@ export const routes: Routes = [
   },
   {
     path: 'treatments',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/treatments/pages/treatments-list-page/treatments-list-page.component').then(
         (m) => m.TreatmentsListPageComponent,
@@ -99,6 +100,7 @@ export const routes: Routes = [
   },
   {
     path: 'treatments/:id/new',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/treatments/pages/create-procedure-page/create-procedure-page.component').then(
         (m) => m.CreateProcedurePageComponent,
@@ -106,6 +108,7 @@ export const routes: Routes = [
   },
   {
     path: 'treatments/:id/edit',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/treatments/pages/edit-procedure-page/edit-procedure-page.component').then(
         (m) => m.EditProcedurePageComponent,
@@ -113,6 +116,7 @@ export const routes: Routes = [
   },
   {
     path: 'treatments/:id',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/treatments/pages/management-page/management-page.component').then(
         (m) => m.TreatmentManagementPageComponent,

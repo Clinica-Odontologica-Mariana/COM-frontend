@@ -193,6 +193,8 @@ export class TreatmentService {
       switchMap((plan) =>
         this.http.put<void>(`${this.apiBase}/treatment-plans/${treatmentPlanId}`, {
           title: plan.title,
+          status: plan.status,
+          totalAmount: plan.totalAmount,
           notes,
         }),
       ),
@@ -206,7 +208,7 @@ export class TreatmentService {
   startProcedure(itemId: string, description: string): Observable<void> {
     return this.http.put<void>(`${this.apiBase}/treatment-plans/items/${itemId}`, {
       status: 'APPROVED',
-      description: description || ' ',
+      description: description?.trim() || null,
     });
   }
 
