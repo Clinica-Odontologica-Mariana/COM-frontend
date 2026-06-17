@@ -59,33 +59,8 @@ const MAX_PUBLIC_CERTIFICATES = 3;
         </div>
       </section>
 
-      <!-- TIMELINE -->
-      <section class="border-y border-[#EEE5E0] bg-white/70 px-6 py-16 lg:px-12">
-        <div class="mx-auto max-w-5xl text-center">
-          <h2 class="font-serif text-3xl text-[#8B574B] sm:text-4xl">Marcos de Carreira</h2>
-          <p class="mt-2 text-sm text-[#A29087]">A jornada contínua da Dra. Mariana</p>
-
-          <div class="mt-12 grid gap-6 md:grid-cols-3">
-            @for (item of timeline; track item.year) {
-              <div class="relative rounded-2xl bg-white px-6 py-8 shadow-sm ring-1 ring-[#F0E8E3]">
-                <div
-                  class="mx-auto mb-4 grid h-10 w-10 place-items-center rounded-full bg-[#8B574B] text-white"
-                >
-                  ✦
-                </div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#B49B91]">
-                  {{ item.year }}
-                </p>
-                <h3 class="mt-2 font-serif text-lg text-[#5E514B]">{{ item.title }}</h3>
-                <p class="mt-1 text-sm text-[#8F817A]">{{ item.place }}</p>
-              </div>
-            }
-          </div>
-        </div>
-      </section>
-
       <!-- CERTIFICATES -->
-      @if (certificatesLoading() || certificates().length > 0) {
+      @if (certificates().length > 0) {
         <section id="certificados" class="border-b border-[#EEE5E0] px-6 py-16 lg:px-12">
           <div class="mx-auto max-w-5xl">
             <div class="flex items-start justify-between gap-4">
@@ -103,38 +78,26 @@ const MAX_PUBLIC_CERTIFICATES = 3;
               }
             </div>
 
-            @if (certificatesLoading()) {
-              <div class="mt-10 grid gap-4 md:grid-cols-3">
-                @for (_ of [1, 2, 3]; track $index) {
-                  <div class="animate-pulse rounded-2xl bg-[#F0E8E3] p-6 shadow-sm">
-                    <div class="mb-3 h-3 w-20 rounded bg-[#DDD0CA]"></div>
-                    <div class="h-5 w-3/4 rounded bg-[#DDD0CA]"></div>
-                    <div class="mt-2 h-4 w-1/2 rounded bg-[#DDD0CA]"></div>
-                  </div>
-                }
-              </div>
-            } @else {
-              <div class="mt-10 grid gap-4 md:grid-cols-3">
-                @for (cert of certificates(); track cert.id) {
-                  <article
-                    class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#F0E8E3] transition hover:shadow-md"
+            <div class="mt-10 grid gap-4 md:grid-cols-3">
+              @for (cert of certificates(); track cert.id) {
+                <article
+                  class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#F0E8E3] transition hover:shadow-md"
+                >
+                  <span
+                    class="inline-block rounded-full bg-[#F5EDE8] px-3 py-1 text-xs font-semibold text-[#8B574B]"
                   >
-                    <span
-                      class="inline-block rounded-full bg-[#F5EDE8] px-3 py-1 text-xs font-semibold text-[#8B574B]"
-                    >
-                      {{ cert.certificateType }}
-                    </span>
-                    <h3 class="mt-3 font-serif text-lg text-[#5E514B]">{{ cert.title }}</h3>
-                    @if (cert.content) {
-                      <p class="mt-2 text-sm leading-6 text-[#8F817A]">{{ cert.content }}</p>
-                    }
-                    @if (cert.issuedAtFormatted) {
-                      <p class="mt-4 text-xs text-[#B49B91]">{{ cert.issuedAtFormatted }}</p>
-                    }
-                  </article>
-                }
-              </div>
-            }
+                    {{ cert.certificateType }}
+                  </span>
+                  <h3 class="mt-3 font-serif text-lg text-[#5E514B]">{{ cert.title }}</h3>
+                  @if (cert.content) {
+                    <p class="mt-2 text-sm leading-6 text-[#8F817A]">{{ cert.content }}</p>
+                  }
+                  @if (cert.issuedAtFormatted) {
+                    <p class="mt-4 text-xs text-[#B49B91]">{{ cert.issuedAtFormatted }}</p>
+                  }
+                </article>
+              }
+            </div>
           </div>
         </section>
       }
@@ -245,13 +208,6 @@ export class HomeComponent implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
 
   protected readonly certificates = signal<CertificateViewModel[]>([]);
-  protected readonly certificatesLoading = signal(false);
-
-  protected readonly timeline = [
-    { year: '2016', title: 'Graduada em Odontologia', place: 'UnB' },
-    { year: '2021', title: 'Especialização Estética', place: 'USP' },
-    { year: '2023', title: 'Consultoria Internacional', place: 'Portugal/Espanha' },
-  ];
 
   protected readonly philosophy = [
     {
@@ -285,15 +241,13 @@ export class HomeComponent implements OnInit {
     if (!this.authService.isTokenValid()) {
       return;
     }
-    this.certificatesLoading.set(true);
     this.certificateApi.getAll().subscribe({
       next: (dtos) => {
         const active = dtos.filter((d) => d.active && !d.revokedAt);
         this.certificates.set(adaptCertificates(active).slice(0, MAX_PUBLIC_CERTIFICATES));
-        this.certificatesLoading.set(false);
       },
       error: () => {
-        this.certificatesLoading.set(false);
+        /* mantém a seção oculta se a listagem falhar */
       },
     });
   }
