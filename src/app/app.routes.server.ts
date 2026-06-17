@@ -15,7 +15,7 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'locations',
-    renderMode: RenderMode.Prerender,
+    renderMode: RenderMode.Client,
   },
   {
     path: 'admin-access',
@@ -27,6 +27,14 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'clinics/new',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'panel',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'panel/history',
     renderMode: RenderMode.Client,
   },
   {
@@ -50,6 +58,18 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'patients/:id/edit',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'patients/:id/treatments',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'treatments',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'medical-records',
     renderMode: RenderMode.Client,
   },
@@ -58,11 +78,15 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
-    path: 'panel',
+    path: 'treatments/:id',
     renderMode: RenderMode.Client,
   },
   {
-    path: 'panel/history',
+    path: 'treatments/:id/new',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'treatments/:id/edit',
     renderMode: RenderMode.Client,
   },
   {

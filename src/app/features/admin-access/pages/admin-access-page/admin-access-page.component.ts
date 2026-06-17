@@ -66,7 +66,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                 class="text-2xl leading-relaxed italic xl:text-[2rem]"
                 style="font-family: 'Noto Serif', serif"
               >
-                “A precisão da odontologia com o acolhimento do ambiente humano.”
+                "A precisão da odontologia com o acolhimento do ambiente humano."
               </p>
               <div
                 class="space-y-1 text-sm font-semibold uppercase tracking-[0.28em] text-[#F8E8DE]/80"

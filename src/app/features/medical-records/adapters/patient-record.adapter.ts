@@ -30,7 +30,11 @@ export function adaptPatient(dto: PatientDTO): PatientView {
 }
 
 function stableAlertId(type: string, desc: string): string {
-  return `${type}-${desc.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)}`;
+  return `${type}-${desc
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40)}`;
 }
 
 export function adaptMedicalAlerts(record: MedicalRecordDTO): MedicalAlertView[] {
@@ -42,7 +46,12 @@ export function adaptMedicalAlerts(record: MedicalRecordDTO): MedicalAlertView[]
       .map((s) => s.trim())
       .filter(Boolean)
       .forEach((desc) => {
-        alerts.push({ id: stableAlertId('allergy', desc), description: desc, severity: 'HIGH', type: 'allergy' });
+        alerts.push({
+          id: stableAlertId('allergy', desc),
+          description: desc,
+          severity: 'HIGH',
+          type: 'allergy',
+        });
       });
   }
 
@@ -52,7 +61,12 @@ export function adaptMedicalAlerts(record: MedicalRecordDTO): MedicalAlertView[]
       .map((s) => s.trim())
       .filter(Boolean)
       .forEach((desc) => {
-        alerts.push({ id: stableAlertId('condition', desc), description: desc, severity: 'MEDIUM', type: 'condition' });
+        alerts.push({
+          id: stableAlertId('condition', desc),
+          description: desc,
+          severity: 'MEDIUM',
+          type: 'condition',
+        });
       });
   }
 
@@ -62,7 +76,12 @@ export function adaptMedicalAlerts(record: MedicalRecordDTO): MedicalAlertView[]
       .map((s) => s.trim())
       .filter(Boolean)
       .forEach((desc) => {
-        alerts.push({ id: stableAlertId('medication', desc), description: desc, severity: 'LOW', type: 'medication' });
+        alerts.push({
+          id: stableAlertId('medication', desc),
+          description: desc,
+          severity: 'LOW',
+          type: 'medication',
+        });
       });
   }
 
@@ -75,7 +94,8 @@ export function adaptTreatmentSummary(
 ): TreatmentSummaryView | null {
   if (!plans.length) return null;
 
-  const activePlan = plans.find((p) => p.status === 'ACTIVE' || p.status === 'IN_PROGRESS') ?? plans[0];
+  const activePlan =
+    plans.find((p) => p.status === 'ACTIVE' || p.status === 'IN_PROGRESS') ?? plans[0];
 
   const planItems = items.filter((i) => i.treatmentPlanId === activePlan.id);
   const total = planItems.length;

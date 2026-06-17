@@ -114,7 +114,7 @@ import { formatConsultationDate, formatCpf, getInitials } from '../../utils/form
                 <td colspan="6" class="px-8 py-16 text-center">
                   <p class="text-sm text-[#78716C]">Nenhum paciente encontrado.</p>
                   <a
-                    routerLink="/pacientes/new"
+                    routerLink="/patients/new"
                     class="mt-4 inline-block rounded-xl bg-[#7C5145] px-6 py-2 text-sm font-bold text-white shadow-lg shadow-[#7C5145]/20 transition hover:bg-[#6a453b]"
                   >
                     Cadastrar paciente

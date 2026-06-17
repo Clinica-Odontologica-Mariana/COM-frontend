@@ -75,11 +75,59 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'patients/:id/edit',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/patients/pages/edit-patient/edit-patient.component').then(
+        (m) => m.EditPatientComponent,
+      ),
+  },
+  {
+    path: 'patients/:id/treatments',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/medical-records/pages/patient-record-page/patient-record-page.component').then(
+        (m) => m.PatientRecordPageComponent,
+      ),
+  },
+  {
     path: 'pacientes/:id/editar',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/patients/pages/edit-patient/edit-patient.component').then(
         (m) => m.EditPatientComponent,
+      ),
+  },
+  {
+    path: 'treatments',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/treatments/pages/treatments-list-page/treatments-list-page.component').then(
+        (m) => m.TreatmentsListPageComponent,
+      ),
+  },
+  {
+    path: 'treatments/:id/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/treatments/pages/create-procedure-page/create-procedure-page.component').then(
+        (m) => m.CreateProcedurePageComponent,
+      ),
+  },
+  {
+    path: 'treatments/:id/edit',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/treatments/pages/edit-procedure-page/edit-procedure-page.component').then(
+        (m) => m.EditProcedurePageComponent,
+      ),
+  },
+  {
+    path: 'treatments/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/treatments/pages/management-page/management-page.component').then(
+        (m) => m.TreatmentManagementPageComponent,
       ),
   },
   {

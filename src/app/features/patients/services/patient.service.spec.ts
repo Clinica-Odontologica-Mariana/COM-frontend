@@ -20,7 +20,6 @@ const mockPatient: Patient = {
   continuousMedications: '',
   phone: '(61) 99843-9301',
   email: 'helena@exemplo.com',
-  whatsappReminders: false,
   address: { zipCode: '', street: '', neighborhood: '', city: '', state: '' },
 };
 

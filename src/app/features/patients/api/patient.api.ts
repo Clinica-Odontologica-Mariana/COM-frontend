@@ -180,7 +180,7 @@ export class PatientApi {
     }).pipe(
       switchMap(({ patient, record }) =>
         this.medicalRecordApi
-          .updateMedicalRecord(record.id, toMedicalBody(dto))
+          .updateMedicalRecord(record.id, { ...toMedicalBody(dto), allergies: record.allergies ?? null })
           .pipe(map((updated) => toPatient(patient, updated))),
       ),
     );

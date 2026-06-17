@@ -34,14 +34,14 @@ describe('AppointmentService', () => {
 
   it('creates and deletes appointment', async () => {
     const created = await firstValueFrom(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       service.create({
         patientId: 'p1',
-        procedure: 'limpeza',
-        location: 'asa_sul',
+        procedureId: null,
         date: toIsoDate(new Date()),
         startTime: '10:00',
         endTime: '11:00',
-      }),
+      } as any),
     );
     expect(created.id).toBeTruthy();
 
