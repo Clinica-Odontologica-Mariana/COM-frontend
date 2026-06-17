@@ -15,7 +15,7 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'locations',
-    renderMode: RenderMode.Prerender,
+    renderMode: RenderMode.Client,
   },
   {
     path: 'admin-access',
