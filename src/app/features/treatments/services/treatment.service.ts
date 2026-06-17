@@ -11,8 +11,7 @@ import {
   TreatmentPlanItemDto,
 } from '../data/dto/treatment-plan.dto';
 import { ApiResponse } from '../../../core/models/api-response.model';
-
-const API_BASE = '/api/v1';
+import { API_BASE_URL } from '../../../core/config/api.config';
 
 const API_STATUS: Record<ProcedureStatus, string> = {
   pending: 'PENDING',
@@ -47,10 +46,11 @@ function unwrap<T>(source: Observable<ApiResponse<T>>): Observable<T> {
 @Injectable({ providedIn: 'root' })
 export class TreatmentService {
   private http = inject(HttpClient);
+  private readonly apiBase = inject(API_BASE_URL);
 
   getTreatmentList(): Observable<TreatmentListItem[]> {
     return unwrap(
-      this.http.get<ApiResponse<PatientPageDto>>(`${API_BASE}/patients`, {
+      this.http.get<ApiResponse<PatientPageDto>>(`${this.apiBase}/patients`, {
         params: { size: '200', page: '0' },
       }),
     ).pipe(
@@ -62,7 +62,7 @@ export class TreatmentService {
           patients.map((patient) =>
             unwrap(
               this.http.get<ApiResponse<TreatmentPlanDto[]>>(
-                `${API_BASE}/treatment-plans/by-patient/${patient.id}`,
+                `${this.apiBase}/treatment-plans/by-patient/${patient.id}`,
               ),
             ).pipe(
               switchMap((plans) => {
@@ -71,7 +71,7 @@ export class TreatmentService {
                   plans.map((plan) =>
                     unwrap(
                       this.http.get<ApiResponse<TreatmentPlanItemDto[]>>(
-                        `${API_BASE}/treatment-plans/${plan.id}/items`,
+                        `${this.apiBase}/treatment-plans/${plan.id}/items`,
                       ),
                     ).pipe(
                       map(
@@ -117,12 +117,12 @@ export class TreatmentService {
     return forkJoin({
       plan: unwrap(
         this.http.get<ApiResponse<TreatmentPlanDto>>(
-          `${API_BASE}/treatment-plans/${treatmentPlanId}`,
+          `${this.apiBase}/treatment-plans/${treatmentPlanId}`,
         ),
       ),
       items: unwrap(
         this.http.get<ApiResponse<TreatmentPlanItemDto[]>>(
-          `${API_BASE}/treatment-plans/${treatmentPlanId}/items`,
+          `${this.apiBase}/treatment-plans/${treatmentPlanId}/items`,
         ),
       ),
     }).pipe(
@@ -137,7 +137,7 @@ export class TreatmentService {
                 procedureIds.map((id) =>
                   unwrap(
                     this.http.get<ApiResponse<ClinicalProcedureDto>>(
-                      `${API_BASE}/clinical-procedures/${id}`,
+                      `${this.apiBase}/clinical-procedures/${id}`,
                     ),
                   ).pipe(catchError(() => of(null))),
                 ),
@@ -154,16 +154,16 @@ export class TreatmentService {
 
         return forkJoin({
           patient: unwrap(
-            this.http.get<ApiResponse<PatientDto>>(`${API_BASE}/patients/${plan.patientId}`),
+            this.http.get<ApiResponse<PatientDto>>(`${this.apiBase}/patients/${plan.patientId}`),
           ).pipe(catchError(() => of(null))),
           medicalRecord: unwrap(
             this.http.get<ApiResponse<never>>(
-              `${API_BASE}/medical-records/by-patient/${plan.patientId}`,
+              `${this.apiBase}/medical-records/by-patient/${plan.patientId}`,
             ),
           ).pipe(catchError(() => of(null))),
           odontogramEntries: unwrap(
             this.http.get<ApiResponse<OdontogramEntryDto[]>>(
-              `${API_BASE}/odontogram-entries/by-patient/${plan.patientId}`,
+              `${this.apiBase}/odontogram-entries/by-patient/${plan.patientId}`,
             ),
           ).pipe(catchError(() => of([]))),
           clinicalProcs: clinicalProcs$,
@@ -187,11 +187,11 @@ export class TreatmentService {
   updateNotes(treatmentPlanId: string, notes: string): Observable<void> {
     return unwrap(
       this.http.get<ApiResponse<TreatmentPlanDto>>(
-        `${API_BASE}/treatment-plans/${treatmentPlanId}`,
+        `${this.apiBase}/treatment-plans/${treatmentPlanId}`,
       ),
     ).pipe(
       switchMap((plan) =>
-        this.http.put<void>(`${API_BASE}/treatment-plans/${treatmentPlanId}`, {
+        this.http.put<void>(`${this.apiBase}/treatment-plans/${treatmentPlanId}`, {
           title: plan.title,
           notes,
         }),
@@ -200,11 +200,11 @@ export class TreatmentService {
   }
 
   completeProcedure(itemId: string): Observable<void> {
-    return this.http.patch<void>(`${API_BASE}/treatment-plans/items/${itemId}/complete`, {});
+    return this.http.patch<void>(`${this.apiBase}/treatment-plans/items/${itemId}/complete`, {});
   }
 
   startProcedure(itemId: string, description: string): Observable<void> {
-    return this.http.put<void>(`${API_BASE}/treatment-plans/items/${itemId}`, {
+    return this.http.put<void>(`${this.apiBase}/treatment-plans/items/${itemId}`, {
       status: 'APPROVED',
       description: description || ' ',
     });
@@ -221,7 +221,7 @@ export class TreatmentService {
   ): Observable<TreatmentPlanItemDto> {
     return unwrap(
       this.http.post<ApiResponse<TreatmentPlanItemDto>>(
-        `${API_BASE}/treatment-plans/${planId}/items`,
+        `${this.apiBase}/treatment-plans/${planId}/items`,
         {
           description: data.description,
           estimatedPrice: data.estimatedPrice ?? 0,
@@ -243,7 +243,7 @@ export class TreatmentService {
   ): Observable<TreatmentPlanItemDto> {
     return unwrap(
       this.http.put<ApiResponse<TreatmentPlanItemDto>>(
-        `${API_BASE}/treatment-plans/items/${itemId}`,
+        `${this.apiBase}/treatment-plans/items/${itemId}`,
         {
           description: data.description,
           estimatedPrice: data.estimatedPrice ?? 0,
@@ -255,13 +255,13 @@ export class TreatmentService {
   }
 
   deleteProcedureItem(itemId: string): Observable<void> {
-    return this.http.delete<void>(`${API_BASE}/treatment-plans/items/${itemId}`);
+    return this.http.delete<void>(`${this.apiBase}/treatment-plans/items/${itemId}`);
   }
 
   getTreatmentByPatient(patientId: string): Observable<TreatmentData> {
     return unwrap(
       this.http.get<ApiResponse<TreatmentPlanDto[]>>(
-        `${API_BASE}/treatment-plans/by-patient/${patientId}`,
+        `${this.apiBase}/treatment-plans/by-patient/${patientId}`,
       ),
     ).pipe(
       switchMap((plans) => {

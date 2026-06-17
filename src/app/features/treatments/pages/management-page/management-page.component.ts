@@ -16,6 +16,7 @@ import { JourneyTrackerComponent } from '../../components/journey-tracker/journe
 import { OdontogramGridComponent } from '../../components/odontogram-grid/odontogram-grid.component';
 import { ProcedureCardComponent } from '../../components/procedure-card/procedure-card.component';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
+import { ToastService } from '../../../../core/services/toast.service';
 
 type ConfirmType = 'complete' | 'start';
 
@@ -434,6 +435,7 @@ export class TreatmentManagementPageComponent implements OnInit {
   private location = inject(Location);
   private treatmentService = inject(TreatmentService);
   private platformId = inject(PLATFORM_ID);
+  private readonly toast = inject(ToastService);
 
   protected id = computed(() => this.route.snapshot.paramMap.get('id') ?? '');
 
@@ -507,7 +509,8 @@ export class TreatmentManagementPageComponent implements OnInit {
     this.showNotesDialog.set(false);
     this.treatmentService.updateNotes(this._data()!.id, notes).subscribe({
       error: () => {
-        // Notes saved locally; a background sync failure is non-critical
+        // Notes saved locally; warn that the background sync failed
+        this.toast.error('Não foi possível salvar as anotações no servidor.');
       },
     });
   }
@@ -547,7 +550,10 @@ export class TreatmentManagementPageComponent implements OnInit {
       return { ...t, procedures: updatedProcs, executed, toPay: t.totalBudget - executed };
     });
     this.treatmentService.completeProcedure(proc.id).subscribe({
-      error: () => this.load(),
+      error: () => {
+        this.toast.error('Não foi possível concluir o procedimento. Recarregando os dados.');
+        this.load();
+      },
     });
   }
 
@@ -561,7 +567,10 @@ export class TreatmentManagementPageComponent implements OnInit {
       return { ...t, procedures: updatedProcs };
     });
     this.treatmentService.startProcedure(proc.id, proc.name).subscribe({
-      error: () => this.load(),
+      error: () => {
+        this.toast.error('Não foi possível iniciar o procedimento. Recarregando os dados.');
+        this.load();
+      },
     });
   }
 }
