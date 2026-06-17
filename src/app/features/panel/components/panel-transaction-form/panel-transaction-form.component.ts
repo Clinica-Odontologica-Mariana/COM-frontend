@@ -365,7 +365,7 @@ export class TransactionFormModalComponent implements OnChanges {
     tStatus = statusMap[tStatus] || tStatus;
 
     const val = Math.abs(data.amount || data.value || 0);
-    const amountStr = val.toLocaleString('pr-BR', {
+    const amountStr = val.toLocaleString('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });

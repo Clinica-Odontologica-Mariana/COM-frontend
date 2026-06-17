@@ -61,7 +61,6 @@ import { ClinicSummaryDto } from '../../api/financial-transactions.api';
             <option value="Concluído">Concluído</option>
             <option value="Pago">Pago</option>
             <option value="Pendente">Pendente</option>
-            <option value="Cancelado">Cancelado</option>
           </select>
         </label>
 
