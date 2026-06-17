@@ -20,6 +20,7 @@ const ALL_TEETH = [...UPPER_ARCH, ...LOWER_ARCH];
 
 const makeProcedure = (o: Partial<Procedure> = {}): Procedure => ({
   id: 'proc-1',
+  ids: ['proc-1'],
   name: 'Extração',
   type: 'Cirurgia',
   startDate: '01/01/2024',

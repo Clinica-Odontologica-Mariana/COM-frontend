@@ -147,7 +147,9 @@ describe('TreatmentService', () => {
       httpMock.expectOne('/api/v1/odontogram-entries/by-patient/pat-1').flush(wrap([]));
 
       const data = await result$;
-      expect(data.procedures).toHaveLength(2);
+      // itens com mesma descrição/status/preço são agrupados num único Procedure
+      expect(data.procedures).toHaveLength(1);
+      expect(data.procedures[0].ids).toEqual(['item-1', 'item-2']);
     });
   });
 

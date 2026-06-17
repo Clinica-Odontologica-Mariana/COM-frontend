@@ -161,6 +161,7 @@ describe('ProcedureFormComponent', () => {
         estimatedPrice: 100,
         status: 'APPROVED',
         toothNumber: undefined,
+        materials: [],
       });
     });
 
