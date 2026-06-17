@@ -8,6 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../../../core/services/toast.service';
 import {
   BreadcrumbItem,
@@ -44,6 +45,7 @@ interface PatientFormControls {
   email: FormControl<string>;
   zipCode: FormControl<string>;
   street: FormControl<string>;
+  streetNumber: FormControl<string>;
   neighborhood: FormControl<string>;
   city: FormControl<string>;
   state: FormControl<string>;
@@ -56,7 +58,7 @@ interface PatientFormControls {
     <div class="min-h-full pb-12">
       <app-patient-page-header [title]="pageTitle()" [breadcrumbs]="breadcrumbs()">
         <a
-          routerLink="/pacientes"
+          routerLink="/patients"
           class="rounded-xl px-6 py-2 text-base font-bold text-[#78716C] transition hover:bg-[#F5F5F4]"
         >
           Cancelar
@@ -123,6 +125,8 @@ interface PatientFormControls {
                     id="cpf"
                     type="text"
                     formControlName="cpf"
+                    inputmode="numeric"
+                    maxlength="14"
                     class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
                     placeholder="000.000.000-00"
                     (input)="onCpfInput($event)"
@@ -463,25 +467,55 @@ interface PatientFormControls {
                     id="zipCode"
                     type="text"
                     formControlName="zipCode"
+                    inputmode="numeric"
+                    maxlength="9"
                     class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
                     placeholder="00000-000"
                     (input)="onZipCodeInput($event)"
                   />
                 </div>
-                <div class="space-y-1">
-                  <label
-                    for="street"
-                    class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
-                  >
-                    Logradouro
-                  </label>
-                  <input
-                    id="street"
-                    type="text"
-                    formControlName="street"
-                    class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
-                    placeholder="Rua, Avenida, Praça..."
-                  />
+                <div class="grid gap-4 sm:grid-cols-[1fr_120px]">
+                  <div class="space-y-1">
+                    <label
+                      for="street"
+                      class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                    >
+                      Logradouro
+                    </label>
+                    <div class="relative">
+                      <input
+                        id="street"
+                        type="text"
+                        formControlName="street"
+                        class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none transition-opacity"
+                        [class.opacity-50]="loadingCep()"
+                        placeholder="Rua, Avenida, Praça..."
+                      />
+                      @if (loadingCep()) {
+                        <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                          <svg class="h-4 w-4 animate-spin text-[#7C5145]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+                          </svg>
+                        </span>
+                      }
+                    </div>
+                  </div>
+                  <div class="space-y-1">
+                    <label
+                      for="streetNumber"
+                      class="px-1 text-xs font-bold uppercase tracking-wide text-[#78716C]"
+                    >
+                      Número
+                    </label>
+                    <input
+                      id="streetNumber"
+                      type="text"
+                      formControlName="streetNumber"
+                      class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
+                      placeholder="Nº"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -497,7 +531,8 @@ interface PatientFormControls {
                     id="neighborhood"
                     type="text"
                     formControlName="neighborhood"
-                    class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
+                    class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none transition-opacity"
+                    [class.opacity-50]="loadingCep()"
                     placeholder="Nome do bairro"
                   />
                 </div>
@@ -512,7 +547,8 @@ interface PatientFormControls {
                     id="city"
                     type="text"
                     formControlName="city"
-                    class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none"
+                    class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-base outline-none transition-opacity"
+                    [class.opacity-50]="loadingCep()"
                     placeholder="São Paulo"
                   />
                 </div>
@@ -528,7 +564,8 @@ interface PatientFormControls {
                     type="text"
                     formControlName="state"
                     maxlength="2"
-                    class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-center text-base uppercase outline-none"
+                    class="h-14 w-full rounded-xl bg-[#EEEEEE] px-4 text-center text-base uppercase outline-none transition-opacity"
+                    [class.opacity-50]="loadingCep()"
                     placeholder="SP"
                   />
                 </div>
@@ -548,6 +585,7 @@ export class PatientFormPageComponent {
   private readonly patientService = inject(PatientService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toast = inject(ToastService);
+  private readonly http = inject(HttpClient);
 
   private static readonly ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png'];
 
@@ -560,10 +598,11 @@ export class PatientFormPageComponent {
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
+  protected readonly loadingCep = signal(false);
   protected readonly photoPreview = signal<string | undefined>(undefined);
   protected readonly pageTitle = signal('Novo Paciente');
   protected readonly breadcrumbs = signal<BreadcrumbItem[]>([
-    { label: 'Pacientes', link: '/pacientes' },
+    { label: 'Pacientes', link: '/patients' },
     { label: 'Novo Cadastro' },
   ]);
 
@@ -585,6 +624,7 @@ export class PatientFormPageComponent {
     email: this.fb.nonNullable.control('', Validators.email),
     zipCode: this.fb.nonNullable.control(''),
     street: this.fb.nonNullable.control(''),
+    streetNumber: this.fb.nonNullable.control(''),
     neighborhood: this.fb.nonNullable.control(''),
     city: this.fb.nonNullable.control(''),
     state: this.fb.nonNullable.control(''),
@@ -598,7 +638,7 @@ export class PatientFormPageComponent {
       this.patientId = id;
       this.pageTitle.set('Editar Paciente');
       this.breadcrumbs.set([
-        { label: 'Pacientes', link: '/pacientes' },
+        { label: 'Pacientes', link: '/patients' },
         { label: 'Editar Cadastro' },
       ]);
       this.loadPatient(id);
@@ -607,17 +647,51 @@ export class PatientFormPageComponent {
 
   protected onCpfInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.form.controls.cpf.setValue(formatCpf(input.value));
+    const formatted = formatCpf(input.value);
+    input.value = formatted;
+    this.form.controls.cpf.setValue(formatted, { emitEvent: false });
   }
 
   protected onPhoneInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.form.controls.phone.setValue(formatPhone(input.value));
+    const formatted = formatPhone(input.value);
+    input.value = formatted;
+    this.form.controls.phone.setValue(formatted, { emitEvent: false });
   }
 
   protected onZipCodeInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.form.controls.zipCode.setValue(formatZipCode(input.value));
+    const formatted = formatZipCode(input.value);
+    input.value = formatted;
+    this.form.controls.zipCode.setValue(formatted, { emitEvent: false });
+
+    const digits = formatted.replace(/\D/g, '');
+    if (digits.length === 8) {
+      this.fetchAddressByZipCode(digits);
+    }
+  }
+
+  private fetchAddressByZipCode(cep: string): void {
+    this.loadingCep.set(true);
+    this.http
+      .get<{ logradouro: string; bairro: string; localidade: string; uf: string; erro?: boolean }>(
+        `https://viacep.com.br/ws/${cep}/json/`,
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.loadingCep.set(false);
+          if (!data.erro) {
+            this.form.patchValue({
+              street: data.logradouro,
+              neighborhood: data.bairro,
+              city: data.localidade,
+              state: data.uf,
+            });
+          }
+        },
+        error: () => this.loadingCep.set(false),
+      });
   }
 
   protected isConditionSelected(condition: HealthCondition): boolean {
@@ -680,7 +754,7 @@ export class PatientFormPageComponent {
         this.toast.success(
           this.patientId ? 'Paciente atualizado com sucesso.' : 'Paciente cadastrado com sucesso.',
         );
-        void this.router.navigate(['/pacientes']);
+        void this.router.navigate(['/patients']);
       },
       error: () => {
         this.saving.set(false);
@@ -696,19 +770,25 @@ export class PatientFormPageComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (patient) => {
+          const rawStreet = patient.address.street ?? '';
+          const commaIdx = rawStreet.indexOf(', ');
+          const streetBase = commaIdx !== -1 ? rawStreet.slice(0, commaIdx) : rawStreet;
+          const streetNumber = commaIdx !== -1 ? rawStreet.slice(commaIdx + 2) : '';
+
           this.form.patchValue({
             fullName: patient.fullName,
-            cpf: patient.cpf,
+            cpf: formatCpf(patient.cpf ?? ''),
             birthDate: patient.birthDate,
             profession: patient.profession,
             gender: patient.gender,
             status: patient.status,
             chiefComplaint: patient.chiefComplaint,
             continuousMedications: patient.continuousMedications,
-            phone: patient.phone,
+            phone: formatPhone(patient.phone ?? ''),
             email: patient.email,
-            zipCode: patient.address.zipCode,
-            street: patient.address.street,
+            zipCode: formatZipCode(patient.address.zipCode ?? ''),
+            street: streetBase,
+            streetNumber,
             neighborhood: patient.address.neighborhood,
             city: patient.address.city,
             state: patient.address.state,
@@ -719,7 +799,7 @@ export class PatientFormPageComponent {
         },
         error: () => {
           this.loading.set(false);
-          void this.router.navigate(['/pacientes']);
+          void this.router.navigate(['/patients']);
         },
       });
   }
@@ -741,7 +821,7 @@ export class PatientFormPageComponent {
       email: value.email,
       address: {
         zipCode: value.zipCode,
-        street: value.street,
+        street: value.streetNumber ? `${value.street}, ${value.streetNumber}` : value.street,
         neighborhood: value.neighborhood,
         city: value.city,
         state: value.state,

@@ -50,11 +50,35 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'patients/:id/edit',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'patients/:id/treatments',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'treatments',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'medical-records',
     renderMode: RenderMode.Client,
   },
   {
     path: 'medical-records/:id',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'treatments/:id',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'treatments/:id/new',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'treatments/:id/edit',
     renderMode: RenderMode.Client,
   },
   {

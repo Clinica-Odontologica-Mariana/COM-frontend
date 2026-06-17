@@ -20,7 +20,7 @@ function isAssetRequest(pathname: string): boolean {
 
 app.get('/env.js', (_req, res) => {
   res.type('application/javascript');
-  res.send(`window.__env = ${JSON.stringify({ API_BASE_URL: apiTarget })};`);
+  res.send(`window.__env = {};`);
 });
 
 app.use('/api/v1', express.raw({ type: '*/*' }), async (req, res, next) => {
