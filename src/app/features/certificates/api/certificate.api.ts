@@ -11,17 +11,26 @@ function unwrap<T>(source: Observable<ApiResponse<T>>): Observable<T> {
   return source.pipe(map((res) => res.data));
 }
 
+interface PageDto<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number; // 0-indexed
+  size: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CertificateApi {
   private readonly http = inject(HttpClient);
   private readonly base = inject(API_BASE_URL);
 
   getAll(): Observable<CertificateDto[]> {
-    return unwrap(
-      this.http.get<ApiResponse<CertificateDto[]>>(`${this.base}/certificates`, {
+    return this.http
+      .get<ApiResponse<PageDto<CertificateDto>>>(`${this.base}/certificates`, {
         context: new HttpContext().set(SUPPRESS_ERROR_TOAST, true),
-      }),
-    );
+        params: { size: '200', page: '0' },
+      })
+      .pipe(map((res) => res.data.content));
   }
 
   getById(id: string): Observable<CertificateDto> {

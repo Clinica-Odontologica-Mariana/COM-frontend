@@ -43,16 +43,17 @@ describe('CertificateApi', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('getByPatient sends GET to /certificates/by-patient/{patientId}', () => {
+  it('getAll sends GET to /certificates and unwraps the page content', () => {
     const dtos = [makeCertDto()];
-    api.getByPatient('patient-1').subscribe((res) => {
+    api.getAll().subscribe((res) => {
       expect(res).toHaveLength(1);
       expect(res[0].id).toBe('cert-1');
     });
 
-    const req = httpMock.expectOne(`${BASE}/certificates/by-patient/patient-1`);
+    const req = httpMock.expectOne((r) => r.url === `${BASE}/certificates`);
     expect(req.request.method).toBe('GET');
-    req.flush(wrap(dtos));
+    expect(req.request.params.get('size')).toBe('200');
+    req.flush(wrap({ content: dtos, totalElements: 1, totalPages: 1, number: 0, size: 200 }));
   });
 
   it('getById sends GET to /certificates/{id}', () => {
@@ -66,7 +67,7 @@ describe('CertificateApi', () => {
   });
 
   it('create sends POST to /certificates with body', () => {
-    const createDto = { patientId: 'patient-1', title: 'Novo', certificateType: 'Extensão' };
+    const createDto = { title: 'Novo', certificateType: 'Extensão' };
     api.create(createDto).subscribe((res) => {
       expect(res.id).toBe('cert-1');
     });
@@ -101,11 +102,11 @@ describe('CertificateApi', () => {
 
   it('propagates HTTP errors as thrown Errors', () => {
     let errorMsg = '';
-    api.getByPatient('bad-id').subscribe({
+    api.getById('bad-id').subscribe({
       error: (err: Error) => (errorMsg = err.message),
     });
 
-    const req = httpMock.expectOne(`${BASE}/certificates/by-patient/bad-id`);
+    const req = httpMock.expectOne(`${BASE}/certificates/bad-id`);
     req.flush({ message: 'Not found' }, { status: 404, statusText: 'Not Found' });
     expect(errorMsg).toBeTruthy();
   });

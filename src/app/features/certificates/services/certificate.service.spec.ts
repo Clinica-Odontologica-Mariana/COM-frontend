@@ -24,7 +24,7 @@ const makeCertDto = (overrides: Partial<CertificateDto> = {}): CertificateDto =>
 
 function createApiMock() {
   return {
-    getByPatient: vi.fn().mockReturnValue(of([makeCertDto()])),
+    getAll: vi.fn().mockReturnValue(of([makeCertDto()])),
     getById: vi.fn().mockReturnValue(of(makeCertDto())),
     create: vi.fn().mockReturnValue(of(makeCertDto({ id: 'new-cert' }))),
     update: vi.fn().mockReturnValue(of(makeCertDto({ title: 'Atualizado' }))),
@@ -64,10 +64,10 @@ describe('CertificateService', () => {
   });
 
   it('load: sets error and clears loading on API failure', () => {
-    api.getByPatient.mockReturnValue(throwError(() => new Error('Network error')));
+    api.getAll.mockReturnValue(throwError(() => new Error('Network error')));
     service.load();
     expect(service.loading()).toBe(false);
-    expect(service.error()).toBe('Network error');
+    expect(service.error()).toBe('Não foi possível carregar os certificados.');
     expect(service.certificates()).toHaveLength(0);
   });
 
@@ -77,7 +77,7 @@ describe('CertificateService', () => {
 
     let emitted = false;
     service
-      .create({ patientId: 'p1', title: 'Novo', certificateType: 'Extensão' })
+      .create({ title: 'Novo', certificateType: 'Extensão' })
       .subscribe((vm) => {
         emitted = true;
         expect(vm.id).toBe('new-cert');
@@ -91,7 +91,7 @@ describe('CertificateService', () => {
 
   it('create: sets error on API failure', () => {
     api.create.mockReturnValue(throwError(() => new Error('Create failed')));
-    service.create({ patientId: 'p1', title: 'X', certificateType: 'Y' }).subscribe({
+    service.create({ title: 'X', certificateType: 'Y' }).subscribe({
       error: () => {},
     });
     expect(service.error()).toBe('Create failed');
@@ -130,9 +130,9 @@ describe('CertificateService', () => {
   });
 
   it('clearError: resets the error signal to null', () => {
-    api.getByPatient.mockReturnValue(throwError(() => new Error('fail')));
+    api.getAll.mockReturnValue(throwError(() => new Error('fail')));
     service.load();
-    expect(service.error()).toBe('fail');
+    expect(service.error()).toBe('Não foi possível carregar os certificados.');
 
     service.clearError();
     expect(service.error()).toBeNull();

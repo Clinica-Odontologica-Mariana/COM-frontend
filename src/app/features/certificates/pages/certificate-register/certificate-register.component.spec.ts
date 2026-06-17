@@ -83,7 +83,6 @@ describe('CertificateRegisterPageComponent', () => {
 
     expect(serviceMock.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        patientId: 'patient-1',
         title: 'Novo Certificado',
         certificateType: 'Extensão',
         content: 'Descrição',
