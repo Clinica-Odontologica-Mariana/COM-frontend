@@ -74,25 +74,39 @@ export class PatientRecordFacade {
             plans: this.api.getTreatmentPlans(patientId).pipe(catchError(() => of([]))),
           }).pipe(
             switchMap(({ patient, record, notes, attachments, plans }) => {
-              const firstPlan: TreatmentPlanDTO | null = plans.length ? plans[0] : null;
-              const itemsRequest = firstPlan
-                ? this.api.getTreatmentPlanItems(firstPlan.id).pipe(catchError(() => of([])))
-                : of<TreatmentPlanItemDTO[]>([]);
+              const ensurePlan$ =
+                plans.length === 0 && record
+                  ? this.api.createTreatmentPlan(patientId, record.id).pipe(
+                      map((newPlan) => [newPlan]),
+                      catchError(() => of([] as TreatmentPlanDTO[])),
+                    )
+                  : of(plans);
 
-              return itemsRequest.pipe(
-                tap((items) => {
-                  this.patchState({
-                    patient: patient ? adaptPatient(patient) : null,
-                    medicalRecord: record,
-                    alerts: record ? adaptMedicalAlerts(record) : [],
-                    treatmentSummary: adaptTreatmentSummary(plans, items),
-                    lastVisit: adaptLastVisit(notes),
-                    balance: adaptBalance(plans),
-                    notes: adaptNotes(notes),
-                    attachments: adaptAttachments(attachments),
-                    procedures: adaptProcedures(items),
-                    loading: false,
-                  });
+              return ensurePlan$.pipe(
+                switchMap((resolvedPlans) => {
+                  const firstPlan: TreatmentPlanDTO | null = resolvedPlans.length ? resolvedPlans[0] : null;
+                  const itemsRequest = firstPlan
+                    ? this.api.getTreatmentPlanItems(firstPlan.id).pipe(catchError(() => of([])))
+                    : of<TreatmentPlanItemDTO[]>([]);
+
+                  return itemsRequest.pipe(
+                    tap((items) => {
+                      this.patchState({
+                        patient: patient ? adaptPatient(patient) : null,
+                        medicalRecord: record,
+                        alerts: record ? adaptMedicalAlerts(record) : [],
+                        treatmentSummary: adaptTreatmentSummary(resolvedPlans, items),
+                        lastVisit: adaptLastVisit(notes),
+                        balance: adaptBalance(resolvedPlans, items),
+                        notes: adaptNotes(notes),
+                        attachments: adaptAttachments(attachments),
+                        procedures: adaptProcedures(items),
+                        loading: false,
+                      });
+
+                      this.loadImageUrls(patientId, attachments);
+                    }),
+                  );
                 }),
               );
             }),
@@ -120,6 +134,20 @@ export class PatientRecordFacade {
     );
   }
 
+  updateNote(patientId: string, noteId: string, payload: MedicalRecordNoteCreateDTO): Observable<ClinicalNoteView> {
+    this.patchState({ savingNote: true });
+    return this.api.updateNote(patientId, noteId, payload).pipe(
+      map((dto) => {
+        const [updated] = adaptNotes([dto]);
+        this.patchState({
+          notes: this.state().notes.map((n) => (n.id === noteId ? updated : n)),
+        });
+        return updated;
+      }),
+      finalize(() => this.patchState({ savingNote: false })),
+    );
+  }
+
   deleteNote(patientId: string, noteId: string): Observable<void> {
     return this.api.deleteNote(patientId, noteId).pipe(
       tap(() => {
@@ -138,8 +166,58 @@ export class PatientRecordFacade {
     );
   }
 
-  addAttachment(attachment: AttachmentView): void {
-    this.patchState({ attachments: [attachment, ...this.state().attachments] });
+  uploadAttachment(patientId: string, file: File): Observable<AttachmentView> {
+    this.patchState({ uploadingAttachment: true });
+    return this.api.uploadAndCreateAttachment(patientId, file).pipe(
+      map(({ dto, imageUrl }) => {
+        const urlMap = imageUrl
+          ? new Map<string, string>([[dto.storedFileId, imageUrl]])
+          : new Map<string, string>();
+        const [view] = adaptAttachments([dto], urlMap);
+        this.patchState({ attachments: [view, ...this.state().attachments] });
+        return view;
+      }),
+      finalize(() => this.patchState({ uploadingAttachment: false })),
+    );
+  }
+
+  private loadImageUrls(patientId: string, attachments: { storedFileId: string; mimeType: string }[]): void {
+    const imageAttachments = attachments.filter((a) => a.mimeType?.startsWith('image/'));
+    if (!imageAttachments.length) return;
+
+    this.api
+      .getOdontogramFilesForPatient(patientId)
+      .pipe(
+        switchMap((odontogramFiles) => {
+          const odontogramFileMap = new Map(odontogramFiles.map((f) => [f.file.id, f.id]));
+          return forkJoin(
+            imageAttachments.map((att) => {
+              const oId = odontogramFileMap.get(att.storedFileId);
+              if (!oId) return of(null as string | null);
+              return this.api
+                .getOdontogramFileDownloadUrl(oId)
+                .pipe(catchError(() => of(null as string | null)));
+            }),
+          ).pipe(
+            map((imageUrls) => {
+              const urlMap = new Map<string, string>();
+              imageAttachments.forEach((att, i) => {
+                const url = imageUrls[i];
+                if (url) urlMap.set(att.storedFileId, url);
+              });
+              return urlMap;
+            }),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((urlMap) => {
+        const updated = this.state().attachments.map((att) => ({
+          ...att,
+          imageUrl: urlMap.get(att.storedFileId) ?? att.imageUrl,
+        }));
+        this.patchState({ attachments: updated });
+      });
   }
 
   private patchState(patch: Partial<PatientRecordState>): void {

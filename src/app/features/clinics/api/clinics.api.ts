@@ -39,6 +39,12 @@ export class ClinicsApi {
     );
   }
 
+  listPublic(): Observable<ClinicRecord[]> {
+    return unwrap(this.http.get<ApiResponse<PageDto<PublicClinicDto>>>(`${this.base}/clinics/public?size=100`)).pipe(
+      map((page) => page.content.map((clinic) => toPublicClinicRecord(clinic))),
+    );
+  }
+
   findById(id: string): Observable<ClinicRecord> {
     return unwrap(this.http.get<ApiResponse<ClinicDto>>(`${this.base}/clinics/${id}`)).pipe(
       map((clinic) => toClinicRecord(clinic)),
@@ -130,6 +136,32 @@ function toClinicRecord(clinic: ClinicDto): ClinicRecord {
     inactiveType: clinic.inactiveType ?? undefined,
     inactiveFrom: clinic.inactiveFrom ?? undefined,
     inactiveTo: clinic.inactiveTo ?? undefined,
+  };
+}
+
+function toPublicClinicRecord(clinic: PublicClinicDto): ClinicRecord {
+  const address = clinic.address;
+  return {
+    id: clinic.id,
+    addressId: undefined,
+    name: clinic.name,
+    phone: clinic.phone,
+    email: clinic.email ?? '',
+    whatsapp: clinic.whatsapp ?? '',
+    instagram: clinic.instagram ?? '',
+    street: address?.street ?? '',
+    number: address?.number ?? '',
+    neighborhood: address?.neighborhood ?? '',
+    zipCode: address?.zipCode ?? '',
+    city: address?.city ?? '',
+    state: address?.state ?? DEFAULT_STATE,
+    imageUrl: clinic.clinicPhotoUrl || '',
+    clinicPhotoFileId: undefined,
+    workingDays: toWorkingDays(clinic.workingHours ?? []),
+    active: true,
+    inactiveType: undefined,
+    inactiveFrom: undefined,
+    inactiveTo: undefined,
   };
 }
 
@@ -233,6 +265,18 @@ interface ClinicDto {
   inactiveFrom: string | null;
   inactiveTo: string | null;
   active: boolean;
+  address: AddressDto | null;
+  workingHours: WorkingHoursDto[] | null;
+}
+
+interface PublicClinicDto {
+  id: string;
+  name: string;
+  phone: string;
+  email: string | null;
+  whatsapp: string | null;
+  instagram: string | null;
+  clinicPhotoUrl: string | null;
   address: AddressDto | null;
   workingHours: WorkingHoursDto[] | null;
 }

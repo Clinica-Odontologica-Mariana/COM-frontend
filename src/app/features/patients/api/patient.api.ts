@@ -1,9 +1,10 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
+import { httpParams } from '../../../core/utils/http-params.utils';
 import { inject, Injectable } from '@angular/core';
-import { forkJoin, Observable, switchMap } from 'rxjs';
+import { catchError, forkJoin, Observable, of, switchMap } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { API_BASE_URL } from '../../../core/config/api.config';
+import { API_BASE_URL, SUPPRESS_ERROR_TOAST } from '../../../core/config/api.config';
 import { ApiResponse } from '../../../core/models/api-response.model';
 import { MedicalRecordApi } from '../../medical-records/api/medical-record.api';
 import { MedicalRecordDTO } from '../../medical-records/models/patient-record.models';
@@ -83,7 +84,6 @@ function toPatient(dto: PatientApiDto, record?: MedicalContext): Patient {
     continuousMedications: record?.continuousMedications ?? '',
     phone: dto.phone ?? '',
     email: dto.email ?? '',
-    whatsappReminders: false,
     address: { zipCode: '', street: '', neighborhood: '', city: '', state: '' },
   };
 }
@@ -121,7 +121,7 @@ export class PatientApi {
   private readonly medicalRecordApi = inject(MedicalRecordApi);
 
   list(filters: PatientFilters = {}, page = 1): Observable<PaginatedPatients> {
-    let params = new HttpParams().set('page', String(page - 1)).set('size', '10');
+    let params = httpParams().set('page', String(page - 1)).set('size', '10');
 
     if (filters.name?.trim()) {
       params = params.set('name', filters.name.trim());
@@ -164,7 +164,25 @@ export class PatientApi {
             switchMap((record) =>
               this.medicalRecordApi
                 .updateMedicalRecord(record.id, toMedicalBody(dto))
-                .pipe(map((updated) => toPatient(patient, updated))),
+                .pipe(
+                  switchMap((updated) =>
+                    this.http
+                      .post<unknown>(
+                        `${this.base}/treatment-plans`,
+                        {
+                          patientId: patient.id,
+                          medicalRecordId: record.id,
+                          title: 'Plano de Tratamento',
+                          status: 'DRAFT',
+                        },
+                        { context: new HttpContext().set(SUPPRESS_ERROR_TOAST, true) },
+                      )
+                      .pipe(
+                        catchError(() => of(null)),
+                        map(() => toPatient(patient, updated)),
+                      ),
+                  ),
+                ),
             ),
           ),
       ),
@@ -180,7 +198,7 @@ export class PatientApi {
     }).pipe(
       switchMap(({ patient, record }) =>
         this.medicalRecordApi
-          .updateMedicalRecord(record.id, toMedicalBody(dto))
+          .updateMedicalRecord(record.id, { ...toMedicalBody(dto), allergies: record.allergies ?? null })
           .pipe(map((updated) => toPatient(patient, updated))),
       ),
     );

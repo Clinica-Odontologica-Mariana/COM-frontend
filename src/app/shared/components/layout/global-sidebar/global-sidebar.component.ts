@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
@@ -9,6 +9,7 @@ interface SidebarItem {
   icon: string;
   link: string;
   match: readonly string[];
+  adminOnly?: boolean;
 }
 
 @Component({
@@ -49,7 +50,7 @@ interface SidebarItem {
       aria-label="Menu de navegação"
     >
       <nav class="mt-2 flex-1 space-y-1 overflow-y-auto" aria-label="Area administrativa">
-        @for (item of items; track item.label) {
+        @for (item of visibleItems(); track item.label) {
           <a
             [routerLink]="item.link"
             [attr.aria-current]="isItemActive(item) ? 'page' : null"
@@ -68,7 +69,13 @@ interface SidebarItem {
 
       <!-- Mobile user section -->
       <div class="mt-4 border-t border-[#EEE8E5] pt-4">
-        <div class="flex items-center gap-3 px-2 pb-4">
+        <a
+          routerLink="/meu-perfil"
+          [attr.aria-current]="isItemActive(profileItem) ? 'page' : null"
+          class="flex items-center gap-3 rounded-xl px-2 py-2 pb-2 transition hover:bg-[#EDE8E6]"
+          [class.bg-[#EDE8E6]]="isItemActive(profileItem)"
+          (click)="closeMobile()"
+        >
           <div
             class="grid h-11 w-11 place-items-center rounded-full bg-[#DFA17C] text-sm font-bold text-[#1F2425]"
           >
@@ -76,8 +83,9 @@ interface SidebarItem {
           </div>
           <div>
             <p class="text-sm font-bold text-[#1F2425]">{{ displayName() }}</p>
+            <p class="text-xs font-medium text-[#8B574B]">Meu Perfil</p>
           </div>
-        </div>
+        </a>
 
         <a
           routerLink="/schedule/new"
@@ -104,20 +112,22 @@ interface SidebarItem {
     >
       <div class="pb-8">
         <div class="flex-row items-center gap-4">
-          <img
-            src="/Logo_clinica.svg"
-            alt=""
-            draggable="false"
-            class="m-3 h-15 w-auto"
-            aria-hidden="true"
-          />
+          <a href="">
+            <img
+              src="/Logo_clinica.svg"
+              alt=""
+              draggable="false"
+              class="m-3 h-15 w-auto"
+              aria-hidden="true"
+            />
+          </a>
           <div>
             <p class="p-2 text-sm font-bold text-[#7c5145b6]">Olá, {{ displayName() }}</p>
           </div>
         </div>
 
         <nav class="mt-5 space-y-1" aria-label="Area administrativa">
-          @for (item of items; track item.label) {
+          @for (item of visibleItems(); track item.label) {
             <a
               [routerLink]="item.link"
               [attr.aria-current]="isItemActive(item) ? 'page' : null"
@@ -126,6 +136,7 @@ interface SidebarItem {
               [class.font-semibold]="isItemActive(item)"
               [class.text-[#8B574B]]="isItemActive(item)"
               [class.text-[#78716C]]="!isItemActive(item)"
+              (click)="closeMobile()"
             >
               <img
                 [src]="item.icon"
@@ -144,7 +155,13 @@ interface SidebarItem {
       </div>
 
       <div class="mt-auto border-t border-[#EEE8E5] pt-8">
-        <div class="flex items-center gap-3 px-2">
+        <a
+          routerLink="/meu-perfil"
+          [attr.aria-current]="isItemActive(profileItem) ? 'page' : null"
+          class="flex items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-[#EDE8E6]"
+          [class.bg-[#EDE8E6]]="isItemActive(profileItem)"
+          title="Ver meu perfil"
+        >
           <div
             class="grid h-11 w-11 place-items-center rounded-full bg-[#DFA17C] text-sm font-bold text-[#1F2425]"
           >
@@ -152,12 +169,14 @@ interface SidebarItem {
           </div>
           <div>
             <p class="text-sm font-bold text-[#1F2425]">{{ displayName() }}</p>
+            <p class="text-xs font-medium text-[#8B574B]">Meu Perfil</p>
           </div>
-        </div>
+        </a>
 
         <a
           routerLink="/schedule/new"
           class="mt-6 flex h-11 items-center justify-center gap-2 rounded-lg bg-[#8B574B] px-4 text-sm font-bold text-white shadow-lg shadow-[#8B574B]/20 transition hover:bg-[#744A40]"
+          (click)="closeMobile()"
         >
           <span class="text-lg leading-none">+</span>
           Novo Atendimento
@@ -182,6 +201,7 @@ export class GlobalSidebarComponent {
   protected readonly mobileOpen = signal(false);
   protected readonly currentUrl = signal(this.router.url);
   protected readonly currentUser = signal<CurrentUser | null>(null);
+
   protected readonly items: SidebarItem[] = [
     {
       label: 'Painel',
@@ -192,8 +212,8 @@ export class GlobalSidebarComponent {
     {
       label: 'Pacientes',
       icon: '/pacientes.svg',
-      link: '/patients',
-      match: ['/patients'],
+      link: '/pacientes',
+      match: ['/pacientes'],
     },
     { label: 'Agenda', icon: '/agenda.svg', link: '/schedule', match: ['/schedule'] },
     {
@@ -205,19 +225,40 @@ export class GlobalSidebarComponent {
     {
       label: 'Tratamentos',
       icon: '/tratamentos.svg',
-      link: '/patients/a3f7c291-5e4b-4d82-b913-0f2c8e7a1d56/treatments',
-      match: ['/treatments', '/patients/'],
+      link: '/treatments',
+      match: ['/treatments'],
     },
     { label: 'Estoque', icon: '/estoque.svg', link: '/inventories', match: ['/inventories'] },
     { label: 'Clínicas', icon: '/Clinicas.svg', link: '/clinics', match: ['/clinics'] },
     {
       label: 'Certificados',
       icon: '/certificados.svg',
-      link: '/medical-records/1',
-      match: ['/certificates'],
+      link: '/certificados',
+      match: ['/certificados'],
+    },
+    {
+      label: 'Funcionários',
+      icon: '/pacientes.svg',
+      link: '/employees',
+      match: ['/employees'],
+      adminOnly: true,
     },
   ];
-  protected readonly logo = { label: 'Logo', icon: '/Logo_clinica.svg' };
+
+  protected readonly profileItem: SidebarItem = {
+    label: 'Meu Perfil',
+    icon: '/pacientes.svg',
+    link: '/meu-perfil',
+    match: ['/meu-perfil'],
+  };
+
+  protected readonly isAdmin = computed(() =>
+    (this.currentUser()?.roles ?? []).some((role) => role.toUpperCase() === 'ADMIN'),
+  );
+
+  protected readonly visibleItems = computed(() =>
+    this.items.filter((item) => !item.adminOnly || this.isAdmin()),
+  );
 
   constructor() {
     this.router.events

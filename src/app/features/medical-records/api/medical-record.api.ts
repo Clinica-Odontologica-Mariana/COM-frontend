@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { forkJoin, Observable, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
-import { API_BASE_URL } from '../../../core/config/api.config';
+import { API_BASE_URL, SUPPRESS_ERROR_TOAST } from '../../../core/config/api.config';
 import { ApiResponse } from '../../../core/models/api-response.model';
 import {
   MedicalRecordAttachmentCreateDTO,
@@ -12,7 +12,9 @@ import {
   MedicalRecordNoteCreateDTO,
   MedicalRecordNoteDTO,
   OdontogramEntryDTO,
+  OdontogramFileSummaryDto,
   PatientDTO,
+  PresignedUrlDTO,
   TreatmentPlanDTO,
   TreatmentPlanItemDTO,
 } from '../models/patient-record.models';
@@ -32,7 +34,9 @@ export class MedicalRecordApi {
 
   getMedicalRecord(patientId: string): Observable<MedicalRecordDTO> {
     return unwrap(
-      this.http.get<ApiResponse<MedicalRecordDTO>>(`${this.base}/medical-records/by-patient/${patientId}`),
+      this.http.get<ApiResponse<MedicalRecordDTO>>(
+        `${this.base}/medical-records/by-patient/${patientId}`,
+      ),
     );
   }
 
@@ -44,7 +48,10 @@ export class MedicalRecordApi {
     );
   }
 
-  createNote(patientId: string, payload: MedicalRecordNoteCreateDTO): Observable<MedicalRecordNoteDTO> {
+  createNote(
+    patientId: string,
+    payload: MedicalRecordNoteCreateDTO,
+  ): Observable<MedicalRecordNoteDTO> {
     return unwrap(
       this.http.post<ApiResponse<MedicalRecordNoteDTO>>(
         `${this.base}/medical-records/by-patient/${patientId}/notes`,
@@ -92,9 +99,59 @@ export class MedicalRecordApi {
     );
   }
 
+  getOdontogramFilesForPatient(patientId: string): Observable<OdontogramFileSummaryDto[]> {
+    return unwrap(
+      this.http.get<ApiResponse<OdontogramFileSummaryDto[]>>(
+        `${this.base}/patients/${patientId}/odontogram-files`,
+      ),
+    );
+  }
+
+  getOdontogramFileDownloadUrl(fileId: string): Observable<string | null> {
+    return unwrap(
+      this.http.get<ApiResponse<PresignedUrlDTO>>(
+        `${this.base}/odontogram-files/${fileId}/download-url`,
+      ),
+    ).pipe(map((dto) => dto?.url ?? null));
+  }
+
+  uploadAndCreateAttachment(
+    patientId: string,
+    file: File,
+  ): Observable<{ dto: MedicalRecordAttachmentDTO; imageUrl: string | null }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http
+      .post<ApiResponse<OdontogramFileSummaryDto>>(
+        `${this.base}/patients/${patientId}/odontogram-files`,
+        formData,
+      )
+      .pipe(
+        map((res) => res.data),
+        switchMap((odontogramFile) => {
+          const storedFileId = odontogramFile.file.id;
+          const odontogramFileId = odontogramFile.id;
+          return forkJoin([
+            this.addAttachment(patientId, { storedFileId }),
+            this.getOdontogramFileDownloadUrl(odontogramFileId).pipe(catchError(() => of(null))),
+          ]).pipe(map(([dto, imageUrl]) => ({ dto, imageUrl })));
+        }),
+      );
+  }
+
   deleteAttachment(patientId: string, attachmentId: string): Observable<void> {
     return this.http.delete<void>(
       `${this.base}/medical-records/by-patient/${patientId}/attachments/${attachmentId}`,
+    );
+  }
+
+  createTreatmentPlan(patientId: string, medicalRecordId: string): Observable<TreatmentPlanDTO> {
+    return unwrap(
+      this.http.post<ApiResponse<TreatmentPlanDTO>>(
+        `${this.base}/treatment-plans`,
+        { patientId, medicalRecordId, title: 'Plano de Tratamento', status: 'DRAFT' },
+        { context: new HttpContext().set(SUPPRESS_ERROR_TOAST, true) },
+      ),
     );
   }
 
@@ -116,7 +173,12 @@ export class MedicalRecordApi {
 
   createTreatmentPlanItem(
     planId: string,
-    payload: { description: string; toothNumber: number | null; estimatedPrice: number; status: string },
+    payload: {
+      description: string;
+      toothNumber: number | null;
+      estimatedPrice: number;
+      status: string;
+    },
   ): Observable<TreatmentPlanItemDTO> {
     return unwrap(
       this.http.post<ApiResponse<TreatmentPlanItemDTO>>(
@@ -129,7 +191,12 @@ export class MedicalRecordApi {
   updateTreatmentPlanItem(
     planId: string,
     itemId: string,
-    payload: { description: string; toothNumber: number | null; estimatedPrice: number; status: string },
+    payload: {
+      description: string;
+      toothNumber: number | null;
+      estimatedPrice: number;
+      status: string;
+    },
   ): Observable<TreatmentPlanItemDTO> {
     return unwrap(
       this.http.put<ApiResponse<TreatmentPlanItemDTO>>(
@@ -147,10 +214,18 @@ export class MedicalRecordApi {
 
   updateMedicalRecord(
     recordId: string,
-    payload: Partial<Pick<MedicalRecordDTO, 'allergies' | 'chronicConditions' | 'continuousMedications' | 'generalObservations'>>,
+    payload: Partial<
+      Pick<
+        MedicalRecordDTO,
+        'allergies' | 'chronicConditions' | 'continuousMedications' | 'generalObservations'
+      >
+    >,
   ): Observable<MedicalRecordDTO> {
     return unwrap(
-      this.http.put<ApiResponse<MedicalRecordDTO>>(`${this.base}/medical-records/${recordId}`, payload),
+      this.http.put<ApiResponse<MedicalRecordDTO>>(
+        `${this.base}/medical-records/${recordId}`,
+        payload,
+      ),
     );
   }
 

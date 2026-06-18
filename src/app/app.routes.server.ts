@@ -15,10 +15,14 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'locations',
-    renderMode: RenderMode.Prerender,
+    renderMode: RenderMode.Client,
   },
   {
     path: 'admin-access',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'employees',
     renderMode: RenderMode.Client,
   },
   {
@@ -30,19 +34,35 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'panel',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'panel/history',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'clinics/:id/edit',
     renderMode: RenderMode.Client,
   },
   {
-    path: 'patients/**',
+    path: 'pacientes',
     renderMode: RenderMode.Client,
   },
   {
-    path: 'patients/:id/treatments',
+    path: 'pacientes/new',
     renderMode: RenderMode.Client,
   },
   {
-    path: 'patients/:id/edit',
+    path: 'pacientes/:id/editar',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'pacientes/:id/tratamentos',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'treatments',
     renderMode: RenderMode.Client,
   },
   {
@@ -51,6 +71,22 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'medical-records/:id',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'certificados',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'treatments/:id',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'treatments/:id/new',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'treatments/:id/edit',
     renderMode: RenderMode.Client,
   },
   {

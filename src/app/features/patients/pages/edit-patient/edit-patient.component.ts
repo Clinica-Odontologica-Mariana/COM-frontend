@@ -7,14 +7,9 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  AbstractControl,
-  FormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 
 import { MedicalRecordApi } from '../../../medical-records/api/medical-record.api';
@@ -22,6 +17,7 @@ import {
   MedicalRecordDTO,
   PatientDTO,
 } from '../../../medical-records/models/patient-record.models';
+import { cpfValidator, formatCpf, formatPhone, formatZipCode } from '../../utils/format.utils';
 
 const HEALTH_CONDITIONS = [
   'Hipertensão',
@@ -32,28 +28,18 @@ const HEALTH_CONDITIONS = [
   'Gestante',
 ] as const;
 
-function cpfValidator(control: AbstractControl): ValidationErrors | null {
-  const v = (control.value ?? '').replace(/\D/g, '');
-  if (!v) return null;
-  if (v.length !== 11) return { cpf: true };
-  return null;
-}
-
 @Component({
   selector: 'app-edit-patient',
   imports: [ReactiveFormsModule, RouterLink],
   template: `
     <div style="font-family: 'Manrope', sans-serif">
-      <!-- Sticky top header -->
       <header
         class="sticky top-0 z-10 flex items-center justify-between px-8 py-6"
         style="background: rgba(249,249,249,0.85); backdrop-filter: blur(10px)"
       >
         <div class="flex flex-col gap-1">
           <nav class="flex items-center gap-2 text-xs uppercase tracking-[1.2px]">
-            <a routerLink="/medical-records" class="text-[#78716C] hover:text-[#7C5145]"
-              >Pacientes</a
-            >
+            <a routerLink="/pacientes" class="text-[#78716C] hover:text-[#7C5145]">Pacientes</a>
             <span class="text-[#78716C]">›</span>
             <span class="font-bold text-[#7C5145]">Editar Cadastro</span>
           </nav>
@@ -66,7 +52,7 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
         </div>
         <div class="flex items-center gap-3">
           <a
-            routerLink="/medical-records"
+            routerLink="/pacientes"
             class="rounded-xl px-6 py-2 text-base font-bold text-[#78716C] transition hover:bg-[#EFE7E3]"
             >Cancelar</a
           >
@@ -100,11 +86,10 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
       <form
         [formGroup]="form"
         (ngSubmit)="submit()"
-        class="mx-auto max-w-5xl px-8 pb-20 pt-6 space-y-6"
+        class="mx-auto w-full px-8 pb-20 pt-6 space-y-6"
       >
-        <!-- Section 1: Dados Pessoais + Foto -->
+        <!-- Dados Pessoais + Foto -->
         <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
-          <!-- Personal data card -->
           <section
             class="flex-1 rounded-3xl bg-[#F3F3F3] p-8 space-y-8"
             style="border: 1px solid rgba(231,229,228,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.05)"
@@ -139,7 +124,6 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
               </div>
             } @else {
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <!-- Nome Completo -->
                 <div class="flex flex-col gap-1">
                   <label class="px-1 text-xs font-bold uppercase tracking-[0.6px] text-[#78716C]"
                     >Nome Completo</label
@@ -152,7 +136,6 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
                   />
                 </div>
 
-                <!-- CPF -->
                 <div class="flex flex-col gap-1">
                   <label class="px-1 text-xs font-bold uppercase tracking-[0.6px] text-[#78716C]"
                     >CPF</label
@@ -160,12 +143,20 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
                   <input
                     formControlName="cpf"
                     type="text"
+                    inputmode="numeric"
+                    maxlength="14"
                     placeholder="000.000.000-00"
                     class="rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none focus:ring-2 focus:ring-[#7C5145]/30"
+                    (input)="onCpfInput($event)"
                   />
+                  @if (form.controls.cpf.touched && form.controls.cpf.hasError('required')) {
+                    <p class="text-xs text-red-500">CPF é obrigatório.</p>
+                  }
+                  @if (form.controls.cpf.touched && form.controls.cpf.hasError('invalidCpf')) {
+                    <p class="text-xs text-red-500">CPF inválido.</p>
+                  }
                 </div>
 
-                <!-- Data de Nascimento -->
                 <div class="flex flex-col gap-1">
                   <label class="px-1 text-xs font-bold uppercase tracking-[0.6px] text-[#78716C]"
                     >Data de Nascimento</label
@@ -177,7 +168,6 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
                   />
                 </div>
 
-                <!-- Profissão -->
                 <div class="flex flex-col gap-1">
                   <label class="px-1 text-xs font-bold uppercase tracking-[0.6px] text-[#78716C]"
                     >Profissão</label
@@ -191,7 +181,6 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
                 </div>
               </div>
 
-              <!-- Gênero -->
               <div class="flex flex-col gap-1">
                 <label class="px-1 text-xs font-bold uppercase tracking-[0.6px] text-[#78716C]"
                   >Gênero</label
@@ -219,10 +208,38 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
                   }
                 </div>
               </div>
+
+              <!-- Status -->
+              <div class="flex flex-col gap-1">
+                <label class="px-1 text-xs font-bold uppercase tracking-[0.6px] text-[#78716C]"
+                  >Status</label
+                >
+                <div class="mt-2 grid grid-cols-2 gap-4">
+                  @for (opt of statusOptions; track opt.value) {
+                    <label
+                      class="flex cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-3 transition"
+                      [class.bg-[#E2E2E2]]="form.get('active')?.value !== opt.value"
+                      [class.bg-[#7C5145]]="form.get('active')?.value === opt.value"
+                    >
+                      <input
+                        type="radio"
+                        formControlName="active"
+                        [value]="opt.value"
+                        class="hidden"
+                      />
+                      <span
+                        class="text-sm font-medium"
+                        [class.text-[#1A1C1C]]="form.get('active')?.value !== opt.value"
+                        [class.text-white]="form.get('active')?.value === opt.value"
+                        >{{ opt.label }}</span
+                      >
+                    </label>
+                  }
+                </div>
+              </div>
             }
           </section>
 
-          <!-- Photo card -->
           <section
             class="flex w-full flex-col items-center justify-center rounded-3xl px-8 py-16 lg:w-72"
             style="background: rgba(124,81,69,0.05); border: 1px solid rgba(124,81,69,0.1)"
@@ -279,7 +296,7 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
           </section>
         </div>
 
-        <!-- Section 2: Anamnese Inicial -->
+        <!-- Anamnese Inicial -->
         <section
           class="rounded-3xl bg-[#F3F3F3] p-8 space-y-10"
           style="border: 1px solid rgba(231,229,228,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.05)"
@@ -307,10 +324,8 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
           </div>
 
           <div class="relative space-y-10 pl-12">
-            <!-- Timeline vertical line -->
             <div class="absolute left-5 top-12 bottom-0 w-px bg-[#E7E5E4]"></div>
 
-            <!-- Motivo da consulta -->
             <div class="relative">
               <div
                 class="absolute -left-12 top-1 grid h-10 w-10 place-items-center rounded-full"
@@ -340,7 +355,6 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
               ></textarea>
             </div>
 
-            <!-- Condições de saúde -->
             <div class="relative">
               <div
                 class="absolute -left-12 top-1 grid h-10 w-10 place-items-center rounded-full bg-[#EEEEEE]"
@@ -378,7 +392,6 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
               </div>
             </div>
 
-            <!-- Medicamentos -->
             <div class="relative">
               <div
                 class="absolute -left-12 top-1 grid h-10 w-10 place-items-center rounded-full bg-[#EEEEEE]"
@@ -409,7 +422,7 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
           </div>
         </section>
 
-        <!-- Section 3: Contato + Localização -->
+        <!-- Contato + Localização -->
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <!-- Contato -->
           <section
@@ -460,9 +473,10 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
                   </svg>
                   <input
                     formControlName="phone"
-                    type="tel"
+                    type="text"
                     placeholder="(00) 00000-0000"
                     class="flex-1 bg-transparent text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none"
+                    (input)="onPhoneInput($event)"
                   />
                 </div>
               </div>
@@ -477,28 +491,6 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
                   placeholder="paciente@exemplo.com"
                   class="rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none focus:ring-2 focus:ring-[#7C5145]/30"
                 />
-              </div>
-
-              <div class="flex items-center justify-between rounded-xl bg-[#EEEEEE] px-4 py-4">
-                <div>
-                  <p class="text-sm font-semibold text-[#1A1C1C]">Notificações</p>
-                  <p class="text-xs text-[#78716C]">
-                    Enviar lembretes de consulta via WhatsApp automaticamente.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  (click)="toggleNotifications()"
-                  class="relative h-6 w-11 rounded-full transition"
-                  [class.bg-[#7C5145]]="notifications()"
-                  [class.bg-[#D6D3D1]]="!notifications()"
-                >
-                  <span
-                    class="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
-                    [class.translate-x-5]="notifications()"
-                    [class.translate-x-0.5]="!notifications()"
-                  ></span>
-                </button>
               </div>
             </div>
           </section>
@@ -536,28 +528,71 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
             </div>
 
             <div class="space-y-4">
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid gap-4 sm:grid-cols-[140px_1fr]">
                 <div class="flex flex-col gap-1">
                   <label class="px-1 text-xs font-bold uppercase tracking-[0.6px] text-[#78716C]"
                     >CEP</label
                   >
                   <input
-                    formControlName="cep"
+                    formControlName="zipCode"
                     type="text"
+                    inputmode="numeric"
+                    maxlength="9"
                     placeholder="00000-000"
                     class="rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none focus:ring-2 focus:ring-[#7C5145]/30"
+                    (input)="onZipCodeInput($event)"
                   />
                 </div>
-                <div class="flex flex-col gap-1">
-                  <label class="px-1 text-xs font-bold uppercase tracking-[0.6px] text-[#78716C]"
-                    >Logradouro</label
-                  >
-                  <input
-                    formControlName="street"
-                    type="text"
-                    placeholder="Rua, Avenida, Praça..."
-                    class="rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none focus:ring-2 focus:ring-[#7C5145]/30"
-                  />
+                <div class="grid gap-4 sm:grid-cols-[1fr_120px]">
+                  <div class="flex flex-col gap-1">
+                    <label class="px-1 text-xs font-bold uppercase tracking-[0.6px] text-[#78716C]"
+                      >Logradouro</label
+                    >
+                    <div class="relative">
+                      <input
+                        formControlName="street"
+                        type="text"
+                        placeholder="Rua, Avenida, Praça..."
+                        class="w-full rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none transition-opacity focus:ring-2 focus:ring-[#7C5145]/30"
+                        [class.opacity-50]="loadingCep()"
+                      />
+                      @if (loadingCep()) {
+                        <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                          <svg
+                            class="h-4 w-4 animate-spin text-[#7C5145]"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <circle
+                              class="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              stroke-width="4"
+                            />
+                            <path
+                              class="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                            />
+                          </svg>
+                        </span>
+                      }
+                    </div>
+                  </div>
+                  <div class="flex flex-col gap-1">
+                    <label class="px-1 text-xs font-bold uppercase tracking-[0.6px] text-[#78716C]"
+                      >Número</label
+                    >
+                    <input
+                      formControlName="streetNumber"
+                      type="text"
+                      placeholder="Nº"
+                      class="w-full rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none focus:ring-2 focus:ring-[#7C5145]/30"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -569,7 +604,8 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
                   formControlName="neighborhood"
                   type="text"
                   placeholder="Nome do bairro"
-                  class="rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none focus:ring-2 focus:ring-[#7C5145]/30"
+                  class="rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none transition-opacity focus:ring-2 focus:ring-[#7C5145]/30"
+                  [class.opacity-50]="loadingCep()"
                 />
               </div>
 
@@ -582,7 +618,8 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
                     formControlName="city"
                     type="text"
                     placeholder="São Paulo"
-                    class="rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none focus:ring-2 focus:ring-[#7C5145]/30"
+                    class="rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none transition-opacity focus:ring-2 focus:ring-[#7C5145]/30"
+                    [class.opacity-50]="loadingCep()"
                   />
                 </div>
                 <div class="flex flex-col gap-1">
@@ -594,7 +631,8 @@ function cpfValidator(control: AbstractControl): ValidationErrors | null {
                     type="text"
                     maxlength="2"
                     placeholder="SP"
-                    class="w-20 rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none focus:ring-2 focus:ring-[#7C5145]/30 uppercase"
+                    class="w-20 rounded-xl bg-[#EEEEEE] px-4 py-4.25 text-base text-[#1A1C1C] placeholder-[#A8A29E] outline-none uppercase transition-opacity focus:ring-2 focus:ring-[#7C5145]/30"
+                    [class.opacity-50]="loadingCep()"
                   />
                 </div>
               </div>
@@ -612,15 +650,18 @@ export class EditPatientComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly http = inject(HttpClient);
 
   private patientId = '';
   private medicalRecordId = '';
+  private currentPatient: PatientDTO | null = null;
+  private currentRecord: MedicalRecordDTO | null = null;
 
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
+  protected readonly loadingCep = signal(false);
   protected readonly loadError = signal<string | undefined>(undefined);
   protected readonly saveError = signal<string | undefined>(undefined);
-  protected readonly notifications = signal(true);
   protected readonly selectedConditions = signal<Set<string>>(new Set());
 
   protected readonly healthConditions = HEALTH_CONDITIONS;
@@ -630,16 +671,24 @@ export class EditPatientComponent implements OnInit {
     { value: 'O', label: 'Outro' },
   ];
 
+  protected readonly statusOptions = [
+    { value: true, label: 'Ativo' },
+    { value: false, label: 'Inativo' },
+  ];
+
   protected readonly form = this.fb.group({
     fullName: ['', Validators.required],
     cpf: ['', [Validators.required, cpfValidator]],
     birthDate: ['', Validators.required],
     notes: [''],
     gender: [''],
+    active: [true],
     phone: [''],
     email: ['', Validators.email],
-    cep: [''],
+    whatsappReminders: [true],
+    zipCode: [''],
     street: [''],
+    streetNumber: [''],
     neighborhood: [''],
     city: [''],
     state: [''],
@@ -654,6 +703,55 @@ export class EditPatientComponent implements OnInit {
     });
   }
 
+  protected onCpfInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const formatted = formatCpf(input.value);
+    input.value = formatted;
+    this.form.controls.cpf.setValue(formatted, { emitEvent: false });
+  }
+
+  protected onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const formatted = formatPhone(input.value);
+    input.value = formatted;
+    this.form.controls.phone.setValue(formatted, { emitEvent: false });
+  }
+
+  protected onZipCodeInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const formatted = formatZipCode(input.value);
+    input.value = formatted;
+    this.form.controls.zipCode.setValue(formatted, { emitEvent: false });
+
+    const digits = formatted.replace(/\D/g, '');
+    if (digits.length === 8) {
+      this.fetchAddressByZipCode(digits);
+    }
+  }
+
+  private fetchAddressByZipCode(cep: string): void {
+    this.loadingCep.set(true);
+    this.http
+      .get<{ logradouro: string; bairro: string; localidade: string; uf: string; erro?: boolean }>(
+        `https://viacep.com.br/ws/${cep}/json/`,
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.loadingCep.set(false);
+          if (!data.erro) {
+            this.form.patchValue({
+              street: data.logradouro,
+              neighborhood: data.bairro,
+              city: data.localidade,
+              state: data.uf,
+            });
+          }
+        },
+        error: () => this.loadingCep.set(false),
+      });
+  }
+
   private loadData(): void {
     this.loading.set(true);
     this.loadError.set(undefined);
@@ -666,6 +764,8 @@ export class EditPatientComponent implements OnInit {
       .subscribe({
         next: ({ patient, record }) => {
           this.medicalRecordId = record.id;
+          this.currentPatient = patient;
+          this.currentRecord = record;
           this.patchForm(patient, record);
           this.loading.set(false);
         },
@@ -677,13 +777,21 @@ export class EditPatientComponent implements OnInit {
   }
 
   private patchForm(patient: PatientDTO, record: MedicalRecordDTO): void {
+    const rawStreet = ((patient as unknown as Record<string, unknown>)['street'] as string) ?? '';
+    const commaIdx = rawStreet.indexOf(', ');
+    const streetBase = commaIdx !== -1 ? rawStreet.slice(0, commaIdx) : rawStreet;
+    const streetNumber = commaIdx !== -1 ? rawStreet.slice(commaIdx + 2) : '';
+
     this.form.patchValue({
       fullName: patient.fullName,
-      cpf: patient.cpf,
+      cpf: formatCpf(patient.cpf ?? ''),
       birthDate: patient.birthDate ? patient.birthDate.slice(0, 10) : '',
       notes: patient.notes ?? '',
-      phone: patient.phone,
+      active: patient.active,
+      phone: formatPhone(patient.phone ?? ''),
       email: patient.email,
+      street: streetBase,
+      streetNumber,
       generalObservations: record.generalObservations ?? '',
       continuousMedications: record.continuousMedications ?? '',
     });
@@ -711,10 +819,6 @@ export class EditPatientComponent implements OnInit {
     this.selectedConditions.set(current);
   }
 
-  protected toggleNotifications(): void {
-    this.notifications.set(!this.notifications());
-  }
-
   protected submit(): void {
     if (this.form.invalid || this.saving()) return;
 
@@ -727,13 +831,17 @@ export class EditPatientComponent implements OnInit {
     forkJoin({
       patient: this.api.updatePatient(this.patientId, {
         fullName: v.fullName ?? '',
-        cpf: v.cpf ?? '',
+        cpf: (v.cpf ?? '').replace(/\D/g, ''),
         birthDate: v.birthDate ?? '',
-        phone: v.phone ?? '',
+        phone: (v.phone ?? '').replace(/\D/g, ''),
         email: v.email ?? '',
         notes: v.notes ?? null,
+        active: v.active ?? true,
+        emergencyContactName: this.currentPatient?.emergencyContactName ?? null,
+        emergencyContactPhone: this.currentPatient?.emergencyContactPhone ?? null,
       }),
       record: this.api.updateMedicalRecord(this.medicalRecordId, {
+        allergies: this.currentRecord?.allergies ?? null,
         chronicConditions: chronicConditions || null,
         generalObservations: v.generalObservations ?? null,
         continuousMedications: v.continuousMedications ?? null,
@@ -743,7 +851,7 @@ export class EditPatientComponent implements OnInit {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.router.navigate(['/medical-records', this.patientId]);
+          this.router.navigate(['/pacientes']);
         },
         error: () => {
           this.saveError.set('Erro ao salvar os dados. Tente novamente.');

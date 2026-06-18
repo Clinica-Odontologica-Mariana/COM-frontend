@@ -30,7 +30,11 @@ export function adaptPatient(dto: PatientDTO): PatientView {
 }
 
 function stableAlertId(type: string, desc: string): string {
-  return `${type}-${desc.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)}`;
+  return `${type}-${desc
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40)}`;
 }
 
 export function adaptMedicalAlerts(record: MedicalRecordDTO): MedicalAlertView[] {
@@ -42,7 +46,12 @@ export function adaptMedicalAlerts(record: MedicalRecordDTO): MedicalAlertView[]
       .map((s) => s.trim())
       .filter(Boolean)
       .forEach((desc) => {
-        alerts.push({ id: stableAlertId('allergy', desc), description: desc, severity: 'HIGH', type: 'allergy' });
+        alerts.push({
+          id: stableAlertId('allergy', desc),
+          description: desc,
+          severity: 'HIGH',
+          type: 'allergy',
+        });
       });
   }
 
@@ -52,7 +61,12 @@ export function adaptMedicalAlerts(record: MedicalRecordDTO): MedicalAlertView[]
       .map((s) => s.trim())
       .filter(Boolean)
       .forEach((desc) => {
-        alerts.push({ id: stableAlertId('condition', desc), description: desc, severity: 'MEDIUM', type: 'condition' });
+        alerts.push({
+          id: stableAlertId('condition', desc),
+          description: desc,
+          severity: 'MEDIUM',
+          type: 'condition',
+        });
       });
   }
 
@@ -62,7 +76,12 @@ export function adaptMedicalAlerts(record: MedicalRecordDTO): MedicalAlertView[]
       .map((s) => s.trim())
       .filter(Boolean)
       .forEach((desc) => {
-        alerts.push({ id: stableAlertId('medication', desc), description: desc, severity: 'LOW', type: 'medication' });
+        alerts.push({
+          id: stableAlertId('medication', desc),
+          description: desc,
+          severity: 'LOW',
+          type: 'medication',
+        });
       });
   }
 
@@ -75,7 +94,8 @@ export function adaptTreatmentSummary(
 ): TreatmentSummaryView | null {
   if (!plans.length) return null;
 
-  const activePlan = plans.find((p) => p.status === 'ACTIVE' || p.status === 'IN_PROGRESS') ?? plans[0];
+  const activePlan =
+    plans.find((p) => p.status === 'ACTIVE' || p.status === 'IN_PROGRESS') ?? plans[0];
 
   const planItems = items.filter((i) => i.treatmentPlanId === activePlan.id);
   const total = planItems.length;
@@ -107,7 +127,7 @@ export function adaptLastVisit(notes: MedicalRecordNoteDTO[]): LastVisitView | n
    * Endpoint esperado: GET /appointments/by-patient/{id}?sort=date&order=desc&limit=1
    * Impacto atual: a data exibida é quando a nota foi criada, podendo divergir da visita real.
    */
-  if (!notes.length) return null;
+  if (!notes.length) return { date: '', description: 'Nenhuma visita registrada' };
 
   const sorted = [...notes].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -119,11 +139,14 @@ export function adaptLastVisit(notes: MedicalRecordNoteDTO[]): LastVisitView | n
   return { date: latest.createdAt, description: shortNote };
 }
 
-export function adaptBalance(plans: TreatmentPlanDTO[]): BalanceView | null {
-  // TODO: integrate with dedicated financial/billing endpoint when available
+export function adaptBalance(
+  plans: TreatmentPlanDTO[],
+  items: TreatmentPlanItemDTO[],
+): BalanceView | null {
   if (!plans.length) return null;
-  const total = plans.reduce((sum, p) => sum + (p.totalAmount ?? 0), 0);
-  return { amount: total };
+  const planTotal = plans.reduce((sum, p) => sum + (p.totalAmount ?? 0), 0);
+  const itemTotal = items.reduce((sum, i) => sum + (i.estimatedPrice ?? 0), 0);
+  return { amount: planTotal || itemTotal };
 }
 
 function computeNoteTitle(note: string): string {
@@ -142,7 +165,10 @@ export function adaptNotes(dtos: MedicalRecordNoteDTO[]): ClinicalNoteView[] {
     }));
 }
 
-export function adaptAttachments(dtos: MedicalRecordAttachmentDTO[]): AttachmentView[] {
+export function adaptAttachments(
+  dtos: MedicalRecordAttachmentDTO[],
+  urlMap: Map<string, string> = new Map(),
+): AttachmentView[] {
   return [...dtos]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .map((dto) => ({
@@ -152,7 +178,9 @@ export function adaptAttachments(dtos: MedicalRecordAttachmentDTO[]): Attachment
       sizeBytes: dto.sizeBytes,
       description: dto.description,
       createdAt: dto.createdAt,
-      isImage: dto.mimeType.startsWith('image/'),
+      isImage: dto.mimeType?.startsWith('image/') ?? false,
+      storedFileId: dto.storedFileId,
+      imageUrl: urlMap.get(dto.storedFileId) ?? null,
     }));
 }
 

@@ -66,10 +66,7 @@ describe('PatientRecordFacade', () => {
   beforeEach(() => {
     api = createApiMock();
     TestBed.configureTestingModule({
-      providers: [
-        PatientRecordFacade,
-        { provide: MedicalRecordApi, useValue: api },
-      ],
+      providers: [PatientRecordFacade, { provide: MedicalRecordApi, useValue: api }],
     });
     facade = TestBed.inject(PatientRecordFacade);
   });
@@ -105,9 +102,7 @@ describe('PatientRecordFacade', () => {
   it('loads last patient data when load() is called twice (switchMap cancels first)', () => {
     const patientA = { ...patientDto, id: 'pA', fullName: 'Paciente A' };
     const patientB = { ...patientDto, id: 'pB', fullName: 'Paciente B' };
-    api.getPatient
-      .mockReturnValueOnce(of(patientA))
-      .mockReturnValueOnce(of(patientB));
+    api.getPatient.mockReturnValueOnce(of(patientA)).mockReturnValueOnce(of(patientB));
 
     facade.load('pA');
     facade.load('pB');
@@ -118,7 +113,12 @@ describe('PatientRecordFacade', () => {
   });
 
   it('creates a note, prepends it to list, and returns the adapted view', () => {
-    const newNoteDto = { ...noteDto, id: 'note2', note: 'Nova evolução.', createdAt: '2024-07-01T10:00:00Z' };
+    const newNoteDto = {
+      ...noteDto,
+      id: 'note2',
+      note: 'Nova evolução.',
+      createdAt: '2024-07-01T10:00:00Z',
+    };
     api.getNotes.mockReturnValue(of([noteDto]));
     api.createNote.mockReturnValue(of(newNoteDto));
 
@@ -162,9 +162,17 @@ describe('PatientRecordFacade', () => {
 
   it('fetches treatment plan items for the first plan', () => {
     const plan = {
-      id: 'plan1', patientId: 'p1', medicalRecordId: 'r1', professionalId: 'prof1',
-      title: 'Plano', status: 'ACTIVE', notes: null, totalAmount: 500,
-      createdByUserId: 'u1', createdAt: '2024-01-01T10:00:00Z', updatedAt: '2024-01-01T10:00:00Z',
+      id: 'plan1',
+      patientId: 'p1',
+      medicalRecordId: 'r1',
+      professionalId: 'prof1',
+      title: 'Plano',
+      status: 'ACTIVE',
+      notes: null,
+      totalAmount: 500,
+      createdByUserId: 'u1',
+      createdAt: '2024-01-01T10:00:00Z',
+      updatedAt: '2024-01-01T10:00:00Z',
     };
     api.getTreatmentPlans.mockReturnValue(of([plan]));
 

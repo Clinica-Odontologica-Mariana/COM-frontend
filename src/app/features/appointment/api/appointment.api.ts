@@ -1,4 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { httpParams } from '../../../core/utils/http-params.utils';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -18,9 +19,13 @@ import {
 interface AppointmentApiDto {
   id: string;
   patientId: string;
+  patientName: string | null;
   clinicId: string;
   workplaceId: string | null;
   professionalId: string | null;
+  professionalName: string | null;
+  procedureId: string | null;
+  statusId: string | null;
   statusCode: string | null;
   statusName: string | null;
   blocksSchedule: boolean;
@@ -81,20 +86,23 @@ function toInitials(name: string): string {
 function toAppointment(dto: AppointmentApiDto): Appointment {
   const { date, time: startTime } = parseDatetime(dto.startDatetime);
   const { time: endTime } = parseDatetime(dto.endDatetime);
+  const patientName = dto.patientName ?? '';
 
   return {
     id: dto.id,
     referenceCode: `#${dto.id.slice(0, 8).toUpperCase()}`,
     patientId: dto.patientId,
-    patientName: '',
+    patientName,
     patientEmail: undefined,
-    patientInitials: undefined,
+    patientInitials: patientName ? toInitials(patientName) : undefined,
+    professionalName: dto.professionalName ?? undefined,
     procedure: 'avaliacao' as ProcedureType,
-    procedureId: null,
+    procedureId: dto.procedureId ?? null,
     location: null,
     workplaceId: dto.workplaceId ?? null,
     clinicId: dto.clinicId ?? null,
     professionalId: dto.professionalId ?? null,
+    statusId: dto.statusId ?? null,
     date,
     startTime,
     endTime,
@@ -194,6 +202,7 @@ export class AppointmentApi {
       clinicId: dto.clinicId,
       workplaceId: dto.workplaceId,
       professionalId: dto.professionalId,
+      procedureId: dto.procedureId ?? null,
       startDatetime: toDatetime(dto.date, dto.startTime),
       endDatetime: toDatetime(dto.date, dto.endTime),
       notes: dto.notes ?? null,
@@ -202,15 +211,14 @@ export class AppointmentApi {
 
     return unwrap(
       this.http.post<ApiResponse<AppointmentApiDto>>(`${this.base}/appointments`, body),
-    ).pipe(map(toAppointment));
+    ).pipe(map((data) => data ? toAppointment(data) : ({} as Appointment)));
   }
 
   update(id: string, dto: Partial<AppointmentFormDto>): Observable<Appointment> {
     const date = dto.date ?? '';
     const body = {
-      clinicId: dto.clinicId,
-      workplaceId: dto.workplaceId,
-      professionalId: dto.professionalId ?? null,
+      statusId: dto.statusId ?? null,
+      procedureId: dto.procedureId ?? null,
       startDatetime: toDatetime(date, dto.startTime ?? '00:00'),
       endDatetime: toDatetime(date, dto.endTime ?? '00:00'),
       notes: dto.notes ?? null,
@@ -219,7 +227,7 @@ export class AppointmentApi {
 
     return unwrap(
       this.http.put<ApiResponse<AppointmentApiDto>>(`${this.base}/appointments/${id}`, body),
-    ).pipe(map(toAppointment));
+    ).pipe(map((data) => data ? toAppointment(data) : ({} as Appointment)));
   }
 
   delete(id: string): Observable<void> {
@@ -227,7 +235,7 @@ export class AppointmentApi {
   }
 
   searchPatients(query: string): Observable<AgendaPatientOption[]> {
-    const params = new HttpParams().set('name', query.trim()).set('size', '10').set('page', '0');
+    const params = httpParams().set('name', query.trim()).set('size', '10').set('page', '0');
 
     return unwrap(
       this.http.get<ApiResponse<PageDto<PatientSearchDto>>>(`${this.base}/patients`, { params }),

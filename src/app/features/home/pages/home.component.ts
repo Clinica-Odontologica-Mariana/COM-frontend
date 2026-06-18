@@ -1,9 +1,24 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  PLATFORM_ID,
+  inject,
+  signal,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
+import { CertificateApi } from '../../certificates/api/certificate.api';
+import { adaptCertificates } from '../../certificates/adapters/certificate.adapter';
+import { CertificateViewModel } from '../../certificates/models/certificate.model';
+
+const MAX_PUBLIC_CERTIFICATES = 3;
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   template: `
     <main class="bg-[#FAFAF9] text-[#6B5B52]">
       <!-- HERO -->
@@ -44,30 +59,48 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         </div>
       </section>
 
-      <!-- TIMELINE -->
-      <section class="border-y border-[#EEE5E0] bg-white/70 px-6 py-16 lg:px-12">
-        <div class="mx-auto max-w-5xl text-center">
-          <h2 class="font-serif text-3xl text-[#8B574B] sm:text-4xl">Marcos de Carreira</h2>
-          <p class="mt-2 text-sm text-[#A29087]">A jornada contínua da Dra. Mariana</p>
-
-          <div class="mt-12 grid gap-6 md:grid-cols-3">
-            @for (item of timeline; track item.year) {
-              <div class="relative rounded-2xl bg-white px-6 py-8 shadow-sm ring-1 ring-[#F0E8E3]">
-                <div
-                  class="mx-auto mb-4 grid h-10 w-10 place-items-center rounded-full bg-[#8B574B] text-white"
-                >
-                  ✦
-                </div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#B49B91]">
-                  {{ item.year }}
-                </p>
-                <h3 class="mt-2 font-serif text-lg text-[#5E514B]">{{ item.title }}</h3>
-                <p class="mt-1 text-sm text-[#8F817A]">{{ item.place }}</p>
+      <!-- CERTIFICATES -->
+      @if (certificates().length > 0) {
+        <section id="certificados" class="border-b border-[#EEE5E0] px-6 py-16 lg:px-12">
+          <div class="mx-auto max-w-5xl">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="font-serif text-3xl text-[#8B574B] sm:text-4xl">Certificações</h2>
+                <p class="mt-2 text-sm text-[#A29087]">Formação e qualificação profissional</p>
               </div>
-            }
+              @if (isAuthenticated()) {
+                <a
+                  routerLink="/certificados"
+                  class="mt-1 flex shrink-0 items-center gap-1.5 rounded-lg border border-[#E3D7D1] bg-white px-4 py-2 text-sm font-semibold text-[#8B574B] transition hover:bg-[#F5EFEC]"
+                >
+                  Gerenciar
+                </a>
+              }
+            </div>
+
+            <div class="mt-10 grid gap-4 md:grid-cols-3">
+              @for (cert of certificates(); track cert.id) {
+                <article
+                  class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#F0E8E3] transition hover:shadow-md"
+                >
+                  <span
+                    class="inline-block rounded-full bg-[#F5EDE8] px-3 py-1 text-xs font-semibold text-[#8B574B]"
+                  >
+                    {{ cert.certificateType }}
+                  </span>
+                  <h3 class="mt-3 font-serif text-lg text-[#5E514B]">{{ cert.title }}</h3>
+                  @if (cert.content) {
+                    <p class="mt-2 text-sm leading-6 text-[#8F817A]">{{ cert.content }}</p>
+                  }
+                  @if (cert.issuedAtFormatted) {
+                    <p class="mt-4 text-xs text-[#B49B91]">{{ cert.issuedAtFormatted }}</p>
+                  }
+                </article>
+              }
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      }
 
       <!-- SPECIALTIES -->
       <section id="atendimento" class="mx-auto max-w-7xl px-6 py-16 lg:px-12">
@@ -111,11 +144,11 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 
             <div class="grid gap-4 sm:grid-cols-2">
               <article class="rounded-[28px] bg-[#ECECEC] p-7 shadow-sm">
-                <p class="text-3xl">✦</p>
+                <img src="estrela_icon.svg" class="size-7" />
                 <h3 class="mt-8 font-serif text-2xl text-[#8B574B]">Estética</h3>
               </article>
               <article class="rounded-[28px] bg-[#F2E2CC] p-7 shadow-sm">
-                <p class="text-3xl">◌</p>
+                <img src="escudo_icon.svg" class="size-7" />
                 <h3 class="mt-8 font-serif text-2xl text-[#8B574B]">Prevenção</h3>
               </article>
             </div>
@@ -139,7 +172,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
                 <div
                   class="grid h-12 w-12 place-items-center rounded-full bg-[#F5D7CF] text-[#8B574B]"
                 >
-                  {{ item.icon }}
+                  <img src="{{ item.icon }}" class="size-5" />
                 </div>
                 <h3 class="mt-6 font-serif text-2xl text-[#8B574B]">{{ item.title }}</h3>
                 <p class="mt-5 text-sm leading-7 text-[#6F645F]">{{ item.description }}</p>
@@ -166,42 +199,53 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         </div>
       </section>
     </main>
-
-    <a
-      href="https://api.whatsapp.com/send?phone=61998439300"
-      class="fixed bottom-6 right-6 z-50 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-lg shadow-black/20 transition hover:scale-105"
-      aria-label="Falar no WhatsApp"
-    >
-      <span class="text-2xl leading-none">⌁</span>
-    </a>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeComponent {
-  protected readonly timeline = [
-    { year: '2016', title: 'Graduada em Odontologia', place: 'UnB' },
-    { year: '2021', title: 'Especialização Estética', place: 'USP' },
-    { year: '2023', title: 'Consultoria Internacional', place: 'Portugal/Espanha' },
-  ];
+export class HomeComponent implements OnInit {
+  private readonly certificateApi = inject(CertificateApi);
+  private readonly authService = inject(AuthService);
+  private readonly platformId = inject(PLATFORM_ID);
+
+  protected readonly certificates = signal<CertificateViewModel[]>([]);
 
   protected readonly philosophy = [
     {
-      icon: '⌂',
+      icon: 'casa_icon.svg',
       title: 'Conveniência Ética',
       description:
         'Levamos o consultório completo até você, garantindo privacidade absoluta e eliminando o estresse do deslocamento.',
     },
     {
-      icon: '♡',
+      icon: 'coracao_icon.svg',
       title: 'Humanização Real',
       description:
         'Consultas com tempo estendido. Ouvimos o paciente além da queixa clínica, tratando a pessoa, não apenas o dente.',
     },
     {
-      icon: '⌁',
+      icon: 'tecnologia_icon.svg',
       title: 'Tecnologia Portátil',
       description:
         'Equipamentos de última geração em versões compactas para diagnósticos precisos em qualquer ambiente.',
     },
   ];
+
+  protected isAuthenticated(): boolean {
+    return this.authService.isTokenValid();
+  }
+
+  ngOnInit(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    // Destaques são públicos: carregam para qualquer visitante (logado ou não).
+    this.certificateApi.getFeatured().subscribe({
+      next: (dtos) => {
+        this.certificates.set(adaptCertificates(dtos).slice(0, MAX_PUBLIC_CERTIFICATES));
+      },
+      error: () => {
+        /* mantém a seção oculta se a listagem falhar */
+      },
+    });
+  }
 }

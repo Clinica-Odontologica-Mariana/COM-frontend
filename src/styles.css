@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Manrope:wght@200..800&family=Inter:wght@100..900&display=swap');
 @import 'tailwindcss';
 
 @theme {
@@ -7,11 +8,50 @@
   --color-brand-muted: #ddc7b4;
   --color-ink: #4f3f38;
   --color-surface: #fffaf8;
+
+  --color-primary: #7c5145;
+  --color-primary-light: rgba(124, 81, 69, 0.1);
+  --color-bg-card: #f3f3f3;
+  --color-bg-input: #eeeeee;
+  --color-text-heading: #1a1c1c;
+  --color-text-body: #69594a;
+  --color-text-muted: #78716c;
+  --color-border-subtle: #e7e5e4;
+  --color-status-green: #22c55e;
+  --color-status-amber: #f59e0b;
+  --color-status-blue: #2291c5;
+  --color-danger: #b20000;
+
+  --font-family-serif: 'Noto Serif', serif;
+  --font-family-sans: 'Manrope', sans-serif;
+  --font-family-body: 'Inter', sans-serif;
   --font-serif: 'Noto Serif', ui-serif, Georgia, serif;
 }
 
 :root {
   color-scheme: light;
+
+  --primary: #7c5145;
+  --primary-light: rgba(124, 81, 69, 0.1);
+  --primary-blur: #98695c;
+  --bg-page: #f9f9f9;
+  --bg-sidebar: #fafaf9;
+  --bg-input: #eeeeee;
+  --bg-card: #f3f3f3;
+  --text-heading: #1a1c1c;
+  --text-body: #69594a;
+  --text-muted: #78716c;
+  --border-subtle: #e7e5e4;
+  --status-green: #22c55e;
+  --status-green-bg: #dcfce7;
+  --status-amber: #f59e0b;
+  --status-amber-bg: #fef3c7;
+  --status-blue: #2291c5;
+  --status-blue-bg: rgba(34, 145, 197, 0.2);
+  --danger: #b20000;
+
+  --shadow-card: 0px 32px 64px rgba(26, 28, 28, 0.05);
+  --shadow-btn: 0px 10px 15px -3px rgba(124, 81, 69, 0.2), 0px 4px 6px -4px rgba(124, 81, 69, 0.2);
 }
 
 html,
@@ -31,4 +71,8 @@ body {
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
+}
+
+button {
+  cursor: pointer;
 }

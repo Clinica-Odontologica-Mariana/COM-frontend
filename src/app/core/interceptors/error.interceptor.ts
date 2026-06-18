@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { SUPPRESS_ERROR_TOAST } from '../config/api.config';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from '../services/toast.service';
 
@@ -11,17 +12,18 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
   const router = inject(Router);
   const toastService = inject(ToastService);
   const isLoginRequest = request.url.includes('/auth/login');
+  const suppressToast = request.context.get(SUPPRESS_ERROR_TOAST);
 
   return next(request).pipe(
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse) {
-        if (error.status === 401 && !isLoginRequest) {
+        if (error.status === 401 && !isLoginRequest && authService.isTokenValid()) {
           authService.logout();
           void router.navigateByUrl('/admin-access');
         }
 
         const message = resolveErrorMessage(error);
-        if (!isLoginRequest) {
+        if (!isLoginRequest && !suppressToast) {
           toastService.error(message);
         }
         return throwError(() => new Error(message));
@@ -33,12 +35,6 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
 };
 
 function resolveErrorMessage(error: HttpErrorResponse): string {
-  const backendMessage = readBackendErrorMessage(error.error);
-
-  if (backendMessage) {
-    return backendMessage;
-  }
-
   if (error.status === 403) {
     return 'Você não tem permissão para essa ação.';
   }
@@ -52,7 +48,7 @@ function resolveErrorMessage(error: HttpErrorResponse): string {
       return 'Usuário ou senha inválidos.';
     }
 
-    const backendMessage = error.error.error?.message ?? error.error.message;
+    const backendMessage = readBackendErrorMessage(error.error);
     if (backendMessage && backendMessage !== 'Unexpected error') {
       return backendMessage;
     }

@@ -5,15 +5,17 @@ import { TreatmentSummaryView } from '../../models/patient-record.models';
 @Component({
   selector: 'app-treatment-summary',
   template: `
-    <section class="rounded-xl bg-[#F3F3F3] p-6 h-full">
+    <section class="rounded-xl max-w-screen bg-[#F3F3F3] p-6 h-full">
       <p class="text-xs font-bold uppercase tracking-[1.2px] text-[#69594A]">
-        Resumo do tratamento
+        Resumo do Tratamento
       </p>
 
       @if (summary(); as s) {
         <div class="mt-4">
           <div class="flex items-baseline gap-2">
-            <span class="text-5xl font-bold text-[#7C5145]" style="font-family: 'Noto Serif', serif"
+            <span
+              class="text-3xl lg:text-5xl font-bold text-[#7C5145]"
+              style="font-family: 'Noto Serif', serif"
               >{{ s.progressPercentage }}%</span
             >
             <span class="text-sm text-[#78716C]">{{ s.currentStep }}</span>

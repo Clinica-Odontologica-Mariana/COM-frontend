@@ -19,12 +19,14 @@ export interface Appointment {
   patientName: string;
   patientEmail?: string;
   patientInitials?: string;
+  professionalName?: string;
   procedure: ProcedureType;
   procedureId?: string | null;
   location: AppointmentLocation | null;
   workplaceId?: string | null;
   clinicId?: string | null;
   professionalId?: string | null;
+  statusId?: string | null;
   date: string;
   startTime: string;
   endTime: string;
@@ -41,6 +43,7 @@ export interface AppointmentFormDto {
   workplaceId: string;
   professionalId: string;
   procedureId?: string | null;
+  statusId?: string | null;
   date: string;
   startTime: string;
   endTime: string;
