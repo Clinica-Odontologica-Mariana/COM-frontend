@@ -277,24 +277,6 @@ const CERTIFICATE_TYPES = [
                         Emitido em {{ cert.issuedAtFormatted }}
                       </span>
                     }
-                    @if (cert.hasFile) {
-                      <span class="flex items-center gap-1 text-[#8B574B]">
-                        <svg
-                          class="h-3.5 w-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                          ></path>
-                        </svg>
-                        Arquivo anexado
-                      </span>
-                    }
                   </div>
 
                   <!-- Actions -->
@@ -498,35 +480,6 @@ const CERTIFICATE_TYPES = [
                     </span>
                   </div>
                 </div>
-              </div>
-
-              <!-- Arquivo -->
-              <div>
-                <label class="text-xs font-bold uppercase text-[#78716C]">Arquivo</label>
-                @if (certificateToView()?.hasFile) {
-                  <div
-                    class="mt-2 flex items-start gap-3 rounded-lg border border-[#D4A574]/50 bg-[#FDF6EE] px-4 py-3 text-sm text-[#8B6535]"
-                  >
-                    <svg
-                      class="mt-0.5 h-4 w-4 shrink-0 text-[#D4A574]"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      ></path>
-                    </svg>
-                    <span
-                      >Arquivo disponível no servidor. Download direto ainda não implementado.</span
-                    >
-                  </div>
-                } @else {
-                  <p class="mt-1 text-sm text-[#A89D95]">Nenhum arquivo anexado.</p>
-                }
               </div>
 
               <div class="flex gap-3 pt-2">
