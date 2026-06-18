@@ -39,9 +39,7 @@ const HEALTH_CONDITIONS = [
       >
         <div class="flex flex-col gap-1">
           <nav class="flex items-center gap-2 text-xs uppercase tracking-[1.2px]">
-            <a routerLink="/pacientes" class="text-[#78716C] hover:text-[#7C5145]"
-              >Pacientes</a
-            >
+            <a routerLink="/pacientes" class="text-[#78716C] hover:text-[#7C5145]">Pacientes</a>
             <span class="text-[#78716C]">›</span>
             <span class="font-bold text-[#7C5145]">Editar Cadastro</span>
           </nav>
@@ -833,9 +831,9 @@ export class EditPatientComponent implements OnInit {
     forkJoin({
       patient: this.api.updatePatient(this.patientId, {
         fullName: v.fullName ?? '',
-        cpf: v.cpf ?? '',
+        cpf: (v.cpf ?? '').replace(/\D/g, ''),
         birthDate: v.birthDate ?? '',
-        phone: v.phone ?? '',
+        phone: (v.phone ?? '').replace(/\D/g, ''),
         email: v.email ?? '',
         notes: v.notes ?? null,
         active: v.active ?? true,

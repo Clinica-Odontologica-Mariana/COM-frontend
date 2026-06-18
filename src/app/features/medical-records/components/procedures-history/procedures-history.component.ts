@@ -9,7 +9,7 @@ import { LucidePlus } from '@lucide/angular';
   selector: 'app-procedures-history',
   imports: [CurrencyPipe, RouterLink, LucidePlus],
   template: `
-    <section class="rounded-xl bg-[#F3F3F3] p-8">
+    <section class="rounded-xl bg-[#F3F3F3] p-4 sm:p-8">
       <div class="flex items-center justify-between gap-2">
         <h3
           class="text-xl font-bold text-[#7C5145] leading-tight"

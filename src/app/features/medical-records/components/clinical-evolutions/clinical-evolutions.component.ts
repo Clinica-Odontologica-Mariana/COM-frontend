@@ -3,19 +3,24 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { EvolutionCardComponent } from '../evolution-card/evolution-card.component';
 import { ClinicalNoteView } from '../../models/patient-record.models';
 
+export interface NoteEditPayload {
+  id: string;
+  note: string;
+}
+
 @Component({
   selector: 'app-clinical-evolutions',
   imports: [EvolutionCardComponent],
   template: `
     <section>
-      <div class="mb-8 flex items-center justify-between gap-4">
-        <h2 class="text-2xl font-bold text-[#7C5145]" style="font-family: 'Noto Serif', serif">
+      <div class="mb-8 flex items-center justify-between gap-3">
+        <h2 class="min-w-0 text-xl font-bold text-[#7C5145] sm:text-2xl" style="font-family: 'Noto Serif', serif">
           Evoluções Clínicas
         </h2>
 
         <button
           type="button"
-          class="flex cursor-pointer items-center gap-2 text-sm font-bold text-[#7C5145] transition hover:text-[#6B4439]"
+          class="flex shrink-0 cursor-pointer items-center gap-2 text-sm font-bold text-[#7C5145] transition hover:text-[#6B4439]"
           (click)="newNote.emit()"
         >
           <svg
@@ -37,7 +42,11 @@ import { ClinicalNoteView } from '../../models/patient-record.models';
 
       <div class="flex flex-col gap-4">
         @for (note of notes(); track note.id) {
-          <app-evolution-card [note]="note" (deleted)="noteDeleted.emit($event)" />
+          <app-evolution-card
+            [note]="note"
+            (deleted)="noteDeleted.emit($event)"
+            (edited)="noteEdited.emit($event)"
+          />
         } @empty {
           <div
             class="rounded-xl border border-dashed border-[#D6D3D1] bg-[#FAFAF9] p-12 text-center"
@@ -61,4 +70,5 @@ export class ClinicalEvolutionsComponent {
   readonly notes = input<ClinicalNoteView[]>([]);
   readonly newNote = output<void>();
   readonly noteDeleted = output<string>();
+  readonly noteEdited = output<NoteEditPayload>();
 }

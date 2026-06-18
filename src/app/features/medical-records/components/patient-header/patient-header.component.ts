@@ -128,10 +128,10 @@ import { PatientView } from '../../models/patient-record.models';
       </header>
     } @else {
       <header class="flex items-center gap-4 py-6">
-        <div class="h-16 w-16 animate-pulse rounded-full bg-[#EFE7E3]"></div>
-        <div class="space-y-2">
-          <div class="h-7 w-64 animate-pulse rounded bg-[#EFE7E3]"></div>
-          <div class="h-4 w-48 animate-pulse rounded bg-[#EFE7E3]"></div>
+        <div class="h-16 w-16 shrink-0 animate-pulse rounded-full bg-[#EFE7E3]"></div>
+        <div class="min-w-0 flex-1 space-y-2">
+          <div class="h-7 w-48 max-w-full animate-pulse rounded bg-[#EFE7E3]"></div>
+          <div class="h-4 w-36 max-w-full animate-pulse rounded bg-[#EFE7E3]"></div>
         </div>
       </header>
     }

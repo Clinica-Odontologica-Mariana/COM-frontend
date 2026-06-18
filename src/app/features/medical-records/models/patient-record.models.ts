@@ -98,6 +98,11 @@ export interface OdontogramEntryDTO {
   recordedAt: string;
 }
 
+export interface OdontogramFileSummaryDto {
+  id: string;
+  file: { id: string };
+}
+
 export interface PresignedUrlDTO {
   url: string;
   expiresAt: string;
@@ -155,6 +160,8 @@ export interface AttachmentView {
   description: string | null;
   createdAt: string;
   isImage: boolean;
+  storedFileId: string;
+  imageUrl: string | null;
 }
 
 export interface ProcedureView {

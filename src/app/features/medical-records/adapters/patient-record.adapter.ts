@@ -162,7 +162,10 @@ export function adaptNotes(dtos: MedicalRecordNoteDTO[]): ClinicalNoteView[] {
     }));
 }
 
-export function adaptAttachments(dtos: MedicalRecordAttachmentDTO[]): AttachmentView[] {
+export function adaptAttachments(
+  dtos: MedicalRecordAttachmentDTO[],
+  urlMap: Map<string, string> = new Map(),
+): AttachmentView[] {
   return [...dtos]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .map((dto) => ({
@@ -172,7 +175,9 @@ export function adaptAttachments(dtos: MedicalRecordAttachmentDTO[]): Attachment
       sizeBytes: dto.sizeBytes,
       description: dto.description,
       createdAt: dto.createdAt,
-      isImage: dto.mimeType.startsWith('image/'),
+      isImage: dto.mimeType?.startsWith('image/') ?? false,
+      storedFileId: dto.storedFileId,
+      imageUrl: urlMap.get(dto.storedFileId) ?? null,
     }));
 }
 
