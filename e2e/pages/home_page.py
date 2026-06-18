@@ -10,7 +10,7 @@ class HomePage(BasePage):
     _NAV_ATENDIMENTO = (By.XPATH, "//app-global-header//a[contains(@href,'/attendance')]")
     _NAV_UNIDADES = (By.XPATH, "//app-global-header//a[contains(@href,'/locations')]")
     _BTN_ENTRAR = (By.XPATH, "//app-global-header//a[contains(@href,'/admin-access')] | //app-global-header//button[contains(normalize-space(.),'Entrar')]")
-    _HERO_SECTION = (By.CSS_SELECTOR, "app-home section, app-home .hero, app-home h1, app-home h2")
+    _HERO_SECTION = (By.CSS_SELECTOR, "app-home-page section, app-home-page h1, app-home-page h2, main section")
     _CTA_AGENDAR = (By.XPATH, "//*[contains(normalize-space(.),'Agende') or contains(normalize-space(.),'agende')]")
     _WHATSAPP_FLOAT = (By.CSS_SELECTOR, "a[href*='wa.me'], a[href*='whatsapp']")
     _FOOTER = (By.CSS_SELECTOR, "app-global-footer")

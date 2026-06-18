@@ -3,22 +3,26 @@ from .base_page import BasePage
 
 
 class PatientsListPage(BasePage):
-    PATH = "/patients"
+    PATH = "/pacientes"
 
     _TABLE = (By.CSS_SELECTOR, "table, [class*='table']")
     _TABLE_ROWS = (By.CSS_SELECTOR, "tbody tr, [class*='table'] [class*='row']:not(:first-child)")
-    _BTN_NOVO_CADASTRO = (By.XPATH, "//a[contains(@href,'/patients/new')] | //button[contains(normalize-space(.),'Novo Cadastro')]")
+    _BTN_NOVO_CADASTRO = (By.XPATH, "//a[contains(@href,'/pacientes/new')] | //button[contains(normalize-space(.),'Novo Cadastro')]")
     _INPUT_BUSCA = (By.CSS_SELECTOR, "input[placeholder*='Buscar'], input[placeholder*='buscar'], input[placeholder*='nome'], input[placeholder*='Nome']")
     _INPUT_CPF = (By.CSS_SELECTOR, "input[placeholder*='CPF'], input[formControlName='cpf']")
     _SELECT_STATUS = (By.CSS_SELECTOR, "select[formControlName='status'], select[name='status']")
-    _BTN_DELETE = (By.XPATH, "//button[@aria-label='Excluir'] | //button[@title='Excluir'] | //button[contains(normalize-space(.),'Excluir') and not(contains(@href,'/patients/new'))]")
-    _BTN_EDIT = (By.XPATH, "//a[contains(@href,'/edit')] | //button[@aria-label='Editar']")
+    _BTN_DELETE = (By.XPATH, "//button[@aria-label='Excluir'] | //button[@title='Excluir'] | //button[contains(normalize-space(.),'Excluir') and not(contains(@href,'/pacientes/new'))]")
+    _BTN_EDIT = (By.XPATH, "//a[contains(@href,'/editar')] | //button[@aria-label='Editar']")
     _EMPTY_STATE = (By.XPATH, "//*[contains(normalize-space(.),'Nenhum') or contains(normalize-space(.),'nenhum') or contains(normalize-space(.),'Sem pacientes')]")
     _PAGINATION = (By.CSS_SELECTOR, "[class*='paginat']")
     _BREADCRUMB = (By.CSS_SELECTOR, "[class*='breadcrumb'], nav[aria-label*='breadcrumb']")
 
     def open(self):
         self.navigate(self.PATH)
+        try:
+            self.wait_for_element(By.CSS_SELECTOR, "main, body", timeout=4)
+        except Exception:
+            pass
         return self
 
     def click_novo_cadastro(self):
@@ -84,18 +88,21 @@ class PatientFormPage(BasePage):
 
     # Ações
     _BTN_SALVAR = (By.XPATH, "//button[@type='submit'] | //button[contains(normalize-space(.),'Salvar')]")
-    _BTN_CANCELAR = (By.XPATH, "//a[contains(@href,'/patients') and contains(normalize-space(.),'Cancelar')] | //button[contains(normalize-space(.),'Cancelar')]")
+    _BTN_CANCELAR = (By.XPATH, "//a[contains(@href,'/pacientes') and contains(normalize-space(.),'Cancelar')] | //button[contains(normalize-space(.),'Cancelar')]")
 
     # Erros
-    _ERROR_FULL_NAME = (By.XPATH, "//input[@formControlName='fullName']/following-sibling::* | //input[@formControlName='fullName']/../following-sibling::*[contains(@class,'text-red')]")
     _GENERIC_REQUIRED_ERROR = (By.CSS_SELECTOR, ".text-red-500")
 
     def open_new(self):
-        self.navigate("/patients/new")
+        self.navigate("/pacientes/new")
+        try:
+            self.wait_for_element(By.CSS_SELECTOR, "input[formControlName='fullName']", timeout=6)
+        except Exception:
+            pass
         return self
 
     def open_edit(self, patient_id: str):
-        self.navigate(f"/patients/{patient_id}/edit")
+        self.navigate(f"/pacientes/{patient_id}/editar")
         return self
 
     def fill_basic_info(self, full_name: str, cpf: str, status: str = "active", gender: str = "female"):
@@ -149,4 +156,4 @@ class PatientFormPage(BasePage):
         return len(self.find_all(*self._GENERIC_REQUIRED_ERROR)) > 0
 
     def is_on_form_page(self) -> bool:
-        return "/patients/new" in self.current_url or "/edit" in self.current_url
+        return "/pacientes/new" in self.current_url or "/editar" in self.current_url

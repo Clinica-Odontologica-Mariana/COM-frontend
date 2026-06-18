@@ -109,8 +109,12 @@ class BasePage:
         except Exception:
             return False
 
-    def element_exists(self, by, value) -> bool:
-        return len(self.driver.find_elements(by, value)) > 0
+    def element_exists(self, by, value, timeout: int = 2) -> bool:
+        try:
+            self.wait(timeout).until(EC.presence_of_element_located((by, value)))
+            return True
+        except Exception:
+            return False
 
     def slow_type(self, element, text: str, delay: float = 0.05):
         for char in text:
@@ -132,6 +136,9 @@ class BasePage:
         )
 
     def clear_local_storage(self):
+        current = self.driver.current_url
+        if not current.startswith("http"):
+            self.driver.get(self.base_url)
         self.driver.execute_script("localStorage.clear();")
 
     # ------------------------------------------------------------------

@@ -48,6 +48,9 @@ class LoginPage(BasePage):
     def is_on_login_page(self) -> bool:
         return self.PATH in self.current_url
 
+    def has_required_errors(self) -> bool:
+        return self.element_exists(By.CSS_SELECTOR, ".text-red-500, [class*='error']")
+
     def username_has_error(self) -> bool:
         return self.element_exists(
             By.XPATH,
