@@ -43,7 +43,7 @@ const STATUS_OPTIONS: StatusOption[] = [
   { value: 'pending', label: 'Pendente' },
   { value: 'in_progress', label: 'Em andamento' },
   { value: 'completed', label: 'Concluído' },
-  { value: 'interrupted', label: 'Interrompido' },
+  { value: 'interrupted', label: 'Observação' },
 ];
 
 const MOCK_MATERIALS: Omit<Material, 'quantity'>[] = [
@@ -442,7 +442,7 @@ export class ProcedureFormComponent implements OnChanges {
 
   protected toothStatesSignal = computed<Record<number, ToothState>>(() =>
     this.selectedTeeth().reduce<Record<number, ToothState>>((acc, t) => {
-      acc[t] = 'selected';
+      acc[t] = 'pending';
       return acc;
     }, {}),
   );

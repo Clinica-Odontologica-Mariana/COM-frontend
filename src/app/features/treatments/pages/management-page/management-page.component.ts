@@ -2,14 +2,16 @@ import { CurrencyPipe, Location, isPlatformBrowser } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   OnInit,
   PLATFORM_ID,
   computed,
   inject,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Procedure, ProcedureStatus, TreatmentData } from '../../models/treatment.model';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink } from '@angular/router';
+import { Procedure, ProcedureStatus, ToothState, TreatmentData } from '../../models/treatment.model';
 import { TreatmentService } from '../../services/treatment.service';
 import { BudgetCardComponent } from '../../components/budget-card/budget-card.component';
 import { JourneyTrackerComponent } from '../../components/journey-tracker/journey-tracker.component';
@@ -17,9 +19,28 @@ import { OdontogramGridComponent } from '../../components/odontogram-grid/odonto
 import { ProcedureCardComponent } from '../../components/procedure-card/procedure-card.component';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
 import { forkJoin } from 'rxjs';
+import { filter, skip } from 'rxjs/operators';
 import { ToastService } from '../../../../core/services/toast.service';
 
 type ConfirmType = 'complete' | 'start';
+
+function recomputeToothStates(
+  procedures: Procedure[],
+  existing: Record<number, ToothState>,
+): Record<number, ToothState> {
+  const states = { ...existing };
+  for (const proc of procedures) {
+    for (const tooth of proc.teeth) {
+      switch (proc.status) {
+        case 'in_progress': states[tooth] = 'pending'; break;
+        case 'completed':   states[tooth] = 'selected'; break;
+        case 'interrupted': states[tooth] = 'inactive'; break;
+        default:            states[tooth] = 'note'; break;
+      }
+    }
+  }
+  return states;
+}
 
 const STATUS_ORDER: Record<ProcedureStatus, number> = {
   in_progress: 0,
@@ -217,6 +238,7 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
 
             <app-journey-tracker
               [currentStep]="treatment()!.journeyStep"
+              [startDate]="treatment()!.startDate"
               [nextStep]="'Iniciar extração dos sisos superiores (dentes 18 e 28)'"
             />
           </div>
@@ -437,6 +459,7 @@ export class TreatmentManagementPageComponent implements OnInit {
   private treatmentService = inject(TreatmentService);
   private platformId = inject(PLATFORM_ID);
   private readonly toast = inject(ToastService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected id = computed(() => this.route.snapshot.paramMap.get('id') ?? '');
 
@@ -465,6 +488,16 @@ export class TreatmentManagementPageComponent implements OnInit {
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.load();
+
+      this.router.events.pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        skip(1),
+        filter((e) => {
+          const url = e.urlAfterRedirects;
+          return url.startsWith('/treatments/') && !url.endsWith('/edit') && !url.endsWith('/new');
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe(() => this.load());
     }
   }
 
@@ -548,7 +581,13 @@ export class TreatmentManagementPageComponent implements OnInit {
       const executed = updatedProcs
         .filter((p) => p.status === 'completed')
         .reduce((sum, p) => sum + p.value, 0);
-      return { ...t, procedures: updatedProcs, executed, toPay: t.totalBudget - executed };
+      return {
+        ...t,
+        procedures: updatedProcs,
+        executed,
+        toPay: t.totalBudget - executed,
+        toothStates: recomputeToothStates(updatedProcs, t.toothStates),
+      };
     });
     forkJoin(proc.ids.map((id) => this.treatmentService.completeProcedure(id))).subscribe({
       error: () => {
@@ -565,7 +604,11 @@ export class TreatmentManagementPageComponent implements OnInit {
       const updatedProcs = t.procedures.map((p) =>
         p.id === proc.id ? { ...p, status: 'in_progress' as ProcedureStatus, startDate: today } : p,
       );
-      return { ...t, procedures: updatedProcs };
+      return {
+        ...t,
+        procedures: updatedProcs,
+        toothStates: recomputeToothStates(updatedProcs, t.toothStates),
+      };
     });
     forkJoin(
       proc.ids.map((id, i) =>

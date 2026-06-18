@@ -90,7 +90,7 @@ import { LucidePlus } from '@lucide/angular';
           }
         </div>
       } @else {
-        <p class="mt-6 text-sm text-[#A8A29E]">Nenhum procedimento no plano de Treatment.</p>
+        <p class="mt-6 text-sm text-[#A8A29E]">Nenhum procedimento registrado.</p>
       }
     </section>
   `,

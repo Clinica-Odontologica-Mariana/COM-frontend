@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { API_BASE_URL } from '../../../core/config/api.config';
+import { API_BASE_URL, SUPPRESS_ERROR_TOAST } from '../../../core/config/api.config';
 import { ApiResponse } from '../../../core/models/api-response.model';
 import {
   MedicalRecordAttachmentCreateDTO,
@@ -100,6 +100,16 @@ export class MedicalRecordApi {
   deleteAttachment(patientId: string, attachmentId: string): Observable<void> {
     return this.http.delete<void>(
       `${this.base}/medical-records/by-patient/${patientId}/attachments/${attachmentId}`,
+    );
+  }
+
+  createTreatmentPlan(patientId: string, medicalRecordId: string): Observable<TreatmentPlanDTO> {
+    return unwrap(
+      this.http.post<ApiResponse<TreatmentPlanDTO>>(
+        `${this.base}/treatment-plans`,
+        { patientId, medicalRecordId, title: 'Plano de Tratamento', status: 'DRAFT' },
+        { context: new HttpContext().set(SUPPRESS_ERROR_TOAST, true) },
+      ),
     );
   }
 

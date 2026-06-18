@@ -41,7 +41,7 @@ export function adaptTreatmentData(
       type: cp?.category ?? 'Outros',
       startDate: fmtDate(first.createdAt),
       endDate: fmtDate(first.completedAt),
-      value: first.estimatedPrice ?? 0,
+      value: group.reduce((sum, i) => sum + (i.estimatedPrice ?? 0), 0),
       teeth,
       materials: (first.materials ?? []).map((m) => ({
         name: m.name,
@@ -72,6 +72,7 @@ export function adaptTreatmentData(
     executed,
     toPay: totalBudget - executed,
     toothStates: buildToothStates(procedures, odontogramEntries),
+    startDate: fmtDate(plan.createdAt),
     journeyStep: calcJourneyStep(procedures),
     notes: plan.notes ?? medicalRecord?.generalObservations ?? '',
   };

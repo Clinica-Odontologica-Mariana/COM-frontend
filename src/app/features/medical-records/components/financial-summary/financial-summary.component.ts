@@ -18,7 +18,7 @@ import { BalanceView, LastVisitView } from '../../models/patient-record.models';
               class="text-3xl font-bold text-[#7C5145] leading-tight"
               style="font-family: 'Noto Serif', serif"
             >
-              {{ shortDate() }}
+              {{ shortDate() || '—' }}
             </p>
             <p class="mt-1 text-xs text-[#78716C] leading-5 line-clamp-2">{{ v.description }}</p>
           </div>

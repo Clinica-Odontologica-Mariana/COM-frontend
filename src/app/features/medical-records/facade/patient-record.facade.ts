@@ -74,25 +74,37 @@ export class PatientRecordFacade {
             plans: this.api.getTreatmentPlans(patientId).pipe(catchError(() => of([]))),
           }).pipe(
             switchMap(({ patient, record, notes, attachments, plans }) => {
-              const firstPlan: TreatmentPlanDTO | null = plans.length ? plans[0] : null;
-              const itemsRequest = firstPlan
-                ? this.api.getTreatmentPlanItems(firstPlan.id).pipe(catchError(() => of([])))
-                : of<TreatmentPlanItemDTO[]>([]);
+              const ensurePlan$ =
+                plans.length === 0 && record
+                  ? this.api.createTreatmentPlan(patientId, record.id).pipe(
+                      map((newPlan) => [newPlan]),
+                      catchError(() => of([] as TreatmentPlanDTO[])),
+                    )
+                  : of(plans);
 
-              return itemsRequest.pipe(
-                tap((items) => {
-                  this.patchState({
-                    patient: patient ? adaptPatient(patient) : null,
-                    medicalRecord: record,
-                    alerts: record ? adaptMedicalAlerts(record) : [],
-                    treatmentSummary: adaptTreatmentSummary(plans, items),
-                    lastVisit: adaptLastVisit(notes),
-                    balance: adaptBalance(plans),
-                    notes: adaptNotes(notes),
-                    attachments: adaptAttachments(attachments),
-                    procedures: adaptProcedures(items),
-                    loading: false,
-                  });
+              return ensurePlan$.pipe(
+                switchMap((resolvedPlans) => {
+                  const firstPlan: TreatmentPlanDTO | null = resolvedPlans.length ? resolvedPlans[0] : null;
+                  const itemsRequest = firstPlan
+                    ? this.api.getTreatmentPlanItems(firstPlan.id).pipe(catchError(() => of([])))
+                    : of<TreatmentPlanItemDTO[]>([]);
+
+                  return itemsRequest.pipe(
+                    tap((items) => {
+                      this.patchState({
+                        patient: patient ? adaptPatient(patient) : null,
+                        medicalRecord: record,
+                        alerts: record ? adaptMedicalAlerts(record) : [],
+                        treatmentSummary: adaptTreatmentSummary(resolvedPlans, items),
+                        lastVisit: adaptLastVisit(notes),
+                        balance: adaptBalance(resolvedPlans),
+                        notes: adaptNotes(notes),
+                        attachments: adaptAttachments(attachments),
+                        procedures: adaptProcedures(items),
+                        loading: false,
+                      });
+                    }),
+                  );
                 }),
               );
             }),

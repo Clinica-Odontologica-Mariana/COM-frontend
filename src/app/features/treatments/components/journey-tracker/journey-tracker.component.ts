@@ -1,15 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 interface JourneyStep {
   label: string;
   subtitle: string;
 }
-
-const STEPS: JourneyStep[] = [
-  { label: 'Triagem Inicial', subtitle: 'Realizado em 05 Out' },
-  { label: 'Fase Curativa', subtitle: 'Em progresso (2 procedimentos)' },
-  { label: 'Fase Preventiva', subtitle: 'Aguardando curativo' },
-];
 
 @Component({
   selector: 'app-journey-tracker',
@@ -28,7 +22,7 @@ const STEPS: JourneyStep[] = [
 
       <!-- Steps -->
       <div style="display: flex; flex-direction: column; gap: 32px; padding-bottom: 24px;">
-        @for (step of steps; track step.label; let i = $index) {
+        @for (step of steps(); track step.label; let i = $index) {
           <div
             class="flex flex-row items-start gap-4"
             style="position: relative; isolation: isolate;"
@@ -54,7 +48,7 @@ const STEPS: JourneyStep[] = [
             </div>
 
             <!-- Connector line (not last step) -->
-            @if (i < steps.length - 1) {
+            @if (i < steps().length - 1) {
               <div
                 style="position: absolute; left: 11px; top: 24px; bottom: -32px; width: 2px; background: rgba(124,81,69,0.2); z-index: 1;"
               ></div>
@@ -110,8 +104,13 @@ const STEPS: JourneyStep[] = [
 export class JourneyTrackerComponent {
   currentStep = input<number>(0);
   nextStep = input<string>('');
+  startDate = input<string>('');
 
-  protected readonly steps = STEPS;
+  protected steps = computed<JourneyStep[]>(() => [
+    { label: 'Triagem Inicial', subtitle: this.startDate() ? `Realizado em ${this.startDate()}` : 'Data de entrada' },
+    { label: 'Fase Curativa', subtitle: 'Em progresso (2 procedimentos)' },
+    { label: 'Fase Preventiva', subtitle: 'Aguardando curativo' },
+  ]);
 
   protected circleStyle(i: number): Record<string, string> {
     const cur = this.currentStep();

@@ -127,7 +127,7 @@ export function adaptLastVisit(notes: MedicalRecordNoteDTO[]): LastVisitView | n
    * Endpoint esperado: GET /appointments/by-patient/{id}?sort=date&order=desc&limit=1
    * Impacto atual: a data exibida é quando a nota foi criada, podendo divergir da visita real.
    */
-  if (!notes.length) return null;
+  if (!notes.length) return { date: '', description: 'Nenhuma visita registrada' };
 
   const sorted = [...notes].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),

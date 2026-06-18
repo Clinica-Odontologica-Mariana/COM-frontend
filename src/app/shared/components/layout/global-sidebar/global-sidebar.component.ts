@@ -229,19 +229,19 @@ export class GlobalSidebarComponent {
       match: ['/treatments'],
     },
     { label: 'Estoque', icon: '/estoque.svg', link: '/inventories', match: ['/inventories'] },
-    {
-      label: 'Funcionários',
-      icon: '/pacientes.svg',
-      link: '/colaboradores',
-      match: ['/colaboradores', '/profissionais'],
-      adminOnly: true,
-    },
     { label: 'Clínicas', icon: '/Clinicas.svg', link: '/clinics', match: ['/clinics'] },
     {
       label: 'Certificados',
       icon: '/certificados.svg',
       link: '/certificados',
       match: ['/certificados'],
+    },
+    {
+      label: 'Funcionários',
+      icon: '/pacientes.svg',
+      link: '/employees',
+      match: ['/employees'],
+      adminOnly: true,
     },
   ];
 

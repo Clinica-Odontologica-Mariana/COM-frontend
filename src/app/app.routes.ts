@@ -16,9 +16,7 @@ export const routes: Routes = [
   {
     path: 'locations',
     loadComponent: () =>
-      import('./features/public/pages/locations/locations-page.component').then(
-        (m) => m.LocationsPageComponent,
-      ),
+      import('./features/locations/locations-page.component').then((m) => m.LocationsPageComponent),
     data: { layout: 'public' },
   },
   {
@@ -45,7 +43,7 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'colaboradores',
+    path: 'employees',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/collaborators/pages/collaborators-page/collaborators-page.component').then(
