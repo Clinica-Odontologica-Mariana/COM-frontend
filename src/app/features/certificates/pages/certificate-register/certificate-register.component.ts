@@ -49,7 +49,7 @@ const CERTIFICATE_TYPES = [
         </div>
       }
 
-      <div class="mx-auto flex gap-8 lg:gap-12">
+      <div class="mx-auto flex flex-col gap-8 lg:flex-row lg:gap-12">
         <!-- LEFT SIDE: FORM -->
         <div class="w-full lg:w-1/2">
           <div class="rounded-2xl bg-white p-8 shadow-sm">
