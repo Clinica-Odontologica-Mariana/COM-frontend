@@ -7,7 +7,7 @@ import { TreatmentSummaryView } from '../../models/patient-record.models';
   template: `
     <section class="rounded-xl bg-[#F3F3F3] p-6 h-full">
       <p class="text-xs font-bold uppercase tracking-[1.2px] text-[#69594A]">
-        Resumo do tratamento
+        Resumo do Tratamento
       </p>
 
       @if (summary(); as s) {

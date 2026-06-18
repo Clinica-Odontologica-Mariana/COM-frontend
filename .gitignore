@@ -44,3 +44,9 @@ __screenshots__/
 Thumbs.db
 # CocoIndex Code (ccc)
 /.cocoindex_code/
+
+# Environment files
+.env
+.env.*
+!*.example
+!/deploy/production/frontend/.env.production.example

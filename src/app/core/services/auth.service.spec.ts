@@ -10,6 +10,9 @@ const mockResponse: LoginResponse = {
   accessToken: 'mock-jwt-token',
   refreshToken: 'mock-refresh-token',
   expiresIn: 3600,
+  refreshExpiresIn: 86400,
+  tokenType: 'Bearer',
+  scope: 'openid profile',
 };
 
 const mockApiResponse = {
@@ -134,6 +137,7 @@ describe('AuthService', () => {
   describe('logout()', () => {
     it('remove access_token e access_token_expiry do localStorage', () => {
       localStorage.setItem('access_token', 'token');
+      localStorage.setItem('refresh_token', 'refresh-token');
       localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
 
       service.logout();
@@ -141,6 +145,35 @@ describe('AuthService', () => {
       expect(localStorage.getItem('access_token')).toBeNull();
       expect(localStorage.getItem('access_token_expiry')).toBeNull();
       expect(localStorage.getItem('refresh_token')).toBeNull();
+    });
+  });
+
+  describe('initDevSession()', () => {
+    it('não chama login quando token já é válido', () => {
+      localStorage.setItem('access_token', 'valid-token');
+      localStorage.setItem('access_token_expiry', String(Date.now() + 60_000));
+
+      service.initDevSession().subscribe();
+
+      httpMock.expectNone('/api/v1/auth/login');
+    });
+
+    it('chama login com credenciais de dev quando token não é válido', () => {
+      service.initDevSession().subscribe();
+
+      const req = httpMock.expectOne('/api/v1/auth/login');
+      expect(req.request.body).toEqual({ username: 'api-admin', password: 'api-admin123' });
+      req.flush(mockApiResponse);
+    });
+
+    it('emite null sem erro quando login falha (catchError)', () => {
+      let result: unknown = 'not-set';
+      service.initDevSession().subscribe((r) => (result = r));
+
+      const req = httpMock.expectOne('/api/v1/auth/login');
+      req.flush({ message: 'error' }, { status: 500, statusText: 'Server Error' });
+
+      expect(result).toBeNull();
     });
   });
 });

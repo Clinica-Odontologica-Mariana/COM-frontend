@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { forkJoin, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { API_BASE_URL } from '../../../core/config/api.config';
@@ -39,6 +39,12 @@ export class ClinicsApi {
     );
   }
 
+  listPublic(): Observable<ClinicRecord[]> {
+    return unwrap(this.http.get<ApiResponse<PageDto<PublicClinicDto>>>(`${this.base}/clinics/public?size=100`)).pipe(
+      map((page) => page.content.map((clinic) => toPublicClinicRecord(clinic))),
+    );
+  }
+
   findById(id: string): Observable<ClinicRecord> {
     return unwrap(this.http.get<ApiResponse<ClinicDto>>(`${this.base}/clinics/${id}`)).pipe(
       map((clinic) => toClinicRecord(clinic)),
@@ -47,17 +53,15 @@ export class ClinicsApi {
 
   create(payload: ClinicFormValue): Observable<ClinicRecord> {
     return this.submitCreate(payload).pipe(
-      switchMap((clinic) => this.syncWorkingHours(clinic.id, payload.workingDays).pipe(map(() => clinic))),
-      switchMap((clinic) => this.findById(clinic.id)),
+      map((clinic) => toClinicRecord(clinic)),
     );
   }
 
   update(id: string, payload: ClinicFormValue, current: ClinicRecord): Observable<ClinicRecord> {
     return this.submitUpdate(id, payload).pipe(
       switchMap((clinic) => this.syncPhotoRemoval(clinic, payload, current)),
-      switchMap((clinic) => this.syncWorkingHours(clinic.id, payload.workingDays).pipe(map(() => clinic))),
       switchMap((clinic) => this.syncStatus(clinic, current.active, payload.active)),
-      switchMap((clinic) => this.findById(clinic.id)),
+      map((clinic) => toClinicRecord(clinic)),
     );
   }
 
@@ -93,24 +97,6 @@ export class ClinicsApi {
     }
 
     return of(clinic);
-  }
-
-  private syncWorkingHours(clinicId: string, days: WorkingDay[]): Observable<unknown> {
-    return unwrap(
-      this.http.get<ApiResponse<WorkingHoursDto[]>>(`${this.base}/working-hours?clinicId=${clinicId}`),
-    ).pipe(
-      switchMap((currentHours) => {
-        const deleteRequests = currentHours.map((hours) =>
-          this.http.delete<ApiResponse<null>>(`${this.base}/working-hours/${hours.id}`),
-        );
-        const createRequests = toWorkingHoursPayloads(clinicId, days).map((payload) =>
-          this.http.post<ApiResponse<WorkingHoursDto>>(`${this.base}/working-hours`, payload),
-        );
-        const deleteStep = deleteRequests.length ? forkJoin(deleteRequests) : of([]);
-
-        return deleteStep.pipe(switchMap(() => (createRequests.length ? forkJoin(createRequests) : of([]))));
-      }),
-    );
   }
 
   private syncStatus(clinic: ClinicDto, currentActive: boolean, nextActive: boolean): Observable<ClinicDto> {
@@ -153,6 +139,32 @@ function toClinicRecord(clinic: ClinicDto): ClinicRecord {
   };
 }
 
+function toPublicClinicRecord(clinic: PublicClinicDto): ClinicRecord {
+  const address = clinic.address;
+  return {
+    id: clinic.id,
+    addressId: undefined,
+    name: clinic.name,
+    phone: clinic.phone,
+    email: clinic.email ?? '',
+    whatsapp: clinic.whatsapp ?? '',
+    instagram: clinic.instagram ?? '',
+    street: address?.street ?? '',
+    number: address?.number ?? '',
+    neighborhood: address?.neighborhood ?? '',
+    zipCode: address?.zipCode ?? '',
+    city: address?.city ?? '',
+    state: address?.state ?? DEFAULT_STATE,
+    imageUrl: clinic.clinicPhotoUrl || '',
+    clinicPhotoFileId: undefined,
+    workingDays: toWorkingDays(clinic.workingHours ?? []),
+    active: true,
+    inactiveType: undefined,
+    inactiveFrom: undefined,
+    inactiveTo: undefined,
+  };
+}
+
 function toClinicPayload(payload: ClinicFormValue): ClinicSaveDto {
   const normalizedEmail = payload.email.trim().toLowerCase();
   return {
@@ -166,6 +178,7 @@ function toClinicPayload(payload: ClinicFormValue): ClinicSaveDto {
     inactiveFrom: null,
     inactiveTo: null,
     address: toAddressPayload(payload),
+    workingHours: toWorkingHoursPayloads(payload.workingDays),
   };
 }
 
@@ -181,11 +194,10 @@ function toAddressPayload(payload: ClinicFormValue): AddressSaveDto {
   };
 }
 
-function toWorkingHoursPayloads(clinicId: string, days: WorkingDay[]): WorkingHoursSaveDto[] {
+function toWorkingHoursPayloads(days: WorkingDay[]): WorkingHoursSaveDto[] {
   return days.flatMap((day) =>
     day.enabled
       ? day.intervals.map((interval) => ({
-          clinicId,
           dayOfWeek: DAY_TO_INDEX[day.dayKey],
           startTime: interval.startTime,
           endTime: interval.endTime,
@@ -257,6 +269,18 @@ interface ClinicDto {
   workingHours: WorkingHoursDto[] | null;
 }
 
+interface PublicClinicDto {
+  id: string;
+  name: string;
+  phone: string;
+  email: string | null;
+  whatsapp: string | null;
+  instagram: string | null;
+  clinicPhotoUrl: string | null;
+  address: AddressDto | null;
+  workingHours: WorkingHoursDto[] | null;
+}
+
 interface ClinicSaveDto {
   name: string;
   phone: string;
@@ -268,6 +292,7 @@ interface ClinicSaveDto {
   inactiveFrom: string | null;
   inactiveTo: string | null;
   address: AddressSaveDto;
+  workingHours: WorkingHoursSaveDto[];
 }
 
 interface AddressDto {
@@ -300,7 +325,6 @@ interface WorkingHoursDto {
 }
 
 interface WorkingHoursSaveDto {
-  clinicId: string;
   dayOfWeek: number;
   startTime: string;
   endTime: string;

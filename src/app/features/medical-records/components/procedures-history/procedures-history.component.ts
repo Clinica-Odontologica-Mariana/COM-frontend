@@ -3,10 +3,11 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { ProcedureView } from '../../models/patient-record.models';
+import { LucidePlus } from '@lucide/angular';
 
 @Component({
   selector: 'app-procedures-history',
-  imports: [CurrencyPipe, RouterLink],
+  imports: [CurrencyPipe, RouterLink, LucidePlus],
   template: `
     <section class="rounded-xl bg-[#F3F3F3] p-8">
       <div class="flex items-center justify-between gap-2">
@@ -18,19 +19,15 @@ import { ProcedureView } from '../../models/patient-record.models';
         </h3>
 
         <a
-          [routerLink]="['/patients', patientId(), 'treatments']"
+          [routerLink]="['/treatments', patientId()]"
           class="flex shrink-0 items-center gap-1 rounded-lg bg-[#7C5145] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#6B4439]"
         >
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-3.5 w-3.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2.5"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
+            lucidePlus
+            aria-hidden="true"
+            class="h-3.5 w-3.5 text-current]"
+            [strokeWidth]="2.1"
+          ></svg>
           Gerenciar
         </a>
       </div>
@@ -43,20 +40,14 @@ import { ProcedureView } from '../../models/patient-record.models';
             >
               <div class="flex items-center gap-3 min-w-0">
                 <!-- Tooth icon -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5 shrink-0 text-[#A8A29E]"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path
-                    d="M12 2C9.5 2 7 4 7 7c0 2 .5 3.5 1 5 .5 1.5 1 4 1 6 0 1 .5 2 1.5 2s1.5-1 2-2c.5-1 1-1 1.5 0 .5 1 1 2 2 2s1.5-1 1.5-2c0-2 .5-4.5 1-6 .5-1.5 1-3 1-5 0-3-2.5-5-5-5z"
-                  />
-                </svg>
+
+                <img
+                  src="/dente_icon.svg"
+                  alt=""
+                  draggable="false"
+                  class="m-2 h-4 w-4"
+                  aria-hidden="true"
+                />
 
                 <div class="min-w-0">
                   <p class="truncate text-sm font-bold text-[#44403C]">{{ proc.description }}</p>
@@ -99,7 +90,7 @@ import { ProcedureView } from '../../models/patient-record.models';
           }
         </div>
       } @else {
-        <p class="mt-6 text-sm text-[#A8A29E]">Nenhum procedimento no plano de tratamento.</p>
+        <p class="mt-6 text-sm text-[#A8A29E]">Nenhum procedimento no plano de Treatment.</p>
       }
     </section>
   `,
