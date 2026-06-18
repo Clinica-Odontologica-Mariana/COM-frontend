@@ -116,7 +116,7 @@ import { ProcedureOption, ProfessionalOption, ScheduleOptionsApi, WorkplaceOptio
                   </div>
                 </div>
 
-                <div class="mb-8 grid gap-6 sm:grid-cols-2">
+                <div class="mb-8 grid gap-6 sm:grid-cols-3">
                   <div>
                     <label class="mb-2 block text-sm tracking-widest text-[#78716C] uppercase"
                       >Data</label
@@ -129,11 +129,21 @@ import { ProcedureOption, ProfessionalOption, ScheduleOptionsApi, WorkplaceOptio
                   </div>
                   <div>
                     <label class="mb-2 block text-sm tracking-widest text-[#78716C] uppercase"
-                      >Horário</label
+                      >Hora de Início</label
                     >
                     <input
                       type="time"
                       formControlName="startTime"
+                      class="w-full rounded-xl bg-[#F3F3F3] px-4 py-4 text-base outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label class="mb-2 block text-sm tracking-widest text-[#78716C] uppercase"
+                      >Hora de Fim</label
+                    >
+                    <input
+                      type="time"
+                      formControlName="endTime"
                       class="w-full rounded-xl bg-[#F3F3F3] px-4 py-4 text-base outline-none"
                     />
                   </div>

@@ -30,6 +30,14 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'panel',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'panel/history',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'clinics/:id/edit',
     renderMode: RenderMode.Client,
   },
@@ -47,14 +55,6 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'pacientes/:id/tratamentos',
-    renderMode: RenderMode.Client,
-  },
-  {
-    path: 'patients/:id/edit',
-    renderMode: RenderMode.Client,
-  },
-  {
-    path: 'patients/:id/treatments',
     renderMode: RenderMode.Client,
   },
   {
