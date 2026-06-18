@@ -777,10 +777,7 @@ export class EditPatientComponent implements OnInit {
   }
 
   private patchForm(patient: PatientDTO, record: MedicalRecordDTO): void {
-    const rawStreet = ((patient as unknown as Record<string, unknown>)['street'] as string) ?? '';
-    const commaIdx = rawStreet.indexOf(', ');
-    const streetBase = commaIdx !== -1 ? rawStreet.slice(0, commaIdx) : rawStreet;
-    const streetNumber = commaIdx !== -1 ? rawStreet.slice(commaIdx + 2) : '';
+    const addr = patient.address;
 
     this.form.patchValue({
       fullName: patient.fullName,
@@ -790,8 +787,12 @@ export class EditPatientComponent implements OnInit {
       active: patient.active,
       phone: formatPhone(patient.phone ?? ''),
       email: patient.email,
-      street: streetBase,
-      streetNumber,
+      zipCode: addr?.zipCode ? formatZipCode(addr.zipCode) : '',
+      street: addr?.street ?? '',
+      streetNumber: addr?.number ?? '',
+      neighborhood: addr?.neighborhood ?? '',
+      city: addr?.city ?? '',
+      state: addr?.state ?? '',
       generalObservations: record.generalObservations ?? '',
       continuousMedications: record.continuousMedications ?? '',
     });

@@ -356,6 +356,7 @@ export class AppointmentCreatePageComponent {
   protected readonly submitting = signal(false);
   protected readonly isRescheduling = signal(false);
   protected readonly loadingOptions = signal(true);
+  private readonly rescheduleId = signal<string | null>(null);
   protected readonly procedureOptions = signal<ProcedureOption[]>([]);
   protected readonly workplaceOptions = signal<WorkplaceOption[]>([]);
   protected readonly professionalOptions = signal<ProfessionalOption[]>([]);
@@ -392,6 +393,7 @@ export class AppointmentCreatePageComponent {
     const rescheduleId = this.route.snapshot.queryParamMap.get('reschedule');
     if (rescheduleId) {
       this.isRescheduling.set(true);
+      this.rescheduleId.set(rescheduleId);
       this.appointmentService
         .getById(rescheduleId)
         .pipe(takeUntilDestroyed(this.destroyRef))
@@ -400,9 +402,12 @@ export class AppointmentCreatePageComponent {
             if (!apt || apt.isBlocked) return;
             this.form.patchValue({
               workplaceId: apt.workplaceId ?? '',
+              professionalId: apt.professionalId ?? '',
+              procedureId: apt.procedureId ?? '',
               date: apt.date,
               startTime: apt.startTime,
               endTime: apt.endTime,
+              notes: apt.notes ?? '',
             });
             const patient: AgendaPatientOption = {
               id: apt.patientId,
@@ -461,10 +466,26 @@ export class AppointmentCreatePageComponent {
     const { patientId, professionalId, procedureId, workplaceId, date, startTime, endTime, notes } =
       this.form.getRawValue();
 
+    this.submitting.set(true);
+
+    const rescheduleId = this.rescheduleId();
+    if (rescheduleId) {
+      this.appointmentService
+        .update(rescheduleId, { procedureId, date, startTime, endTime, notes })
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.submitting.set(false);
+            void this.router.navigate(['/schedule']);
+          },
+          error: () => this.submitting.set(false),
+        });
+      return;
+    }
+
     const selectedWorkplace = this.workplaceOptions().find((w) => w.id === workplaceId);
     const clinicId = selectedWorkplace?.clinicId ?? '';
 
-    this.submitting.set(true);
     this.appointmentService
       .create({
         patientId,

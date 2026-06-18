@@ -1,8 +1,19 @@
 // --- Backend DTOs (match Swagger exactly) ---
 
+export interface PatientAddressDTO {
+  id: string;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
 export interface PatientDTO {
   id: string;
   addressId: string | null;
+  address: PatientAddressDTO | null;
   createdByUserId: string;
   fullName: string;
   cpf: string;

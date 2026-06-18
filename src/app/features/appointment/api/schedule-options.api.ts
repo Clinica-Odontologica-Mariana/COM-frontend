@@ -53,7 +53,7 @@ export interface AppointmentStatusOption {
 
 interface ProfessionalApiDto {
   id: string;
-  name: string;
+  fullName: string;
   specialty: string;
 }
 
@@ -96,7 +96,7 @@ export class ScheduleOptionsApi {
       .get<ApiResponse<PageDto<ProfessionalApiDto>>>(`${this.base}/professionals`, { params })
       .pipe(
         map((res) =>
-          unwrap<ProfessionalApiDto>(res).map((p) => ({ id: p.id, name: p.name, specialty: p.specialty })),
+          unwrap<ProfessionalApiDto>(res).map((p) => ({ id: p.id, name: p.fullName, specialty: p.specialty })),
         ),
         catchError(() => of<ProfessionalOption[]>([])),
       );
