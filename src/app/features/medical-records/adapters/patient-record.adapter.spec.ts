@@ -20,6 +20,7 @@ import {
 const makePatient = (overrides: Partial<PatientDTO> = {}): PatientDTO => ({
   id: 'p1',
   addressId: null,
+  address: null,
   createdByUserId: 'u1',
   fullName: 'Ana Silva',
   cpf: '000.000.000-00',

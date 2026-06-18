@@ -13,6 +13,7 @@ import { PatientRecordFacade } from './patient-record.facade';
 const patientDto: PatientDTO = {
   id: 'p1',
   addressId: null,
+  address: null,
   createdByUserId: 'u1',
   fullName: 'Carlos Mendes',
   cpf: '000.000.000-00',
