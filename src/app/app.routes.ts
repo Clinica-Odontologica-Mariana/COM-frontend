@@ -37,6 +37,30 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'profissionais',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/professionals/pages/professionals-page/professionals-page.component').then(
+        (m) => m.ProfessionalsPageComponent,
+      ),
+  },
+  {
+    path: 'colaboradores',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/collaborators/pages/collaborators-page/collaborators-page.component').then(
+        (m) => m.CollaboratorsPageComponent,
+      ),
+  },
+  {
+    path: 'meu-perfil',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/profile/pages/my-profile-page/profile-page.component').then(
+        (m) => m.MyProfilePageComponent,
+      ),
+  },
+  {
     path: 'clinics/new',
     canActivate: [authGuard],
     loadComponent: () =>

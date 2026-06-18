@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
@@ -9,6 +9,7 @@ interface SidebarItem {
   icon: string;
   link: string;
   match: readonly string[];
+  adminOnly?: boolean;
 }
 
 @Component({
@@ -49,7 +50,7 @@ interface SidebarItem {
       aria-label="Menu de navegação"
     >
       <nav class="mt-2 flex-1 space-y-1 overflow-y-auto" aria-label="Area administrativa">
-        @for (item of items; track item.label) {
+        @for (item of visibleItems(); track item.label) {
           <a
             [routerLink]="item.link"
             [attr.aria-current]="isItemActive(item) ? 'page' : null"
@@ -68,7 +69,13 @@ interface SidebarItem {
 
       <!-- Mobile user section -->
       <div class="mt-4 border-t border-[#EEE8E5] pt-4">
-        <div class="flex items-center gap-3 px-2 pb-4">
+        <a
+          routerLink="/meu-perfil"
+          [attr.aria-current]="isItemActive(profileItem) ? 'page' : null"
+          class="flex items-center gap-3 rounded-xl px-2 py-2 pb-2 transition hover:bg-[#EDE8E6]"
+          [class.bg-[#EDE8E6]]="isItemActive(profileItem)"
+          (click)="closeMobile()"
+        >
           <div
             class="grid h-11 w-11 place-items-center rounded-full bg-[#DFA17C] text-sm font-bold text-[#1F2425]"
           >
@@ -76,8 +83,9 @@ interface SidebarItem {
           </div>
           <div>
             <p class="text-sm font-bold text-[#1F2425]">{{ displayName() }}</p>
+            <p class="text-xs font-medium text-[#8B574B]">Meu Perfil</p>
           </div>
-        </div>
+        </a>
 
         <a
           routerLink="/schedule/new"
@@ -119,7 +127,7 @@ interface SidebarItem {
         </div>
 
         <nav class="mt-5 space-y-1" aria-label="Area administrativa">
-          @for (item of items; track item.label) {
+          @for (item of visibleItems(); track item.label) {
             <a
               [routerLink]="item.link"
               [attr.aria-current]="isItemActive(item) ? 'page' : null"
@@ -147,7 +155,13 @@ interface SidebarItem {
       </div>
 
       <div class="mt-auto border-t border-[#EEE8E5] pt-8">
-        <div class="flex items-center gap-3 px-2">
+        <a
+          routerLink="/meu-perfil"
+          [attr.aria-current]="isItemActive(profileItem) ? 'page' : null"
+          class="flex items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-[#EDE8E6]"
+          [class.bg-[#EDE8E6]]="isItemActive(profileItem)"
+          title="Ver meu perfil"
+        >
           <div
             class="grid h-11 w-11 place-items-center rounded-full bg-[#DFA17C] text-sm font-bold text-[#1F2425]"
           >
@@ -155,8 +169,9 @@ interface SidebarItem {
           </div>
           <div>
             <p class="text-sm font-bold text-[#1F2425]">{{ displayName() }}</p>
+            <p class="text-xs font-medium text-[#8B574B]">Meu Perfil</p>
           </div>
-        </div>
+        </a>
 
         <a
           routerLink="/schedule/new"
@@ -214,6 +229,13 @@ export class GlobalSidebarComponent {
       match: ['/treatments'],
     },
     { label: 'Estoque', icon: '/estoque.svg', link: '/inventories', match: ['/inventories'] },
+    {
+      label: 'Funcionários',
+      icon: '/pacientes.svg',
+      link: '/colaboradores',
+      match: ['/colaboradores', '/profissionais'],
+      adminOnly: true,
+    },
     { label: 'Clínicas', icon: '/Clinicas.svg', link: '/clinics', match: ['/clinics'] },
     {
       label: 'Certificados',
@@ -222,6 +244,21 @@ export class GlobalSidebarComponent {
       match: ['/certificados'],
     },
   ];
+
+  protected readonly profileItem: SidebarItem = {
+    label: 'Meu Perfil',
+    icon: '/pacientes.svg',
+    link: '/meu-perfil',
+    match: ['/meu-perfil'],
+  };
+
+  protected readonly isAdmin = computed(() =>
+    (this.currentUser()?.roles ?? []).some((role) => role.toUpperCase() === 'ADMIN'),
+  );
+
+  protected readonly visibleItems = computed(() =>
+    this.items.filter((item) => !item.adminOnly || this.isAdmin()),
+  );
 
   constructor() {
     this.router.events
