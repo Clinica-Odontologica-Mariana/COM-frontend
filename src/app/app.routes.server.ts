@@ -70,6 +70,10 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'certificados',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'treatments/:id',
     renderMode: RenderMode.Client,
   },

@@ -139,6 +139,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'certificados',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/certificates/pages/certificate-register/certificate-register.component').then(
+        (m) => m.CertificateRegisterPageComponent,
+      ),
+  },
+  {
     path: 'panel',
     canActivate: [authGuard],
     loadComponent: () =>
