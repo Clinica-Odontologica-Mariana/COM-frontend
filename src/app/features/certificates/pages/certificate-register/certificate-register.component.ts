@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { CertificateService } from '../../services/certificate.service';
@@ -582,6 +582,7 @@ const CERTIFICATE_TYPES = [
 })
 export class CertificateRegisterPageComponent implements OnInit {
   protected readonly service = inject(CertificateService);
+  private readonly platformId = inject(PLATFORM_ID);
   protected readonly certificateTypes = CERTIFICATE_TYPES;
 
   protected readonly editingId = signal<string | null>(null);
@@ -654,7 +655,9 @@ export class CertificateRegisterPageComponent implements OnInit {
       issuedAt: cert.issuedAt ? cert.issuedAt.split('T')[0] : '',
     };
     this.editingId.set(cert.id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   protected cancelEdit(): void {
