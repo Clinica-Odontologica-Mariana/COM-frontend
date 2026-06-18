@@ -99,22 +99,6 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'patients/:id/edit',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/patients/pages/edit-patient/edit-patient.component').then(
-        (m) => m.EditPatientComponent,
-      ),
-  },
-  {
-    path: 'patients/:id/treatments',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/medical-records/pages/patient-record-page/patient-record-page.component').then(
-        (m) => m.PatientRecordPageComponent,
-      ),
-  },
-  {
     path: 'pacientes/:id/editar',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -176,6 +160,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/medical-records/pages/patient-record-page/patient-record-page.component').then(
         (m) => m.PatientRecordPageComponent,
+      ),
+  },
+  {
+    path: 'certificados',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/certificates/pages/certificate-register/certificate-register.component').then(
+        (m) => m.CertificateRegisterPageComponent,
       ),
   },
   {

@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { SUPPRESS_ERROR_TOAST } from '../config/api.config';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from '../services/toast.service';
 
@@ -11,25 +12,21 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
   const router = inject(Router);
   const toastService = inject(ToastService);
   const isLoginRequest = request.url.includes('/auth/login');
-  const isProfileRequest = request.url.includes('/users/me') || request.url.includes('/auth/me');
+  const suppressToast = request.context.get(SUPPRESS_ERROR_TOAST);
 
   return next(request).pipe(
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse) {
-        const shouldForceLogout = error.status === 401 && !isLoginRequest && !isProfileRequest;
-
-        if (shouldForceLogout) {
+        if (error.status === 401 && !isLoginRequest) {
           authService.logout();
           void router.navigateByUrl('/admin-access');
         }
 
         const message = resolveErrorMessage(error);
-        const shouldToast = !isLoginRequest && !isProfileRequest && ![400, 409, 429].includes(error.status);
-
-        if (shouldToast) {
+        if (!isLoginRequest && !suppressToast) {
           toastService.error(message);
         }
-        return throwError(() => error);
+        return throwError(() => new Error(message));
       }
 
       return throwError(() => error);

@@ -112,13 +112,15 @@ interface SidebarItem {
     >
       <div class="pb-8">
         <div class="flex-row items-center gap-4">
-          <img
-            src="/Logo_clinica.svg"
-            alt=""
-            draggable="false"
-            class="m-3 h-15 w-auto"
-            aria-hidden="true"
-          />
+          <a href="">
+            <img
+              src="/Logo_clinica.svg"
+              alt=""
+              draggable="false"
+              class="m-3 h-15 w-auto"
+              aria-hidden="true"
+            />
+          </a>
           <div>
             <p class="p-2 text-sm font-bold text-[#7c5145b6]">Olá, {{ displayName() }}</p>
           </div>
@@ -238,8 +240,8 @@ export class GlobalSidebarComponent {
     {
       label: 'Certificados',
       icon: '/certificados.svg',
-      link: '/medical-records/1',
-      match: ['/certificates'],
+      link: '/certificados',
+      match: ['/certificados'],
     },
   ];
 

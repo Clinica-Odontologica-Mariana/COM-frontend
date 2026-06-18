@@ -119,7 +119,7 @@ import { PatientView } from '../../models/patient-record.models';
             }
           </button>
           <a
-            [routerLink]="['/patients', p.id, 'edit']"
+            [routerLink]="['/pacientes', p.id, 'editar']"
             class="rounded-lg bg-[#7C5145] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#6B4439]"
           >
             Editar Cadastro
