@@ -46,8 +46,11 @@ export const routes: Routes = [
   },
   {
     path: 'colaboradores',
-    redirectTo: 'profissionais',
-    pathMatch: 'full',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/collaborators/pages/collaborators-page/collaborators-page.component').then(
+        (m) => m.CollaboratorsPageComponent,
+      ),
   },
   {
     path: 'meu-perfil',
