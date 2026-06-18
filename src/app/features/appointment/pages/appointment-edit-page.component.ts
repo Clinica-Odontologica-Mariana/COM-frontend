@@ -7,7 +7,7 @@ import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.se
 import { Appointment, AppointmentStatus } from '../models/appointment.model';
 import { AppointmentService } from '../services/appointment.service';
 import { AppointmentStatusPillsComponent } from '../components/appointment-status-pills.component';
-import { ProcedureOption, ProfessionalOption, ScheduleOptionsApi, WorkplaceOption } from '../api/schedule-options.api';
+import { ProcedureOption, ProfessionalOption, ScheduleOptionsApi, WorkplaceOption, AppointmentStatusOption } from '../api/schedule-options.api';
 
 @Component({
   selector: 'app-appointment-edit-page',
@@ -289,6 +289,7 @@ export class AppointmentEditPageComponent {
   protected readonly procedureOptions = signal<ProcedureOption[]>([]);
   protected readonly workplaceOptions = signal<WorkplaceOption[]>([]);
   protected readonly professionalOptions = signal<ProfessionalOption[]>([]);
+  protected readonly statusOptions = signal<AppointmentStatusOption[]>([]);
 
   protected readonly form = this.fb.nonNullable.group({
     professionalId: ['', Validators.required],
@@ -342,6 +343,11 @@ export class AppointmentEditPageComponent {
       .subscribe({ next: (p) => this.professionalOptions.set(p), error: () => {} });
 
     this.scheduleOptionsApi
+      .listAppointmentStatuses()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: (s) => this.statusOptions.set(s), error: () => {} });
+
+    this.scheduleOptionsApi
       .listWorkplaces()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -357,17 +363,19 @@ export class AppointmentEditPageComponent {
     const apt = this.appointment();
     if (!apt || this.form.invalid) return;
 
-    const { professionalId, workplaceId, date, startTime, endTime, notes, status } = this.form.getRawValue();
-    const selectedWorkplace = this.workplaceOptions().find((w) => w.id === workplaceId);
-    const clinicId = selectedWorkplace?.clinicId ?? apt.clinicId ?? '';
+    const { date, startTime, endTime, notes, status } = this.form.getRawValue();
+    const statusId =
+      this.statusOptions().find((s) => s.code.toUpperCase() === status.toUpperCase())?.id
+      ?? apt.statusId;
 
     this.saving.set(true);
     this.appointmentService
-      .update(apt.id, { clinicId, workplaceId, professionalId, date, startTime, endTime, notes, status })
+      .update(apt.id, { statusId, date, startTime, endTime, notes })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
+        next: (updated) => {
           this.saving.set(false);
+          if (updated) this.appointment.set(updated);
           void this.router.navigate(['/schedule']);
         },
         error: () => this.saving.set(false),

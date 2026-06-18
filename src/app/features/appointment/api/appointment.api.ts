@@ -24,6 +24,7 @@ interface AppointmentApiDto {
   workplaceId: string | null;
   professionalId: string | null;
   professionalName: string | null;
+  statusId: string | null;
   statusCode: string | null;
   statusName: string | null;
   blocksSchedule: boolean;
@@ -100,6 +101,7 @@ function toAppointment(dto: AppointmentApiDto): Appointment {
     workplaceId: dto.workplaceId ?? null,
     clinicId: dto.clinicId ?? null,
     professionalId: dto.professionalId ?? null,
+    statusId: dto.statusId ?? null,
     date,
     startTime,
     endTime,
@@ -213,9 +215,7 @@ export class AppointmentApi {
   update(id: string, dto: Partial<AppointmentFormDto>): Observable<Appointment> {
     const date = dto.date ?? '';
     const body = {
-      clinicId: dto.clinicId,
-      workplaceId: dto.workplaceId,
-      professionalId: dto.professionalId ?? null,
+      statusId: dto.statusId ?? null,
       startDatetime: toDatetime(date, dto.startTime ?? '00:00'),
       endDatetime: toDatetime(date, dto.endTime ?? '00:00'),
       notes: dto.notes ?? null,

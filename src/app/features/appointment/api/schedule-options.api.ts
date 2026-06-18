@@ -43,6 +43,14 @@ export interface ProfessionalOption {
   specialty: string;
 }
 
+export interface AppointmentStatusOption {
+  id: string;
+  code: string;
+  name: string;
+  blocksSchedule: boolean;
+  finalStatus: boolean;
+}
+
 interface ProfessionalApiDto {
   id: string;
   name: string;
@@ -106,6 +114,15 @@ export class ScheduleOptionsApi {
             .map((p) => ({ id: p.id, code: p.code, name: p.name })),
         ),
         catchError(() => of<ProcedureOption[]>([])),
+      );
+  }
+
+  listAppointmentStatuses(): Observable<AppointmentStatusOption[]> {
+    return this.http
+      .get<ApiResponse<AppointmentStatusOption[]>>(`${this.base}/appointment-statuses`)
+      .pipe(
+        map((res) => res.data ?? []),
+        catchError(() => of<AppointmentStatusOption[]>([])),
       );
   }
 }
