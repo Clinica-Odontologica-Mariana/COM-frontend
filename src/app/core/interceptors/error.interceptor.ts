@@ -17,7 +17,7 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
   return next(request).pipe(
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse) {
-        if (error.status === 401 && !isLoginRequest) {
+        if (error.status === 401 && !isLoginRequest && authService.isTokenValid()) {
           authService.logout();
           void router.navigateByUrl('/admin-access');
         }

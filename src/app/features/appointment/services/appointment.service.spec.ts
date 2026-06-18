@@ -1,14 +1,62 @@
 import { TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { AppointmentService } from './appointment.service';
-import { toIsoDate } from '../utils/calendar.utils';
+import { AppointmentApi } from '../api/appointment.api';
+import { Appointment } from '../models/appointment.model';
+
+function makeAppointment(overrides: Partial<Appointment> = {}): Appointment {
+  return {
+    id: 'apt1',
+    referenceCode: '#APT1',
+    patientId: 'p1',
+    patientName: 'Lúcia Oliveira',
+    patientInitials: 'LO',
+    procedure: 'avaliacao',
+    procedureId: null,
+    location: null,
+    workplaceId: null,
+    clinicId: null,
+    professionalId: null,
+    statusId: null,
+    date: '2026-06-18',
+    startTime: '09:00',
+    endTime: '10:00',
+    status: 'pending',
+    isBlocked: false,
+    ...overrides,
+  };
+}
+
+const mockAppointments: Appointment[] = [
+  makeAppointment({ id: 'apt1', patientName: 'Lúcia Oliveira', workplaceId: 'asa_sul' }),
+  makeAppointment({ id: 'apt2', patientName: 'Carlos Mendes', workplaceId: 'taguatinga' }),
+  makeAppointment({ id: 'apt3', patientName: 'Ana Lima', isBlocked: true, workplaceId: null }),
+];
+
+function createApiMock() {
+  return {
+    list: vi.fn().mockReturnValue(of(mockAppointments)),
+    listByPeriod: vi.fn().mockReturnValue(of(mockAppointments)),
+    listUpcoming: vi.fn().mockReturnValue(of(mockAppointments.filter((a) => !a.isBlocked))),
+    getById: vi.fn().mockReturnValue(of(mockAppointments[0])),
+    create: vi.fn().mockReturnValue(of(makeAppointment({ id: 'new-apt' }))),
+    update: vi.fn().mockReturnValue(of(makeAppointment({ id: 'apt1', notes: 'Nota de teste' }))),
+    delete: vi.fn().mockReturnValue(of(undefined)),
+    searchPatients: vi.fn().mockReturnValue(of([])),
+  };
+}
 
 describe('AppointmentService', () => {
   let service: AppointmentService;
+  let api: ReturnType<typeof createApiMock>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    api = createApiMock();
+    TestBed.configureTestingModule({
+      providers: [AppointmentService, { provide: AppointmentApi, useValue: api }],
+    });
     service = TestBed.inject(AppointmentService);
   });
 
@@ -16,6 +64,7 @@ describe('AppointmentService', () => {
     const now = new Date();
     const result = await firstValueFrom(service.listByMonth(now.getFullYear(), now.getMonth()));
     expect(result.length).toBeGreaterThan(0);
+    expect(api.listByPeriod).toHaveBeenCalled();
   });
 
   it('lists upcoming appointments sorted', async () => {
@@ -24,12 +73,12 @@ describe('AppointmentService', () => {
     expect(result.every((apt) => !apt.isBlocked)).toBe(true);
   });
 
-  it('filters by location', async () => {
+  it('filters by location (workplaceId)', async () => {
     const now = new Date();
     const result = await firstValueFrom(
       service.listByMonth(now.getFullYear(), now.getMonth(), ['asa_sul']),
     );
-    expect(result.every((apt) => apt.isBlocked || apt.location === 'asa_sul')).toBe(true);
+    expect(result.every((apt) => apt.isBlocked || apt.workplaceId === 'asa_sul')).toBe(true);
   });
 
   it('creates and deletes appointment', async () => {
@@ -38,7 +87,7 @@ describe('AppointmentService', () => {
       service.create({
         patientId: 'p1',
         procedureId: null,
-        date: toIsoDate(new Date()),
+        date: '2026-06-18',
         startTime: '10:00',
         endTime: '11:00',
       } as any),

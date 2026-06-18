@@ -9,7 +9,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 
-import { ClinicalEvolutionsComponent } from '../../components/clinical-evolutions/clinical-evolutions.component';
+import { ClinicalEvolutionsComponent, NoteEditPayload } from '../../components/clinical-evolutions/clinical-evolutions.component';
 import { FinancialSummaryComponent } from '../../components/financial-summary/financial-summary.component';
 import { MedicalAlertsComponent } from '../../components/medical-alerts/medical-alerts.component';
 import { PatientGalleryComponent } from '../../components/patient-gallery/patient-gallery.component';
@@ -36,21 +36,10 @@ import { MedicalRecordNoteCreateDTO } from '../../models/patient-record.models';
   ],
   providers: [PatientRecordFacade],
   template: `
-    <div class="mx-auto w-full px-6 pb-16" style="font-family: 'Manrope', sans-serif">
+    <div class="mx-auto w-full px-4 pb-16 sm:px-6" style="font-family: 'Manrope', sans-serif">
       @if (facade.error(); as err) {
         <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {{ err }}
-        </div>
-      }
-
-      @if (uploadUnavailable()) {
-        <div
-          class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
-          role="status"
-          aria-live="polite"
-        >
-          Upload de anexos ainda não disponível — o endpoint de armazenamento está pendente no
-          backend.
         </div>
       }
 
@@ -80,6 +69,7 @@ import { MedicalRecordNoteCreateDTO } from '../../models/patient-record.models';
             [notes]="facade.notes()"
             (newNote)="openNoteDialog()"
             (noteDeleted)="deleteNote($event)"
+            (noteEdited)="editNote($event)"
           />
 
           <app-patient-gallery
@@ -95,7 +85,7 @@ import { MedicalRecordNoteCreateDTO } from '../../models/patient-record.models';
         <aside class="flex flex-col gap-6">
           <app-medical-alerts [alerts]="facade.alerts()" />
           <app-procedures-history [procedures]="facade.procedures()" [patientId]="patientId()" />
-          <app-prescriptions-panel />
+          <app-prescriptions-panel [patientId]="patientId()" />
         </aside>
       </div>
     </div>
@@ -117,7 +107,6 @@ export class PatientRecordPageComponent implements OnInit {
 
   protected readonly patientId = signal('');
   protected readonly showNoteDialog = signal(false);
-  protected readonly uploadUnavailable = signal(false);
 
   ngOnInit(): void {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -141,6 +130,13 @@ export class PatientRecordPageComponent implements OnInit {
       .subscribe({ next: () => this.closeNoteDialog(), error: () => undefined });
   }
 
+  protected editNote({ id, note }: NoteEditPayload): void {
+    this.facade
+      .updateNote(this.patientId(), id, { note })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ error: () => undefined });
+  }
+
   protected deleteNote(noteId: string): void {
     this.facade
       .deleteNote(this.patientId(), noteId)
@@ -155,14 +151,10 @@ export class PatientRecordPageComponent implements OnInit {
       .subscribe();
   }
 
-  protected uploadAttachment(_file: File): void {
-    /**
-     * TODO(BACKEND): upload de anexos pendente de endpoint no servidor.
-     * Endpoint esperado: POST /stored-files → { storedFileId }
-     *   depois: POST /medical-records/by-patient/{id}/attachments { storedFileId }
-     * Impacto atual: arquivos selecionados não são persistidos.
-     */
-    this.uploadUnavailable.set(true);
-    setTimeout(() => this.uploadUnavailable.set(false), 4000);
+  protected uploadAttachment(file: File): void {
+    this.facade
+      .uploadAttachment(this.patientId(), file)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ error: () => undefined });
   }
 }

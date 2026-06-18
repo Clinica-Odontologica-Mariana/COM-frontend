@@ -12,7 +12,7 @@ const TYPE_LABELS: Record<MedicalAlertView['type'], string> = {
   selector: 'app-medical-alerts',
   template: `
     <section
-      class="rounded-xl border border-[#F0BAAF] p-8"
+      class="rounded-xl max-w-screen border border-[#F0BAAF] p-4 sm:p-8"
       style="background: rgba(255, 218, 211, 0.2)"
     >
       <div class="mb-4 flex items-center gap-2">

@@ -20,6 +20,7 @@ import {
 const makePatient = (overrides: Partial<PatientDTO> = {}): PatientDTO => ({
   id: 'p1',
   addressId: null,
+  address: null,
   createdByUserId: 'u1',
   fullName: 'Ana Silva',
   cpf: '000.000.000-00',
@@ -170,26 +171,28 @@ describe('adaptNotes', () => {
 
 describe('adaptBalance', () => {
   it('returns null for empty plans', () => {
-    expect(adaptBalance([])).toBeNull();
+    expect(adaptBalance([], [])).toBeNull();
   });
 
   it('sums totalAmount across all plans', () => {
-    const result = adaptBalance([
-      makePlan({ totalAmount: 300 }),
-      makePlan({ id: 'p2', totalAmount: 200 }),
-    ]);
+    const result = adaptBalance(
+      [makePlan({ totalAmount: 300 }), makePlan({ id: 'p2', totalAmount: 200 })],
+      [],
+    );
     expect(result?.amount).toBe(500);
   });
 
   it('handles plans with null totalAmount', () => {
-    const result = adaptBalance([makePlan({ totalAmount: 0 })]);
+    const result = adaptBalance([makePlan({ totalAmount: 0 })], []);
     expect(result?.amount).toBe(0);
   });
 });
 
 describe('adaptLastVisit', () => {
-  it('returns null for empty notes', () => {
-    expect(adaptLastVisit([])).toBeNull();
+  it('returns a placeholder for empty notes', () => {
+    const result = adaptLastVisit([]);
+    expect(result?.date).toBe('');
+    expect(result?.description).toBe('Nenhuma visita registrada');
   });
 
   it('returns the most recent note date', () => {

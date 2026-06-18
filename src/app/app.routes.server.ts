@@ -22,7 +22,7 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
-    path: 'colaboradores',
+    path: 'employees',
     renderMode: RenderMode.Client,
   },
   {
@@ -71,6 +71,14 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'medical-records/:id',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'medical-records/:id/receita',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'medical-records/:id/atestado',
     renderMode: RenderMode.Client,
   },
   {

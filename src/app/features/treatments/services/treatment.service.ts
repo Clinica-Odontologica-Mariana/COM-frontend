@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable, catchError, forkJoin, map, of, switchMap, throwError } from 'rxjs';
 import { ProcedureStatus, TreatmentData } from '../models/treatment.model';
 import { adaptTreatmentData, fromApiStatus } from '../data/adapters/treatment.adapter';
@@ -11,7 +11,7 @@ import {
   TreatmentPlanItemDto,
 } from '../data/dto/treatment-plan.dto';
 import { ApiResponse } from '../../../core/models/api-response.model';
-import { API_BASE_URL } from '../../../core/config/api.config';
+import { API_BASE_URL, SUPPRESS_ERROR_TOAST } from '../../../core/config/api.config';
 
 const API_STATUS: Record<ProcedureStatus, string> = {
   pending: 'PENDING',
@@ -276,9 +276,30 @@ export class TreatmentService {
       ),
     ).pipe(
       switchMap((plans) => {
-        if (!plans.length)
-          return throwError(() => new Error('Nenhum plano de tratamento encontrado.'));
-        return this.getTreatment(plans[0].id);
+        if (plans.length) return this.getTreatment(plans[0].id);
+
+        return unwrap(
+          this.http.get<ApiResponse<{ id: string }>>(
+            `${this.apiBase}/medical-records/by-patient/${patientId}`,
+            { context: new HttpContext().set(SUPPRESS_ERROR_TOAST, true) },
+          ),
+        ).pipe(
+          switchMap((record) =>
+            unwrap(
+              this.http.post<ApiResponse<TreatmentPlanDto>>(
+                `${this.apiBase}/treatment-plans`,
+                {
+                  patientId,
+                  medicalRecordId: record.id,
+                  title: 'Plano de Tratamento',
+                  status: 'DRAFT',
+                },
+                { context: new HttpContext().set(SUPPRESS_ERROR_TOAST, true) },
+              ),
+            ).pipe(switchMap((newPlan) => this.getTreatment(newPlan.id))),
+          ),
+          catchError(() => throwError(() => new Error('Nenhum plano de tratamento encontrado.'))),
+        );
       }),
     );
   }

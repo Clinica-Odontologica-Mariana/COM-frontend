@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 import { Procedure } from '../../models/treatment.model';
 import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 
-type Variant = 'in_progress' | 'pending' | 'completed';
+type Variant = 'in_progress' | 'pending' | 'completed' | 'interrupted';
 
 @Component({
   selector: 'app-procedure-card',
@@ -102,12 +102,10 @@ export class ProcedureCardComponent {
 
   protected variant = computed<Variant>(() => {
     switch (this.procedure().status) {
-      case 'in_progress':
-        return 'in_progress';
-      case 'completed':
-        return 'completed';
-      default:
-        return 'pending';
+      case 'in_progress':  return 'in_progress';
+      case 'completed':    return 'completed';
+      case 'interrupted':  return 'interrupted';
+      default:             return 'pending';
     }
   });
 
@@ -115,32 +113,30 @@ export class ProcedureCardComponent {
     const base =
       'flex cursor-pointer items-start justify-between rounded-xl p-6 gap-4 transition-opacity hover:opacity-90';
     switch (this.variant()) {
-      case 'in_progress':
-        return `${base} bg-[#7C5145]/5 border-l-4 border-[#7C5145]`;
-      case 'completed':
-        return `${base} bg-white opacity-60`;
-      default:
-        return `${base} bg-[#F3F3F3]`;
+      case 'in_progress':  return `${base} bg-[#7C5145]/5 border-l-4 border-[#7C5145]`;
+      case 'completed':    return `${base} bg-white opacity-60`;
+      case 'interrupted':  return `${base} bg-white opacity-70`;
+      default:             return `${base} bg-[#F3F3F3]`;
     }
   });
 
   protected iconBgClass = computed(() => {
     const base = 'grid h-12 w-12 shrink-0 place-items-center rounded-full';
     switch (this.variant()) {
-      case 'in_progress':
-        return `${base} bg-[#7C5145]/10`;
-      case 'completed':
-        return `${base} bg-[#DCFCE7]`;
-      default:
-        return `${base} bg-[#E7E5E4]`;
+      case 'in_progress':  return `${base} bg-[#7C5145]/10`;
+      case 'completed':    return `${base} bg-[#DCFCE7]`;
+      case 'interrupted':  return `${base} bg-[#DBEAFE]`;
+      default:             return `${base} bg-[#E7E5E4]`;
     }
   });
 
-  protected iconFilter = computed(() =>
-    this.variant() === 'completed'
-      ? 'invert(42%) sepia(73%) saturate(559%) hue-rotate(98deg) brightness(94%) contrast(89%)'
-      : '',
-  );
+  protected iconFilter = computed(() => {
+    switch (this.variant()) {
+      case 'completed':   return 'invert(42%) sepia(73%) saturate(559%) hue-rotate(98deg) brightness(94%) contrast(89%)';
+      case 'interrupted': return 'invert(44%) sepia(44%) saturate(573%) hue-rotate(175deg) brightness(91%) contrast(87%)';
+      default:            return '';
+    }
+  });
 
   protected iconSrc = computed(() => {
     switch (this.procedure().type) {
@@ -160,7 +156,11 @@ export class ProcedureCardComponent {
     }
   });
 
-  protected amountColorClass = computed(() =>
-    this.variant() === 'in_progress' ? 'text-[#7C5145]' : 'text-[#1A1C1C]',
-  );
+  protected amountColorClass = computed(() => {
+    switch (this.variant()) {
+      case 'in_progress':  return 'text-[#7C5145]';
+      case 'interrupted':  return 'text-[#2291C5]';
+      default:             return 'text-[#1A1C1C]';
+    }
+  });
 }

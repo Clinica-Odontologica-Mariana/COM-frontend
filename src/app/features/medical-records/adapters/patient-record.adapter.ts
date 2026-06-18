@@ -127,7 +127,7 @@ export function adaptLastVisit(notes: MedicalRecordNoteDTO[]): LastVisitView | n
    * Endpoint esperado: GET /appointments/by-patient/{id}?sort=date&order=desc&limit=1
    * Impacto atual: a data exibida é quando a nota foi criada, podendo divergir da visita real.
    */
-  if (!notes.length) return null;
+  if (!notes.length) return { date: '', description: 'Nenhuma visita registrada' };
 
   const sorted = [...notes].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -139,11 +139,14 @@ export function adaptLastVisit(notes: MedicalRecordNoteDTO[]): LastVisitView | n
   return { date: latest.createdAt, description: shortNote };
 }
 
-export function adaptBalance(plans: TreatmentPlanDTO[]): BalanceView | null {
-  // TODO: integrate with dedicated financial/billing endpoint when available
+export function adaptBalance(
+  plans: TreatmentPlanDTO[],
+  items: TreatmentPlanItemDTO[],
+): BalanceView | null {
   if (!plans.length) return null;
-  const total = plans.reduce((sum, p) => sum + (p.totalAmount ?? 0), 0);
-  return { amount: total };
+  const planTotal = plans.reduce((sum, p) => sum + (p.totalAmount ?? 0), 0);
+  const itemTotal = items.reduce((sum, i) => sum + (i.estimatedPrice ?? 0), 0);
+  return { amount: planTotal || itemTotal };
 }
 
 function computeNoteTitle(note: string): string {
@@ -162,7 +165,10 @@ export function adaptNotes(dtos: MedicalRecordNoteDTO[]): ClinicalNoteView[] {
     }));
 }
 
-export function adaptAttachments(dtos: MedicalRecordAttachmentDTO[]): AttachmentView[] {
+export function adaptAttachments(
+  dtos: MedicalRecordAttachmentDTO[],
+  urlMap: Map<string, string> = new Map(),
+): AttachmentView[] {
   return [...dtos]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .map((dto) => ({
@@ -172,7 +178,9 @@ export function adaptAttachments(dtos: MedicalRecordAttachmentDTO[]): Attachment
       sizeBytes: dto.sizeBytes,
       description: dto.description,
       createdAt: dto.createdAt,
-      isImage: dto.mimeType.startsWith('image/'),
+      isImage: dto.mimeType?.startsWith('image/') ?? false,
+      storedFileId: dto.storedFileId,
+      imageUrl: urlMap.get(dto.storedFileId) ?? null,
     }));
 }
 

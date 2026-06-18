@@ -16,9 +16,7 @@ export const routes: Routes = [
   {
     path: 'locations',
     loadComponent: () =>
-      import('./features/public/pages/locations/locations-page.component').then(
-        (m) => m.LocationsPageComponent,
-      ),
+      import('./features/locations/locations-page.component').then((m) => m.LocationsPageComponent),
     data: { layout: 'public' },
   },
   {
@@ -45,7 +43,7 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'colaboradores',
+    path: 'employees',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/collaborators/pages/collaborators-page/collaborators-page.component').then(
@@ -152,6 +150,22 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/medical-records/pages/medical-records-list-page/medical-records-list-page.component').then(
         (m) => m.MedicalRecordsListPageComponent,
+      ),
+  },
+  {
+    path: 'medical-records/:id/receita',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/prescriptions/pages/prescription-form/prescription-form.component').then(
+        (m) => m.PrescriptionFormComponent,
+      ),
+  },
+  {
+    path: 'medical-records/:id/atestado',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/prescriptions/pages/atestado-form/atestado-form.component').then(
+        (m) => m.AtestadoFormComponent,
       ),
   },
   {

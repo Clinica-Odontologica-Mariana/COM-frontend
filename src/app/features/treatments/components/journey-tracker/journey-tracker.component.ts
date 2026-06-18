@@ -1,15 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 interface JourneyStep {
   label: string;
   subtitle: string;
 }
-
-const STEPS: JourneyStep[] = [
-  { label: 'Triagem Inicial', subtitle: 'Realizado em 05 Out' },
-  { label: 'Fase Curativa', subtitle: 'Em progresso (2 procedimentos)' },
-  { label: 'Fase Preventiva', subtitle: 'Aguardando curativo' },
-];
 
 @Component({
   selector: 'app-journey-tracker',
@@ -28,7 +22,7 @@ const STEPS: JourneyStep[] = [
 
       <!-- Steps -->
       <div style="display: flex; flex-direction: column; gap: 32px; padding-bottom: 24px;">
-        @for (step of steps; track step.label; let i = $index) {
+        @for (step of steps(); track step.label; let i = $index) {
           <div
             class="flex flex-row items-start gap-4"
             style="position: relative; isolation: isolate;"
@@ -54,7 +48,7 @@ const STEPS: JourneyStep[] = [
             </div>
 
             <!-- Connector line (not last step) -->
-            @if (i < steps.length - 1) {
+            @if (i < steps().length - 1) {
               <div
                 style="position: absolute; left: 11px; top: 24px; bottom: -32px; width: 2px; background: rgba(124,81,69,0.2); z-index: 1;"
               ></div>
@@ -77,41 +71,22 @@ const STEPS: JourneyStep[] = [
           </div>
         }
       </div>
-
-      <!-- Next step card -->
-      @if (nextStep()) {
-        <div
-          style="background: #FFFFFF; border-top: 4px solid #69594A; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;"
-        >
-          <!-- Header row -->
-          <div style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <circle cx="6" cy="6" r="5.5" stroke="#69594A" />
-              <path d="M6 5.5V8.5" stroke="#69594A" stroke-width="1.2" stroke-linecap="round" />
-              <circle cx="6" cy="3.5" r="0.6" fill="#69594A" />
-            </svg>
-            <span
-              style="font-family: Manrope, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #69594A;"
-            >
-              Próximo Passo
-            </span>
-          </div>
-          <!-- Body -->
-          <p
-            style="font-family: Manrope, sans-serif; font-size: 12px; font-weight: 400; line-height: 20px; color: #514440; margin: 0;"
-          >
-            {{ nextStep() }}
-          </p>
-        </div>
-      }
     </div>
   `,
 })
 export class JourneyTrackerComponent {
   currentStep = input<number>(0);
   nextStep = input<string>('');
+  startDate = input<string>('');
 
-  protected readonly steps = STEPS;
+  protected steps = computed<JourneyStep[]>(() => [
+    {
+      label: 'Triagem Inicial',
+      subtitle: this.startDate() ? `Realizado em ${this.startDate()}` : 'Data de entrada',
+    },
+    { label: 'Fase Curativa', subtitle: 'Em progresso (2 procedimentos)' },
+    { label: 'Fase Preventiva', subtitle: 'Aguardando curativo' },
+  ]);
 
   protected circleStyle(i: number): Record<string, string> {
     const cur = this.currentStep();

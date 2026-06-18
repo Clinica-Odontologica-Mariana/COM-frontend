@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnChanges,
+  OnInit,
   SimpleChanges,
   computed,
   inject,
@@ -21,8 +22,10 @@ import { Material, Procedure, ProcedureStatus, ToothState } from '../../models/t
 import { MaterialsTableComponent } from '../materials-table/materials-table.component';
 import { OdontogramGridComponent } from '../odontogram-grid/odontogram-grid.component';
 import { TreatmentService } from '../../services/treatment.service';
+import { InventoryService } from '../../../inventories/services/inventory.service';
+import { InventoryItem } from '../../../inventories/models/inventory.model';
 import { ConfirmDeleteModalComponent } from '../../../../shared/components/feedback/confirm-delete-modal/confirm-delete-modal.component';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, forkJoin, catchError, of, switchMap, map } from 'rxjs';
 
 const PROCEDURE_TYPES = [
   'Cirurgia',
@@ -43,21 +46,9 @@ const STATUS_OPTIONS: StatusOption[] = [
   { value: 'pending', label: 'Pendente' },
   { value: 'in_progress', label: 'Em andamento' },
   { value: 'completed', label: 'Concluído' },
-  { value: 'interrupted', label: 'Interrompido' },
+  { value: 'interrupted', label: 'Observação' },
 ];
 
-const MOCK_MATERIALS: Omit<Material, 'quantity'>[] = [
-  { name: 'Resina Composta', category: 'Restauração' },
-  { name: 'Amálgama', category: 'Restauração' },
-  { name: 'Cimento de Ionômero de Vidro', category: 'Restauração' },
-  { name: 'Anestésico Local', category: 'Cirurgia' },
-  { name: 'Fio de Sutura', category: 'Cirurgia' },
-  { name: 'Gaze Estéril', category: 'Cirurgia' },
-  { name: 'Braquete Metálico', category: 'Ortodontia' },
-  { name: 'Fio Ortodôntico', category: 'Ortodontia' },
-  { name: 'Escova Interdental', category: 'Prevenção' },
-  { name: 'Flúor Gel', category: 'Prevenção' },
-];
 
 const API_STATUS: Record<ProcedureStatus, string> = {
   pending: 'PENDING',
@@ -184,17 +175,14 @@ interface ProcedureFormGroup {
               >
               <select
                 formControlName="type"
-                class="rounded-xl px-4 py-4.25 text-base outline-none transition opacity-50 cursor-not-allowed"
-                style="background: #EEEEEE; font-family: Manrope, sans-serif; border: 2px solid transparent; appearance: none;"
+                class="rounded-xl px-4 py-4.25 text-base outline-none transition cursor-pointer"
+                style="background: #EEEEEE; font-family: Manrope, sans-serif; border: 2px solid transparent;"
               >
-                <option value="" disabled>Selecione o tipo</option>
+                <option value="">Selecione o tipo</option>
                 @for (t of procedureTypes; track t) {
                   <option [value]="t">{{ t }}</option>
                 }
               </select>
-              <span class="text-[11px] text-[#78716C]" style="font-family: Manrope, sans-serif;">
-                Aguardando suporte do backend para salvar este campo.
-              </span>
             </div>
           </div>
 
@@ -276,9 +264,12 @@ interface ProcedureFormGroup {
                 [formControl]="materialSelectControl"
                 class="flex-1 rounded-xl px-4 py-4.25 text-base outline-none transition"
                 style="background: #EEEEEE; font-family: Manrope, sans-serif; border: 2px solid transparent; appearance: none; cursor: pointer;"
+                [disabled]="materialsLoading()"
               >
-                <option value="">Selecione um material</option>
-                @for (m of mockMaterials; track m.name) {
+                <option value="">
+                  {{ materialsLoading() ? 'Carregando...' : 'Selecione um material' }}
+                </option>
+                @for (m of availableMaterials(); track m.id) {
                   <option [value]="m.name">{{ m.name }}</option>
                 }
               </select>
@@ -323,7 +314,7 @@ interface ProcedureFormGroup {
               </button>
             </div>
             <a
-              routerLink="/materiais/novo"
+              routerLink="/inventories/new"
               class="mt-1 self-start text-[12px] font-semibold text-[#7C5145] hover:underline"
               style="font-family: Manrope, sans-serif;"
             >
@@ -406,7 +397,7 @@ interface ProcedureFormGroup {
     />
   `,
 })
-export class ProcedureFormComponent implements OnChanges {
+export class ProcedureFormComponent implements OnChanges, OnInit {
   treatmentId = input.required<string>();
   patientId = input.required<string>();
   patientName = input.required<string>();
@@ -417,11 +408,14 @@ export class ProcedureFormComponent implements OnChanges {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private treatmentService = inject(TreatmentService);
+  private inventoryService = inject(InventoryService);
 
   protected readonly procedureTypes = PROCEDURE_TYPES;
   protected readonly statusOptions = STATUS_OPTIONS;
-  protected readonly mockMaterials = MOCK_MATERIALS;
   protected readonly Math = Math;
+
+  protected availableMaterials = signal<InventoryItem[]>([]);
+  protected materialsLoading = signal(true);
 
   protected selectedTeeth = signal<number[]>([]);
   protected materials = signal<Material[]>([]);
@@ -434,7 +428,7 @@ export class ProcedureFormComponent implements OnChanges {
 
   protected form: FormGroup<ProcedureFormGroup> = this.fb.group({
     name: this.fb.nonNullable.control('', Validators.required),
-    type: this.fb.nonNullable.control({ value: '', disabled: true }),
+    type: this.fb.nonNullable.control(''),
     startDate: this.fb.nonNullable.control(''),
     endDate: this.fb.nonNullable.control(''),
     value: this.fb.nonNullable.control('', Validators.required),
@@ -442,10 +436,39 @@ export class ProcedureFormComponent implements OnChanges {
 
   protected toothStatesSignal = computed<Record<number, ToothState>>(() =>
     this.selectedTeeth().reduce<Record<number, ToothState>>((acc, t) => {
-      acc[t] = 'selected';
+      acc[t] = 'pending';
       return acc;
     }, {}),
   );
+
+  ngOnInit(): void {
+    this.inventoryService
+      .listClinics()
+      .pipe(
+        switchMap((clinics) =>
+          clinics.length
+            ? forkJoin(
+                clinics.map((c) =>
+                  this.inventoryService.listItems(c.id).pipe(catchError(() => of([] as InventoryItem[]))),
+                ),
+              )
+            : of([] as InventoryItem[][]),
+        ),
+        map((arrays) => {
+          const seen = new Set<string>();
+          return (arrays as InventoryItem[][]).flat().filter((item) => {
+            if (!item.active || seen.has(item.id)) return false;
+            seen.add(item.id);
+            return true;
+          });
+        }),
+        catchError(() => of([] as InventoryItem[])),
+      )
+      .subscribe((items) => {
+        this.availableMaterials.set(items);
+        this.materialsLoading.set(false);
+      });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['existingProcedure']) {
@@ -489,15 +512,16 @@ export class ProcedureFormComponent implements OnChanges {
   protected addMaterial(): void {
     const name = this.materialSelectControl.value ?? '';
     if (!name) return;
-    const found = MOCK_MATERIALS.find((m) => m.name === name);
+    const found = this.availableMaterials().find((m) => m.name === name);
     if (!found) return;
     const qty = this.materialQty();
+    const category = found.itemType === 'EQUIPMENT' ? 'Equipamento' : 'Material';
     this.materials.update((list) => {
       const existing = list.findIndex((m) => m.name === name);
       if (existing >= 0) {
         return list.map((m, i) => (i === existing ? { ...m, quantity: m.quantity + qty } : m));
       }
-      return [...list, { name: found.name, category: found.category, quantity: qty }];
+      return [...list, { name: found.name, category, quantity: qty }];
     });
     this.materialSelectControl.reset('');
     this.materialQty.set(1);

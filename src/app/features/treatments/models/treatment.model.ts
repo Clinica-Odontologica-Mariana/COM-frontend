@@ -35,6 +35,7 @@ export interface TreatmentData {
   executed: number;
   toPay: number;
   toothStates: Record<number, ToothState>;
+  startDate: string;
   journeyStep: number;
   notes: string;
 }

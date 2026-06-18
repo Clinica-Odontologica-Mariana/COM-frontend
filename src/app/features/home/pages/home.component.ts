@@ -7,8 +7,6 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
 import { CertificateApi } from '../../certificates/api/certificate.api';
 import { adaptCertificates } from '../../certificates/adapters/certificate.adapter';
 import { CertificateViewModel } from '../../certificates/models/certificate.model';
@@ -18,7 +16,7 @@ const MAX_PUBLIC_CERTIFICATES = 3;
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   template: `
     <main class="bg-[#FAFAF9] text-[#6B5B52]">
       <!-- HERO -->
@@ -63,19 +61,9 @@ const MAX_PUBLIC_CERTIFICATES = 3;
       @if (certificates().length > 0) {
         <section id="certificados" class="border-b border-[#EEE5E0] px-6 py-16 lg:px-12">
           <div class="mx-auto max-w-5xl">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <h2 class="font-serif text-3xl text-[#8B574B] sm:text-4xl">Certificações</h2>
-                <p class="mt-2 text-sm text-[#A29087]">Formação e qualificação profissional</p>
-              </div>
-              @if (isAuthenticated()) {
-                <a
-                  routerLink="/certificados"
-                  class="mt-1 flex shrink-0 items-center gap-1.5 rounded-lg border border-[#E3D7D1] bg-white px-4 py-2 text-sm font-semibold text-[#8B574B] transition hover:bg-[#F5EFEC]"
-                >
-                  Gerenciar
-                </a>
-              }
+            <div>
+              <h2 class="font-serif text-3xl text-[#8B574B] sm:text-4xl">Certificações</h2>
+              <p class="mt-2 text-sm text-[#A29087]">Formação e qualificação profissional</p>
             </div>
 
             <div class="mt-10 grid gap-4 md:grid-cols-3">
@@ -204,7 +192,6 @@ const MAX_PUBLIC_CERTIFICATES = 3;
 })
 export class HomeComponent implements OnInit {
   private readonly certificateApi = inject(CertificateApi);
-  private readonly authService = inject(AuthService);
   private readonly platformId = inject(PLATFORM_ID);
 
   protected readonly certificates = signal<CertificateViewModel[]>([]);
@@ -229,10 +216,6 @@ export class HomeComponent implements OnInit {
         'Equipamentos de última geração em versões compactas para diagnósticos precisos em qualquer ambiente.',
     },
   ];
-
-  protected isAuthenticated(): boolean {
-    return this.authService.isTokenValid();
-  }
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) {

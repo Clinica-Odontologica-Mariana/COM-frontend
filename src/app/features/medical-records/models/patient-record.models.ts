@@ -1,8 +1,19 @@
 // --- Backend DTOs (match Swagger exactly) ---
 
+export interface PatientAddressDTO {
+  id: string;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
 export interface PatientDTO {
   id: string;
   addressId: string | null;
+  address: PatientAddressDTO | null;
   createdByUserId: string;
   fullName: string;
   cpf: string;
@@ -98,6 +109,11 @@ export interface OdontogramEntryDTO {
   recordedAt: string;
 }
 
+export interface OdontogramFileSummaryDto {
+  id: string;
+  file: { id: string };
+}
+
 export interface PresignedUrlDTO {
   url: string;
   expiresAt: string;
@@ -155,6 +171,8 @@ export interface AttachmentView {
   description: string | null;
   createdAt: string;
   isImage: boolean;
+  storedFileId: string;
+  imageUrl: string | null;
 }
 
 export interface ProcedureView {

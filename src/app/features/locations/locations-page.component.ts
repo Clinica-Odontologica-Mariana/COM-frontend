@@ -1,10 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
-import { ClinicsApi } from '../../../clinics/api/clinics.api';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { ClinicsApi } from '../clinics/api/clinics.api';
 import {
   ClinicCardViewModel,
-  WorkingDay,
   toClinicCardViewModel,
-} from '../../../clinics/models/clinic.models';
+  WorkingDay,
+} from '../clinics/models/clinic.models';
 
 interface LocationUnit extends ClinicCardViewModel {
   fullAddress: string;
@@ -72,17 +79,9 @@ interface LocationUnit extends ClinicCardViewModel {
               </article>
             }
           </div>
-        } @else if (feedback()) {
-          <div class="rounded-lg border border-[#E9C9C0] bg-[#FFF6F4] px-6 py-5 text-[#A34D43]">
-            {{ feedback() }}
-          </div>
         } @else if (!visibleUnits().length) {
-          <div class="rounded-lg border border-[#EFEAE7] bg-white px-6 py-12 text-center">
-            <h3 class="font-serif text-3xl font-bold text-[#89594C]">Nenhuma unidade cadastrada</h3>
-            <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-[#5E514B]">
-              Assim que uma clínica for cadastrada no gerenciamento, ela aparecerá aqui para
-              consulta.
-            </p>
+          <div class="rounded-lg border border-[#E9C9C0] bg-[#FFF6F4] px-6 py-5 text-[#A34D43]">
+            Não foi possível carregar as unidades no momento.
           </div>
         } @else {
           <div class="grid gap-8 lg:grid-cols-2">
@@ -99,7 +98,9 @@ interface LocationUnit extends ClinicCardViewModel {
                       loading="lazy"
                     />
                   } @else {
-                    <div class="flex h-full items-center justify-center px-6 text-center text-[#8B7E77]">
+                    <div
+                      class="flex h-full items-center justify-center px-6 text-center text-[#8B7E77]"
+                    >
                       <p class="text-base font-semibold">Imagem da unidade indisponível</p>
                     </div>
                   }
@@ -168,7 +169,9 @@ interface LocationUnit extends ClinicCardViewModel {
                     }
                     @if (unit.email) {
                       <p class="flex gap-4">
-                        <span class="mt-1 h-5 w-5 shrink-0 text-center text-sm font-bold text-[#89594C]">
+                        <span
+                          class="mt-1 h-5 w-5 shrink-0 text-center text-sm font-bold text-[#89594C]"
+                        >
                           &#64;
                         </span>
                         <span>{{ unit.email }}</span>
@@ -176,7 +179,7 @@ interface LocationUnit extends ClinicCardViewModel {
                     }
                   </div>
 
-                  <div class="mt-auto flex flex-col items-start gap-3 pt-10">
+                  <div class="mt-auto flex items-center justify-between gap-3 pt-10">
                     <a
                       [href]="unit.mapUrl"
                       target="_blank"
@@ -189,9 +192,9 @@ interface LocationUnit extends ClinicCardViewModel {
                       [href]="unit.whatsappUrl"
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="inline-flex w-fit items-center gap-2 text-sm font-bold uppercase tracking-wide text-[#89594C] transition hover:text-[#744A40]"
+                      class="inline-flex items-center justify-center rounded border border-[#9E8D83] bg-[#7A6B62] px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-[#6B5D55]"
                     >
-                      Agendar <span aria-hidden="true">-></span>
+                      Agendar
                     </a>
                   </div>
                 </div>
@@ -209,24 +212,24 @@ export class LocationsPageComponent implements OnInit {
 
   protected readonly skeletonCards = Array.from({ length: 4 });
   protected readonly loading = signal(true);
-  protected readonly feedback = signal<string | null>(null);
   protected readonly units = signal<LocationUnit[]>([]);
   protected readonly visibleUnits = computed(() =>
     [...this.units()].sort((left, right) => left.name.localeCompare(right.name, 'pt-BR')),
   );
   protected readonly primaryWhatsappUrl = computed(
-    () => this.visibleUnits().find((unit) => unit.whatsapp)?.whatsappUrl ?? 'https://api.whatsapp.com/send?phone=61993359225',
+    () =>
+      this.visibleUnits().find((unit) => unit.whatsapp)?.whatsappUrl ??
+      'https://api.whatsapp.com/send?phone=61993359225',
   );
 
   ngOnInit(): void {
-    this.clinicsApi.listPublic().subscribe({
+    this.clinicsApi.list().subscribe({
       next: (clinics) => {
         this.units.set(clinics.map((clinic) => toLocationUnit(toClinicCardViewModel(clinic))));
         this.loading.set(false);
       },
       error: () => {
         this.loading.set(false);
-        this.feedback.set('Não foi possível carregar as unidades no momento.');
       },
     });
   }
@@ -240,7 +243,9 @@ export class LocationsPageComponent implements OnInit {
 
     const dayLabels = enabledDays.map((day) => day.label.replace('-feira', ''));
     const schedules = enabledDays
-      .map((day) => day.intervals.map((interval) => `${interval.startTime} - ${interval.endTime}`).join(', '))
+      .map((day) =>
+        day.intervals.map((interval) => `${interval.startTime} - ${interval.endTime}`).join(', '),
+      )
       .filter(Boolean);
     const uniqueSchedules = Array.from(new Set(schedules));
 

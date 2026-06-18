@@ -77,8 +77,8 @@ import { getStatusColor } from '../../utils/status.utils';
                   <td class="px-5 py-4 text-[13px] border-t border-stone-100 font-medium text-stone-800">{{ a.description }}</td>
                   <td class="px-5 py-4 border-t border-stone-100">
                     <span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold"
-                      [ngClass]="a.category === 'RECEITA' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'">
-                      {{ a.category }}
+                      [ngClass]="a.type === 'RECEITA' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'">
+                      {{ a.type }}
                     </span>
                   </td>
                   <td class="px-5 py-4 border-t border-stone-100">

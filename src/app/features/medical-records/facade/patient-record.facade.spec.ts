@@ -13,6 +13,7 @@ import { PatientRecordFacade } from './patient-record.facade';
 const patientDto: PatientDTO = {
   id: 'p1',
   addressId: null,
+  address: null,
   createdByUserId: 'u1',
   fullName: 'Carlos Mendes',
   cpf: '000.000.000-00',
@@ -45,6 +46,20 @@ const noteDto: MedicalRecordNoteDTO = {
   createdAt: '2024-06-01T10:00:00Z',
 };
 
+const planDto = {
+  id: 'plan1',
+  patientId: 'p1',
+  medicalRecordId: 'r1',
+  professionalId: null,
+  title: 'Plano',
+  status: 'ACTIVE',
+  notes: null,
+  totalAmount: 0,
+  createdByUserId: 'u1',
+  createdAt: '2024-01-01T10:00:00Z',
+  updatedAt: '2024-01-01T10:00:00Z',
+};
+
 function createApiMock() {
   return {
     getPatient: vi.fn().mockReturnValue(of(patientDto)),
@@ -52,6 +67,7 @@ function createApiMock() {
     getNotes: vi.fn().mockReturnValue(of([])),
     getAttachments: vi.fn().mockReturnValue(of([])),
     getTreatmentPlans: vi.fn().mockReturnValue(of([])),
+    createTreatmentPlan: vi.fn().mockReturnValue(of(planDto)),
     getTreatmentPlanItems: vi.fn().mockReturnValue(of([])),
     createNote: vi.fn(),
     deleteNote: vi.fn(),

@@ -11,6 +11,8 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { ToastService } from '../../../../core/services/toast.service';
+
 import { PatientView } from '../../models/patient-record.models';
 
 @Component({
@@ -29,9 +31,9 @@ import { PatientView } from '../../models/patient-record.models';
             {{ initials() }}
           </div>
 
-          <div>
+          <div class="min-w-0">
             <h1
-              class="text-2xl font-bold text-[#3F322D] leading-tight"
+              class="text-lg lg:text-2xl font-bold text-[#3F322D] leading-tight"
               style="font-family: 'Noto Serif', serif"
             >
               {{ p.fullName }}
@@ -128,10 +130,10 @@ import { PatientView } from '../../models/patient-record.models';
       </header>
     } @else {
       <header class="flex items-center gap-4 py-6">
-        <div class="h-16 w-16 animate-pulse rounded-full bg-[#EFE7E3]"></div>
-        <div class="space-y-2">
-          <div class="h-7 w-64 animate-pulse rounded bg-[#EFE7E3]"></div>
-          <div class="h-4 w-48 animate-pulse rounded bg-[#EFE7E3]"></div>
+        <div class="h-16 w-16 shrink-0 animate-pulse rounded-full bg-[#EFE7E3]"></div>
+        <div class="min-w-0 flex-1 space-y-2">
+          <div class="h-7 w-48 max-w-full animate-pulse rounded bg-[#EFE7E3]"></div>
+          <div class="h-4 w-36 max-w-full animate-pulse rounded bg-[#EFE7E3]"></div>
         </div>
       </header>
     }
@@ -141,6 +143,7 @@ import { PatientView } from '../../models/patient-record.models';
 export class PatientHeaderComponent {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly toast = inject(ToastService);
 
   readonly patient = input<PatientView | null>(null);
 
@@ -200,6 +203,7 @@ export class PatientHeaderComponent {
   }
 
   private showCopied(): void {
+    this.toast.success('Link copiado para a área de transferência!');
     this.copied.set(true);
     this.cdr.markForCheck();
     setTimeout(() => {

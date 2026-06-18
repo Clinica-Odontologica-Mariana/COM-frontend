@@ -28,6 +28,7 @@ export interface CreateUserResponseDto {
 export interface ProfessionalDto {
   id: string;
   userId: string;
+  fullName: string;
   clinicId: string;
   specialtyId: string;
   licenseNumber: string;

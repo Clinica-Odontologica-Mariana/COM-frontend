@@ -11,7 +11,7 @@ const BADGE_CONFIGS: Record<ProcedureStatus, BadgeConfig> = {
   pending:      { label: 'Pendente',      color: '#92400E', bg: '#FEF3C7' },
   in_progress:  { label: 'Em andamento',  color: '#7C5145', bg: '#F0E4DF' },
   completed:    { label: 'Concluído',     color: '#166534', bg: '#BBFCC7' },
-  interrupted:  { label: 'Interrompido',  color: '#1E40AF', bg: '#DBEAFE' },
+  interrupted:  { label: 'Observação',    color: '#1E40AF', bg: '#DBEAFE' },
 };
 
 @Component({

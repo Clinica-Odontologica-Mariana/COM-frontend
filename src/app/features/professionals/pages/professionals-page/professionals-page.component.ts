@@ -316,7 +316,7 @@ export class ProfessionalsPageComponent implements OnInit {
         id: user.id,
         userId: user.id,
         username: user.username,
-        fullName: this.api.fullName(user),
+        fullName: professional?.fullName || this.api.fullName(user),
         email: user.email,
         role: this.api.roleForUser(user.id, professional ? 'DOCTOR' : undefined),
         clinicId: professional?.clinicId ?? '',
