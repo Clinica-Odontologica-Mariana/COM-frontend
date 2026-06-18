@@ -75,22 +75,6 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'patients/:id/edit',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/patients/pages/edit-patient/edit-patient.component').then(
-        (m) => m.EditPatientComponent,
-      ),
-  },
-  {
-    path: 'patients/:id/treatments',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/medical-records/pages/patient-record-page/patient-record-page.component').then(
-        (m) => m.PatientRecordPageComponent,
-      ),
-  },
-  {
     path: 'pacientes/:id/editar',
     canActivate: [authGuard],
     loadComponent: () =>
