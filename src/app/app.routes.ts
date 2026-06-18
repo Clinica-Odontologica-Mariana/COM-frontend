@@ -155,7 +155,24 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'panel',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/panel/pages/panel-page/panel-page.component').then(
+        (m) => m.PanelPageComponent,
+      ),
+  },
+  {
+    path: 'panel/history',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/panel/pages/panel-history-page/panel-history-page.component').then(
+        (m) => m.HistoryPageComponent,
+      ),
+  },
+  {
     path: 'schedule',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/appointment/pages/appointment-main-page.component').then(
         (m) => m.AppointmentMainPageComponent,
@@ -163,6 +180,7 @@ export const routes: Routes = [
   },
   {
     path: 'schedule/new',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/appointment/pages/appointment-create-page.component').then(
         (m) => m.AppointmentCreatePageComponent,
@@ -170,6 +188,7 @@ export const routes: Routes = [
   },
   {
     path: 'schedule/appointments',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/appointment/pages/appointments-list-page.component').then(
         (m) => m.AppointmentsListPageComponent,
@@ -177,6 +196,7 @@ export const routes: Routes = [
   },
   {
     path: 'schedule/:id/edit',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/appointment/pages/appointment-edit-page.component').then(
         (m) => m.AppointmentEditPageComponent,
