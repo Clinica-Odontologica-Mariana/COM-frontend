@@ -485,7 +485,7 @@ const CERTIFICATE_TYPES = [
 
             <!-- Content -->
             <div class="space-y-5 p-6">
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label class="text-xs font-bold uppercase text-[#78716C]">Título</label>
                   <p class="mt-1 font-semibold text-[#5E514B]">{{ certificateToView()?.title }}</p>
@@ -507,7 +507,7 @@ const CERTIFICATE_TYPES = [
                 </div>
               }
 
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label class="text-xs font-bold uppercase text-[#78716C]">Data de Emissão</label>
                   <p class="mt-1 font-semibold text-[#5E514B]">
