@@ -58,7 +58,7 @@ interface PatientFormControls {
     <div class="min-h-full pb-12">
       <app-patient-page-header [title]="pageTitle()" [breadcrumbs]="breadcrumbs()">
         <a
-          routerLink="/patients"
+          routerLink="/pacientes"
           class="rounded-xl px-6 py-2 text-base font-bold text-[#78716C] transition hover:bg-[#F5F5F4]"
         >
           Cancelar
@@ -602,7 +602,7 @@ export class PatientFormPageComponent {
   protected readonly photoPreview = signal<string | undefined>(undefined);
   protected readonly pageTitle = signal('Novo Paciente');
   protected readonly breadcrumbs = signal<BreadcrumbItem[]>([
-    { label: 'Pacientes', link: '/patients' },
+    { label: 'Pacientes', link: '/pacientes' },
     { label: 'Novo Cadastro' },
   ]);
 
@@ -638,7 +638,7 @@ export class PatientFormPageComponent {
       this.patientId = id;
       this.pageTitle.set('Editar Paciente');
       this.breadcrumbs.set([
-        { label: 'Pacientes', link: '/patients' },
+        { label: 'Pacientes', link: '/pacientes' },
         { label: 'Editar Cadastro' },
       ]);
       this.loadPatient(id);
@@ -754,7 +754,7 @@ export class PatientFormPageComponent {
         this.toast.success(
           this.patientId ? 'Paciente atualizado com sucesso.' : 'Paciente cadastrado com sucesso.',
         );
-        void this.router.navigate(['/patients']);
+        void this.router.navigate(['/pacientes']);
       },
       error: () => {
         this.saving.set(false);
@@ -799,7 +799,7 @@ export class PatientFormPageComponent {
         },
         error: () => {
           this.loading.set(false);
-          void this.router.navigate(['/patients']);
+          void this.router.navigate(['/pacientes']);
         },
       });
   }

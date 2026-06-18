@@ -24,7 +24,7 @@ import { PatientService } from '../../services/patient.service';
     <div class="min-h-full pb-12">
       <app-patient-page-header title="Pacientes">
         <a
-          routerLink="/patients/new"
+          routerLink="/pacientes/new"
           class="rounded-xl bg-[#7C5145] px-8 py-2 text-base font-bold text-white shadow-lg shadow-[#7C5145]/20 transition hover:bg-[#6a453b]"
         >
           Novo Cadastro

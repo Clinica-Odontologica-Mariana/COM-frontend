@@ -10,9 +10,6 @@ const mockResponse: LoginResponse = {
   accessToken: 'mock-jwt-token',
   refreshToken: 'mock-refresh-token',
   expiresIn: 3600,
-  refreshExpiresIn: 86400,
-  tokenType: 'Bearer',
-  scope: 'openid profile',
 };
 
 const mockApiResponse = {

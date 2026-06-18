@@ -26,6 +26,7 @@ export interface Appointment {
   workplaceId?: string | null;
   clinicId?: string | null;
   professionalId?: string | null;
+  statusId?: string | null;
   date: string;
   startTime: string;
   endTime: string;
@@ -42,6 +43,7 @@ export interface AppointmentFormDto {
   workplaceId: string;
   professionalId: string;
   procedureId?: string | null;
+  statusId?: string | null;
   date: string;
   startTime: string;
   endTime: string;
