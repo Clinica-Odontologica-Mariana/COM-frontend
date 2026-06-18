@@ -120,35 +120,6 @@ const CERTIFICATE_TYPES = [
                 />
               </div>
 
-              <!-- Upload do Documento -->
-              <div>
-                <label class="block text-xs font-bold uppercase tracking-wide text-[#78716C]">
-                  Documento
-                </label>
-                <!-- Banner informativo — upload ainda não disponível -->
-                <div
-                  class="mt-2 flex items-start gap-3 rounded-lg border border-[#D4A574]/50 bg-[#FDF6EE] px-4 py-3 text-sm text-[#8B6535]"
-                >
-                  <svg
-                    class="mt-0.5 h-4 w-4 shrink-0 text-[#D4A574]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                  <span
-                    >O upload de arquivos para certificados ainda não está disponível. Salve os
-                    demais dados e anexe o documento quando a funcionalidade for liberada.</span
-                  >
-                </div>
-              </div>
-
               <!-- Botões -->
               <div class="flex gap-3">
                 <button
