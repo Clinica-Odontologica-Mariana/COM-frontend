@@ -319,6 +319,7 @@ export class AppointmentEditPageComponent {
           this.appointment.set(apt);
           this.form.patchValue({
             professionalId: apt.professionalId ?? '',
+            procedureId: apt.procedureId ?? '',
             workplaceId: apt.workplaceId ?? '',
             date: apt.date,
             startTime: apt.startTime,
@@ -363,14 +364,14 @@ export class AppointmentEditPageComponent {
     const apt = this.appointment();
     if (!apt || this.form.invalid) return;
 
-    const { date, startTime, endTime, notes, status } = this.form.getRawValue();
+    const { date, startTime, endTime, notes, status, procedureId } = this.form.getRawValue();
     const statusId =
       this.statusOptions().find((s) => s.code.toUpperCase() === status.toUpperCase())?.id
       ?? apt.statusId;
 
     this.saving.set(true);
     this.appointmentService
-      .update(apt.id, { statusId, date, startTime, endTime, notes })
+      .update(apt.id, { statusId, procedureId: procedureId || null, date, startTime, endTime, notes })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {

@@ -24,6 +24,7 @@ interface AppointmentApiDto {
   workplaceId: string | null;
   professionalId: string | null;
   professionalName: string | null;
+  procedureId: string | null;
   statusId: string | null;
   statusCode: string | null;
   statusName: string | null;
@@ -96,7 +97,7 @@ function toAppointment(dto: AppointmentApiDto): Appointment {
     patientInitials: patientName ? toInitials(patientName) : undefined,
     professionalName: dto.professionalName ?? undefined,
     procedure: 'avaliacao' as ProcedureType,
-    procedureId: null,
+    procedureId: dto.procedureId ?? null,
     location: null,
     workplaceId: dto.workplaceId ?? null,
     clinicId: dto.clinicId ?? null,
@@ -201,6 +202,7 @@ export class AppointmentApi {
       clinicId: dto.clinicId,
       workplaceId: dto.workplaceId,
       professionalId: dto.professionalId,
+      procedureId: dto.procedureId ?? null,
       startDatetime: toDatetime(dto.date, dto.startTime),
       endDatetime: toDatetime(dto.date, dto.endTime),
       notes: dto.notes ?? null,
@@ -216,6 +218,7 @@ export class AppointmentApi {
     const date = dto.date ?? '';
     const body = {
       statusId: dto.statusId ?? null,
+      procedureId: dto.procedureId ?? null,
       startDatetime: toDatetime(date, dto.startTime ?? '00:00'),
       endDatetime: toDatetime(date, dto.endTime ?? '00:00'),
       notes: dto.notes ?? null,
