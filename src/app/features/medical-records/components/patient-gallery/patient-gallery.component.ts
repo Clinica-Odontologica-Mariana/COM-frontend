@@ -1,5 +1,13 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, HostListener, inject, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { filter } from 'rxjs';
 
 import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
@@ -9,7 +17,7 @@ import { AttachmentView } from '../../models/patient-record.models';
   selector: 'app-patient-gallery',
   imports: [DatePipe],
   template: `
-    <section class="my-4">
+    <section class="my-4 max-w-screen">
       <div class="mb-8">
         <h2 class="text-2xl font-bold text-[#7C5145]" style="font-family: 'Noto Serif', serif">
           Exames e Galeria
@@ -22,7 +30,9 @@ import { AttachmentView } from '../../models/patient-record.models';
             <!-- Preview area -->
             <div
               class="flex aspect-square cursor-pointer items-center justify-center overflow-hidden"
-              [class]="att.isImage && !att.imageUrl ? 'bg-[#E7E5E4]' : (!att.isImage ? 'bg-[#F5F5F4]' : '')"
+              [class]="
+                att.isImage && !att.imageUrl ? 'bg-[#E7E5E4]' : !att.isImage ? 'bg-[#F5F5F4]' : ''
+              "
               (click)="openModal(att)"
             >
               @if (att.isImage && att.imageUrl) {
@@ -159,7 +169,14 @@ import { AttachmentView } from '../../models/patient-record.models';
             (click)="closeModal()"
             aria-label="Fechar"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -175,14 +192,36 @@ import { AttachmentView } from '../../models/patient-record.models';
               />
             } @else if (selected()!.isImage) {
               <div class="flex h-48 items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-[#78716C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-16 w-16 text-[#78716C]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
                 </svg>
               </div>
             } @else {
               <div class="flex h-48 flex-col items-center justify-center gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-[#78716C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-16 w-16 text-[#78716C]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  />
                 </svg>
               </div>
             }

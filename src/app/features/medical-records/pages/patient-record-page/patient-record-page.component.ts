@@ -36,7 +36,7 @@ import { MedicalRecordNoteCreateDTO } from '../../models/patient-record.models';
   ],
   providers: [PatientRecordFacade],
   template: `
-    <div class="mx-auto w-full px-6 pb-16" style="font-family: 'Manrope', sans-serif">
+    <div class="mx-auto w-full px-4 pb-16 sm:px-6" style="font-family: 'Manrope', sans-serif">
       @if (facade.error(); as err) {
         <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {{ err }}
@@ -85,7 +85,7 @@ import { MedicalRecordNoteCreateDTO } from '../../models/patient-record.models';
         <aside class="flex flex-col gap-6">
           <app-medical-alerts [alerts]="facade.alerts()" />
           <app-procedures-history [procedures]="facade.procedures()" [patientId]="patientId()" />
-          <app-prescriptions-panel />
+          <app-prescriptions-panel [patientId]="patientId()" />
         </aside>
       </div>
     </div>

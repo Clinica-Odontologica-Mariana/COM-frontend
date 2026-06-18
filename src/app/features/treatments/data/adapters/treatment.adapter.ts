@@ -122,7 +122,7 @@ function buildToothStates(
           states[tooth] = 'selected';
           break;
         case 'interrupted':
-          states[tooth] = 'inactive';
+          states[tooth] = 'note';
           break;
         case 'pending':
         default:

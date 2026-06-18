@@ -7,7 +7,7 @@ import { BalanceView, LastVisitView } from '../../models/patient-record.models';
   selector: 'app-financial-summary',
   imports: [CurrencyPipe],
   template: `
-    <div class="flex flex-col gap-4 sm:flex-row h-full">
+    <div class="flex flex-col gap-4 sm:flex-row h-full max-w-screen">
       <!-- Última visita -->
       <section class="flex-1 rounded-xl bg-[#F3F3F3] p-6">
         <p class="text-xs font-bold uppercase tracking-[1.2px] text-[#69594A]">Última Visita</p>
@@ -15,7 +15,7 @@ import { BalanceView, LastVisitView } from '../../models/patient-record.models';
         @if (lastVisit(); as v) {
           <div class="mt-3">
             <p
-              class="text-3xl font-bold text-[#7C5145] leading-tight"
+              class="text-2xl lg:text-3xl font-bold text-[#7C5145] leading-tight"
               style="font-family: 'Noto Serif', serif"
             >
               {{ shortDate() || '—' }}
@@ -39,7 +39,7 @@ import { BalanceView, LastVisitView } from '../../models/patient-record.models';
         @if (balance(); as b) {
           <div class="mt-3">
             <p
-              class="text-3xl font-bold text-white leading-tight"
+              class="text-2xl lg:text-3xl font-bold text-white leading-tight"
               style="font-family: 'Noto Serif', serif"
             >
               {{ b.amount | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}

@@ -71,33 +71,6 @@ interface JourneyStep {
           </div>
         }
       </div>
-
-      <!-- Next step card -->
-      @if (nextStep()) {
-        <div
-          style="background: #FFFFFF; border-top: 4px solid #69594A; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;"
-        >
-          <!-- Header row -->
-          <div style="display: flex; flex-direction: row; align-items: center; gap: 8px;">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <circle cx="6" cy="6" r="5.5" stroke="#69594A" />
-              <path d="M6 5.5V8.5" stroke="#69594A" stroke-width="1.2" stroke-linecap="round" />
-              <circle cx="6" cy="3.5" r="0.6" fill="#69594A" />
-            </svg>
-            <span
-              style="font-family: Manrope, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #69594A;"
-            >
-              Próximo Passo
-            </span>
-          </div>
-          <!-- Body -->
-          <p
-            style="font-family: Manrope, sans-serif; font-size: 12px; font-weight: 400; line-height: 20px; color: #514440; margin: 0;"
-          >
-            {{ nextStep() }}
-          </p>
-        </div>
-      }
     </div>
   `,
 })
@@ -107,7 +80,10 @@ export class JourneyTrackerComponent {
   startDate = input<string>('');
 
   protected steps = computed<JourneyStep[]>(() => [
-    { label: 'Triagem Inicial', subtitle: this.startDate() ? `Realizado em ${this.startDate()}` : 'Data de entrada' },
+    {
+      label: 'Triagem Inicial',
+      subtitle: this.startDate() ? `Realizado em ${this.startDate()}` : 'Data de entrada',
+    },
     { label: 'Fase Curativa', subtitle: 'Em progresso (2 procedimentos)' },
     { label: 'Fase Preventiva', subtitle: 'Aguardando curativo' },
   ]);

@@ -11,6 +11,8 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { ToastService } from '../../../../core/services/toast.service';
+
 import { PatientView } from '../../models/patient-record.models';
 
 @Component({
@@ -29,9 +31,9 @@ import { PatientView } from '../../models/patient-record.models';
             {{ initials() }}
           </div>
 
-          <div>
+          <div class="min-w-0">
             <h1
-              class="text-2xl font-bold text-[#3F322D] leading-tight"
+              class="text-lg lg:text-2xl font-bold text-[#3F322D] leading-tight"
               style="font-family: 'Noto Serif', serif"
             >
               {{ p.fullName }}
@@ -141,6 +143,7 @@ import { PatientView } from '../../models/patient-record.models';
 export class PatientHeaderComponent {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly toast = inject(ToastService);
 
   readonly patient = input<PatientView | null>(null);
 
@@ -200,6 +203,7 @@ export class PatientHeaderComponent {
   }
 
   private showCopied(): void {
+    this.toast.success('Link copiado para a área de transferência!');
     this.copied.set(true);
     this.cdr.markForCheck();
     setTimeout(() => {

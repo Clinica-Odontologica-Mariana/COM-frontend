@@ -153,6 +153,22 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'medical-records/:id/receita',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/prescriptions/pages/prescription-form/prescription-form.component').then(
+        (m) => m.PrescriptionFormComponent,
+      ),
+  },
+  {
+    path: 'medical-records/:id/atestado',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/prescriptions/pages/atestado-form/atestado-form.component').then(
+        (m) => m.AtestadoFormComponent,
+      ),
+  },
+  {
     path: 'medical-records/:id',
     canActivate: [authGuard],
     loadComponent: () =>

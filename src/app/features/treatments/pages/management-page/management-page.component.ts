@@ -34,7 +34,7 @@ function recomputeToothStates(
       switch (proc.status) {
         case 'in_progress': states[tooth] = 'pending'; break;
         case 'completed':   states[tooth] = 'selected'; break;
-        case 'interrupted': states[tooth] = 'inactive'; break;
+        case 'interrupted': states[tooth] = 'note'; break;
         default:            states[tooth] = 'note'; break;
       }
     }
@@ -357,7 +357,7 @@ const STATUS_ORDER: Record<ProcedureStatus, number> = {
                   <div class="shrink-0 text-right">
                     <p
                       class="font-family-sans m-0 text-base font-bold"
-                      [class]="proc.status === 'completed' ? 'text-[#16A34A]' : 'text-[#1A1C1C]'"
+                      [class]="proc.status === 'completed' ? 'text-[#16A34A]' : proc.status === 'interrupted' ? 'text-[#2291C5]' : 'text-[#1A1C1C]'"
                     >
                       {{ proc.value | currency: 'BRL' : 'symbol' : '1.2-2' : 'pt-BR' }}
                     </p>

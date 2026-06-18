@@ -13,14 +13,17 @@ export interface NoteEditPayload {
   imports: [EvolutionCardComponent],
   template: `
     <section>
-      <div class="mb-8 flex items-center justify-between gap-3">
-        <h2 class="min-w-0 text-xl font-bold text-[#7C5145] sm:text-2xl" style="font-family: 'Noto Serif', serif">
+      <div class="mb-8 flex items-center justify-between gap-3 max-w-screen">
+        <h2
+          class="min-w-0 text-base lg:text-xl font-bold text-[#7C5145]"
+          style="font-family: 'Noto Serif', serif"
+        >
           Evoluções Clínicas
         </h2>
 
         <button
           type="button"
-          class="flex shrink-0 cursor-pointer items-center gap-2 text-sm font-bold text-[#7C5145] transition hover:text-[#6B4439]"
+          class="flex shrink-0 cursor-pointer items-center gap-2 text-xs lg:text-sm font-bold text-[#7C5145] transition hover:text-[#6B4439]"
           (click)="newNote.emit()"
         >
           <svg

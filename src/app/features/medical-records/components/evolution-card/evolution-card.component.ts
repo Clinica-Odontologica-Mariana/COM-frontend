@@ -11,7 +11,7 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
   imports: [DatePipe],
   template: `
     <article
-      class="rounded-xl border border-[#F5F5F4] bg-white p-8 shadow-sm"
+      class="rounded-xl max-w-screen order border-[#F5F5F4] bg-white p-8 not-lg:p-4 shadow-sm"
       [class.opacity-80]="archived()"
     >
       <!-- Header: icon + title + status badge -->
@@ -42,7 +42,9 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
           </div>
 
           <div>
-            <p class="text-base font-bold leading-6 text-[#292524]">{{ note().title }}</p>
+            <p class="text-sm lg:text-base font-bold leading-6 text-[#292524]">
+              {{ note().title }}
+            </p>
             <p class="text-xs text-[#A8A29E]">
               {{ note().createdAt | date: "dd 'de' MMMM',' yyyy • HH:mm" : undefined : 'pt-BR' }}
             </p>
@@ -62,43 +64,94 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
           </span>
 
           @if (!editing()) {
-            <!-- Edit -->
-            <button
-              type="button"
-              class="rounded-full px-2 py-1 text-xs text-[#A8A29E] transition hover:bg-[#F5F5F4] hover:text-[#78716C] cursor-pointer"
-              (click)="startEdit()"
-              aria-label="Editar evolução"
-            >
-              Editar
-            </button>
+            <!-- Mobile: three-dots dropdown -->
+            <div class="relative lg:hidden">
+              <button
+                type="button"
+                class="grid h-7 w-7 cursor-pointer place-items-center rounded-full text-[#A8A29E] transition hover:bg-[#F5F5F4] hover:text-[#78716C]"
+                (click)="toggleMenu()"
+                aria-label="Mais opções"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" />
+                </svg>
+              </button>
+              @if (showMenu()) {
+                <div class="absolute right-0 top-full z-20 mt-1 min-w-27.5 overflow-hidden rounded-lg border border-[#E7DCD5] bg-white shadow-lg">
+                  @if (confirmingDelete()) {
+                    <div class="px-3 py-2 text-xs text-[#78716C]">Confirmar?</div>
+                    <button
+                      type="button"
+                      class="w-full px-3 py-2 text-left text-xs font-semibold text-red-600 hover:bg-red-50"
+                      (click)="confirmDelete()"
+                    >
+                      Sim, excluir
+                    </button>
+                    <button
+                      type="button"
+                      class="w-full px-3 py-2 text-left text-xs text-[#78716C] hover:bg-[#F5F5F4]"
+                      (click)="cancelDeleteAndClose()"
+                    >
+                      Cancelar
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="w-full px-3 py-2 text-left text-xs text-[#78716C] hover:bg-[#F5F5F4]"
+                      (click)="startEditAndClose()"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      class="w-full px-3 py-2 text-left text-xs text-red-500 hover:bg-red-50"
+                      (click)="requestDelete()"
+                    >
+                      Excluir
+                    </button>
+                  }
+                </div>
+              }
+            </div>
 
-            <!-- Delete -->
-            @if (confirmingDelete()) {
-              <span class="text-xs text-[#78716C]">Excluir?</span>
-              <button
-                type="button"
-                class="rounded-full px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50"
-                (click)="confirmDelete()"
-              >
-                Sim
-              </button>
-              <button
-                type="button"
-                class="rounded-full px-2 py-1 text-xs text-[#78716C] transition hover:bg-[#F5F5F4]"
-                (click)="cancelDelete()"
-              >
-                Não
-              </button>
-            } @else {
+            <!-- Desktop: text buttons -->
+            <div class="hidden items-center gap-2 lg:flex">
               <button
                 type="button"
                 class="rounded-full px-2 py-1 text-xs text-[#A8A29E] transition hover:bg-[#F5F5F4] hover:text-[#78716C] cursor-pointer"
-                (click)="requestDelete()"
-                aria-label="Excluir evolução"
+                (click)="startEdit()"
+                aria-label="Editar evolução"
               >
-                Excluir
+                Editar
               </button>
-            }
+
+              @if (confirmingDelete()) {
+                <span class="text-xs text-[#78716C]">Excluir?</span>
+                <button
+                  type="button"
+                  class="rounded-full px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+                  (click)="confirmDelete()"
+                >
+                  Sim
+                </button>
+                <button
+                  type="button"
+                  class="rounded-full px-2 py-1 text-xs text-[#78716C] transition hover:bg-[#F5F5F4]"
+                  (click)="cancelDelete()"
+                >
+                  Não
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="rounded-full px-2 py-1 text-xs text-[#A8A29E] transition hover:bg-[#F5F5F4] hover:text-[#78716C] cursor-pointer"
+                  (click)="requestDelete()"
+                  aria-label="Excluir evolução"
+                >
+                  Excluir
+                </button>
+              }
+            </div>
           }
         </div>
       </div>
@@ -159,6 +212,7 @@ export class EvolutionCardComponent {
   protected readonly expanded = signal(false);
   protected readonly editing = signal(false);
   protected readonly editValue = signal('');
+  protected readonly showMenu = signal(false);
 
   protected readonly archived = computed(() => {
     const raw = this.note().createdAt;
@@ -176,9 +230,17 @@ export class EvolutionCardComponent {
     return text.slice(0, MAX_CHARS).trimEnd() + '…';
   });
 
+  protected toggleMenu(): void {
+    this.showMenu.update((v) => !v);
+  }
+
   protected startEdit(): void {
     this.editValue.set(this.note().note);
     this.editing.set(true);
+  }
+  protected startEditAndClose(): void {
+    this.showMenu.set(false);
+    this.startEdit();
   }
   protected cancelEdit(): void {
     this.editing.set(false);
@@ -196,8 +258,13 @@ export class EvolutionCardComponent {
   protected cancelDelete(): void {
     this.confirmingDelete.set(false);
   }
+  protected cancelDeleteAndClose(): void {
+    this.confirmingDelete.set(false);
+    this.showMenu.set(false);
+  }
   protected confirmDelete(): void {
     this.confirmingDelete.set(false);
+    this.showMenu.set(false);
     this.deleted.emit(this.note().id);
   }
 }

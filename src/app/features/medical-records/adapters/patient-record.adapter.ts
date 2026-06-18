@@ -139,11 +139,14 @@ export function adaptLastVisit(notes: MedicalRecordNoteDTO[]): LastVisitView | n
   return { date: latest.createdAt, description: shortNote };
 }
 
-export function adaptBalance(plans: TreatmentPlanDTO[]): BalanceView | null {
-  // TODO: integrate with dedicated financial/billing endpoint when available
+export function adaptBalance(
+  plans: TreatmentPlanDTO[],
+  items: TreatmentPlanItemDTO[],
+): BalanceView | null {
   if (!plans.length) return null;
-  const total = plans.reduce((sum, p) => sum + (p.totalAmount ?? 0), 0);
-  return { amount: total };
+  const planTotal = plans.reduce((sum, p) => sum + (p.totalAmount ?? 0), 0);
+  const itemTotal = items.reduce((sum, i) => sum + (i.estimatedPrice ?? 0), 0);
+  return { amount: planTotal || itemTotal };
 }
 
 function computeNoteTitle(note: string): string {

@@ -62,7 +62,7 @@ const STATUS_LABEL: Record<ProcedureStatus, string> = {
   pending: 'Pendente',
   in_progress: 'Em andamento',
   completed: 'Concluído',
-  interrupted: 'Interrompido',
+  interrupted: 'Observação',
 };
 
 const STATUS_COLORS: Record<ProcedureStatus, { bg: string; text: string; dot: string }> = {

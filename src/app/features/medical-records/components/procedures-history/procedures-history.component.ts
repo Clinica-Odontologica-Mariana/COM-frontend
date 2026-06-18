@@ -9,10 +9,10 @@ import { LucidePlus } from '@lucide/angular';
   selector: 'app-procedures-history',
   imports: [CurrencyPipe, RouterLink, LucidePlus],
   template: `
-    <section class="rounded-xl bg-[#F3F3F3] p-4 sm:p-8">
-      <div class="flex items-center justify-between gap-2">
+    <section class="rounded-xl max-w-screen bg-[#F3F3F3] p-4 sm:p-8">
+      <div class="flex flex-col gap-3 items-start lg:justify-between">
         <h3
-          class="text-xl font-bold text-[#7C5145] leading-tight"
+          class="text-base lg:text-xl font-bold text-[#7C5145] leading-tight"
           style="font-family: 'Noto Serif', serif"
         >
           Histórico de Procedimentos
@@ -20,7 +20,7 @@ import { LucidePlus } from '@lucide/angular';
 
         <a
           [routerLink]="['/treatments', patientId()]"
-          class="flex shrink-0 items-center gap-1 rounded-lg bg-[#7C5145] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#6B4439]"
+          class="flex w-fit shrink-0 items-center gap-1 rounded-lg bg-[#7C5145] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#6B4439]"
         >
           <svg
             lucidePlus

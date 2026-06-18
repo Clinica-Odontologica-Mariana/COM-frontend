@@ -97,7 +97,7 @@ export class PatientRecordFacade {
                         alerts: record ? adaptMedicalAlerts(record) : [],
                         treatmentSummary: adaptTreatmentSummary(resolvedPlans, items),
                         lastVisit: adaptLastVisit(notes),
-                        balance: adaptBalance(resolvedPlans),
+                        balance: adaptBalance(resolvedPlans, items),
                         notes: adaptNotes(notes),
                         attachments: adaptAttachments(attachments),
                         procedures: adaptProcedures(items),
