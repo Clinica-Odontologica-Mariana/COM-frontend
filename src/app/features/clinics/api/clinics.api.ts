@@ -197,11 +197,16 @@ function toAddressPayload(payload: ClinicFormValue): AddressSaveDto {
 function toWorkingHoursPayloads(days: WorkingDay[]): WorkingHoursSaveDto[] {
   return days.flatMap((day) =>
     day.enabled
-      ? day.intervals.map((interval) => ({
-          dayOfWeek: DAY_TO_INDEX[day.dayKey],
-          startTime: interval.startTime,
-          endTime: interval.endTime,
-        }))
+      ? day.intervals
+          .filter(
+            (interval) =>
+              interval.startTime.trim().length > 0 && interval.endTime.trim().length > 0,
+          )
+          .map((interval) => ({
+            dayOfWeek: DAY_TO_INDEX[day.dayKey],
+            startTime: interval.startTime,
+            endTime: interval.endTime,
+          }))
       : [],
   );
 }

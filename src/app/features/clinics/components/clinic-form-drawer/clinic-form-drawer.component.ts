@@ -16,6 +16,7 @@ import {
   ClinicDayKey,
   ClinicFormValue,
   WorkingDay,
+  WorkingInterval,
   cloneWorkingDays,
 } from '../../models/clinic.models';
 
@@ -390,11 +391,11 @@ function timeValueValidator(value: string): boolean {
                 class="text-3xl font-bold text-[#8B5E4E]"
                 style="font-family: 'Noto Serif', serif"
               >
-                Horário de Funcionamento
+                Horário de Funcionamento *
               </h2>
               <p class="max-w-55 text-sm leading-7 text-[#6B625D]">
-                Defina os dias e horários em que você atende em cada clínica. Você pode adicionar
-                múltiplos intervalos por dia, por exemplo, manhã e tarde.
+                Defina ao menos um dia e horário de atendimento. Você pode adicionar múltiplos
+                intervalos por dia, por exemplo, manhã e tarde.
               </p>
             </div>
 
@@ -547,13 +548,12 @@ export class ClinicFormDrawerComponent {
 
     const value = this.form.getRawValue();
     const enabledDays = this.workingDays().filter((day) => day.enabled);
+    const daysWithCompleteIntervals = enabledDays.filter((day) =>
+      day.intervals.some((interval) => this.hasCompleteInterval(interval)),
+    );
 
     if (this.form.controls.email.invalid) {
       return 'Informe um e-mail válido para contato.';
-    }
-
-    if (this.form.invalid) {
-      return 'Preencha os campos obrigatórios para continuar.';
     }
 
     if (!zipCodeValidator(value.zipCode)) {
@@ -564,12 +564,28 @@ export class ClinicFormDrawerComponent {
       return 'Informe uma UF válida com 2 letras.';
     }
 
-    if (!enabledDays.length) {
-      return 'Selecione ao menos um dia de funcionamento.';
+    if (!daysWithCompleteIntervals.length) {
+      return 'Preencha ao menos um dia e horário de funcionamento.';
+    }
+
+    if (this.form.invalid) {
+      return 'Preencha os campos obrigatórios para continuar.';
     }
 
     for (const day of enabledDays) {
       for (const interval of day.intervals) {
+        if (this.isPartialInterval(interval)) {
+          return `Preencha início e fim do horário em ${day.label}.`;
+        }
+      }
+
+      const completeIntervals = day.intervals.filter((interval) => this.hasCompleteInterval(interval));
+
+      if (!completeIntervals.length) {
+        return `Preencha ao menos um horário em ${day.label}.`;
+      }
+
+      for (const interval of completeIntervals) {
         if (!timeValueValidator(interval.startTime) || !timeValueValidator(interval.endTime)) {
           return 'Informe horários válidos no formato HH:MM.';
         }
@@ -581,8 +597,10 @@ export class ClinicFormDrawerComponent {
     }
 
     for (const day of enabledDays) {
-      if (day.intervals.length > 1) {
-        const sorted = [...day.intervals].sort((a, b) => a.startTime.localeCompare(b.startTime));
+      const completeIntervals = day.intervals.filter((interval) => this.hasCompleteInterval(interval));
+
+      if (completeIntervals.length > 1) {
+        const sorted = [...completeIntervals].sort((a, b) => a.startTime.localeCompare(b.startTime));
 
         for (let i = 0; i < sorted.length - 1; i++) {
           if (sorted[i].endTime > sorted[i + 1].startTime) {
@@ -870,6 +888,16 @@ export class ClinicFormDrawerComponent {
   private formatCepValue(value: string): string {
     const digits = value.replace(/\D/g, '').slice(0, 8);
     return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+  }
+
+  private hasCompleteInterval(interval: WorkingInterval): boolean {
+    return interval.startTime.trim().length > 0 && interval.endTime.trim().length > 0;
+  }
+
+  private isPartialInterval(interval: WorkingInterval): boolean {
+    return this.hasCompleteInterval(interval)
+      ? false
+      : interval.startTime.trim().length > 0 || interval.endTime.trim().length > 0;
   }
 
   private createEmptyWorkingDays(): WorkingDay[] {
