@@ -101,9 +101,6 @@ interface BackendFieldError {
                 <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                   <div class="max-w-2xl space-y-2">
                     <h2 class="text-2xl font-semibold text-[#7C5145]" style="font-family: 'Noto Serif', serif">Informações Pessoais</h2>
-                    <p class="text-sm leading-7 text-[#726863]">
-                      O backend permite editar apenas nome, e-mail e telefone. Usuário, papéis e data de criação ficam somente leitura.
-                    </p>
                   </div>
                   <div class="rounded-[22px] bg-[#FAF7F5] px-4 py-3 text-sm text-[#6C625D]">
                     <p class="font-semibold text-[#8B5E4E]">Usuário</p>
