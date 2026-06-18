@@ -674,25 +674,16 @@ export class MyProfilePageComponent implements OnInit {
   }
 
   private formatRoles(roles: string[]): string {
-    if (!roles.length) {
-      return '—';
-    }
+    const labels: Record<string, string> = {
+      ADMIN: 'Administrador',
+      RECEPTIONIST: 'Recepcionista',
+      DOCTOR: 'Dentista',
+      DENTIST: 'Dentista',
+    };
 
-    return roles
-      .map((role) => {
-        switch (role.toUpperCase()) {
-          case 'ADMIN':
-            return 'Administrador';
-          case 'RECEPTIONIST':
-            return 'Recepcionista';
-          case 'DOCTOR':
-          case 'DENTIST':
-            return 'Dentista';
-          default:
-            return role;
-        }
-      })
-      .join(', ');
+    const appRoles = roles.map((role) => labels[role.toUpperCase()]).filter((label): label is string => !!label);
+
+    return appRoles.length ? [...new Set(appRoles)].join(', ') : '—';
   }
 
   private formatDate(value: string): string {
