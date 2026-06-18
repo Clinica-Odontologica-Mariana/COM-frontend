@@ -74,6 +74,14 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'medical-records/:id/receita',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'medical-records/:id/atestado',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'certificados',
     renderMode: RenderMode.Client,
   },
