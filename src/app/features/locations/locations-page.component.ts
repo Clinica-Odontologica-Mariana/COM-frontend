@@ -223,7 +223,7 @@ export class LocationsPageComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    this.clinicsApi.list().subscribe({
+    this.clinicsApi.listPublic().subscribe({
       next: (clinics) => {
         this.units.set(clinics.map((clinic) => toLocationUnit(toClinicCardViewModel(clinic))));
         this.loading.set(false);
